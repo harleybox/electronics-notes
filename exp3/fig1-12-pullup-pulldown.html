@@ -71,6 +71,17 @@
       <line x1="174" y1="334" x2="186" y2="334" stroke="#4a5a6a" stroke-width="1"/>
       <text x="166" y="350" class="lbl" fill="#4a5a6a">GND</text>
 
+      <!-- ── Power source on the left: closes the loop (VCC ↔ GND) ── -->
+      <!-- Without this the current would appear to vanish at GND; the   -->
+      <!-- supply is what returns it to VCC, so the loop is continuous.  -->
+      <line x1="80" y1="50"  x2="80" y2="178" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="80" y1="192" x2="80" y2="320" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="66" y1="178" x2="94" y2="178" stroke="#f5a623" stroke-width="2.5"/>
+      <line x1="74" y1="192" x2="86" y2="192" stroke="#8899aa" stroke-width="2"/>
+      <text x="44" y="176" class="lbl" fill="#f5a623" font-size="12">+</text>
+      <text x="48" y="200" class="lbl" fill="#8899aa" font-size="13">−</text>
+      <text x="30" y="232" class="lbl" fill="#6a7a8a" font-size="9">5V 电源</text>
+
       <!-- ============================================================ -->
       <!-- Main column at x=120 : VCC ─ (upper part) ─ NODE ─ (lower) ─ GND -->
       <!-- NODE junction at y=185, x=120                                   -->
@@ -372,21 +383,25 @@ function setMode(m) {
 // ============================================================
 let pArr = [];
 function currentPath() {
+  // Every path is a CLOSED loop: after reaching GND it returns along
+  // the GND rail (left), up through the 5V supply, and back along the
+  // VCC rail — so the current visibly circulates instead of vanishing.
+  const ret = [[80,320],[80,50]]; // GND rail → up through supply → VCC rail
   if (mode === 'up') {
     if (!pressed) {
-      // VCC(120,50) → R → NODE(120,185) → LED → GND(120,320)
-      return [[120,50],[120,185],[120,320]];
+      // VCC(120,50) → R → NODE(120,185) → LED → GND(120,320) → supply → back
+      return [[120,50],[120,185],[120,320], ...ret, [120,50]];
     } else {
       // VCC → R → NODE → S → GND  (node pulled low through switch)
-      return [[120,50],[120,185],[240,185],[240,272],[240,320]];
+      return [[120,50],[120,185],[240,185],[240,272],[240,320], ...ret, [120,50]];
     }
   } else {
     if (!pressed) {
-      // VCC(120,50) → LED → NODE(120,185) → R → GND(120,320)
-      return [[120,50],[120,185],[120,320]];
+      // VCC(120,50) → LED → NODE(120,185) → R → GND(120,320) → supply → back
+      return [[120,50],[120,185],[120,320], ...ret, [120,50]];
     } else {
       // VCC → S → NODE → R → GND (node pulled high through switch)
-      return [[240,50],[240,138],[240,185],[120,185],[120,320]];
+      return [[240,50],[240,138],[240,185],[120,185],[120,320], ...ret, [240,50]];
     }
   }
 }
@@ -432,7 +447,7 @@ function clearParticles() {
 
 let spawnTimer = 0;
 function tick(ts) {
-  if (ts - spawnTimer > 380) { spawnParticle(); spawnTimer = ts; }
+  if (ts - spawnTimer > 260) { spawnParticle(); spawnTimer = ts; }
   updateParticles();
   requestAnimationFrame(tick);
 }
