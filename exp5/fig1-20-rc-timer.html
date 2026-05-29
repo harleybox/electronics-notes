@@ -134,6 +134,22 @@
     user-select: none;
   }
   #btn-s:hover { border-color: #22d36a; color: #22d36a; }
+  #btn-mute {
+    background: #1e2535;
+    border: 2px solid #3a4560;
+    color: #8899aa;
+    border-radius: 8px;
+    padding: 9px;
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: 100%;
+    user-select: none;
+  }
+  #btn-mute:hover { border-color: #8899aa; color: #c0ccd8; }
+  #btn-mute.muted { color: #5a6b7d; border-color: #2a3040; }
   #btn-s.pressed {
     background: #1a3328;
     border-color: #22d36a;
@@ -305,6 +321,7 @@
     <div>
       <div class="panel-title">操作</div>
       <button id="btn-s">按住 S 开始计时</button>
+      <button id="btn-mute" style="margin-top:10px">🔊 蜂鸣声：开</button>
     </div>
 
     <div>
@@ -342,6 +359,53 @@ const bw1 = document.getElementById('bw1');
 const bw2 = document.getElementById('bw2');
 const c1fill = document.getElementById('c1fill');
 const particles = document.getElementById('particles');
+const btnMute = document.getElementById('btn-mute');
+
+// ── Web Audio buzzer ──
+let audioCtx = null;
+let buzzOsc = null;
+let buzzGain = null;
+let soundOn = true;
+
+function ensureAudio() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function startBuzzSound() {
+  if (!soundOn) return;
+  ensureAudio();
+  if (buzzOsc) return;
+  buzzOsc = audioCtx.createOscillator();
+  buzzGain = audioCtx.createGain();
+  buzzOsc.type = 'square';        // piezo-buzzer character
+  buzzOsc.frequency.value = 2700; // ~2.7 kHz typical active buzzer
+  buzzGain.gain.value = 0.0;
+  buzzOsc.connect(buzzGain).connect(audioCtx.destination);
+  buzzOsc.start();
+  // quick fade-in to avoid click
+  buzzGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 0.01);
+}
+
+function stopBuzzSound() {
+  if (!buzzOsc) return;
+  const osc = buzzOsc, g = buzzGain;
+  g.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.02);
+  setTimeout(() => { try { osc.stop(); } catch (e) {} }, 80);
+  buzzOsc = null;
+  buzzGain = null;
+}
+
+btnMute.addEventListener('click', () => {
+  soundOn = !soundOn;
+  btnMute.textContent = soundOn ? '🔊 蜂鸣声：开' : '🔇 蜂鸣声：关';
+  btnMute.classList.toggle('muted', !soundOn);
+  if (!soundOn) stopBuzzSound();
+  else if (buzzing) startBuzzSound(); // resume if currently buzzing
+});
 
 function setStatus(id, on) {
   document.getElementById(id).classList.toggle('active', on);
@@ -416,6 +480,7 @@ function tick(ts) {
       note.className = 'buzzing';
       note.innerHTML = '⚠ C₁ 电压达到触发门槛！<br>VS 导通，蜂鸣器响，定时结束。';
       startBuzzAnim();
+      startBuzzSound();
     }
   }
   updateParticles();
@@ -443,6 +508,7 @@ function stopBuzzAnim() {
 }
 
 function startPress() {
+  if (soundOn) ensureAudio(); // unlock audio within the user gesture
   pressing = true;
   startTime = null;
   dischargeStart = null;
@@ -470,6 +536,7 @@ function stopPress() {
   if (buzzing) {
     buzzing = false;
     stopBuzzAnim();
+    stopBuzzSound();
     setStatus('st-trig', false);
     setStatus('st-buz', false);
     vsBody.setAttribute('fill','#1e2535');
