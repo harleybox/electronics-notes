@@ -196,20 +196,21 @@
       </defs>
 
       <!-- ── Wires (static gray) ── -->
-      <!-- Left vertical: top node to C1 bottom -->
-      <line x1="60" y1="100" x2="60" y2="280" stroke="#2e3a50" stroke-width="2"/>
+      <!-- Left vertical: top node → R1 → C1 top plate (stops at the plate; no bridge across the cap) -->
+      <line x1="60" y1="100" x2="60" y2="210" stroke="#2e3a50" stroke-width="2"/>
       <!-- Bottom horizontal: C1 bottom to GND junction -->
       <line x1="60" y1="280" x2="220" y2="280" stroke="#2e3a50" stroke-width="2"/>
-      <!-- GND junction to R2 bottom -->
+      <!-- node → R2 top stub, and R2 bottom → GND junction -->
+      <line x1="160" y1="190" x2="160" y2="200" stroke="#2e3a50" stroke-width="2"/>
       <line x1="160" y1="240" x2="160" y2="280" stroke="#2e3a50" stroke-width="2"/>
       <!-- Mid horizontal: R2 top / D2 left / C1 top area -->
       <line x1="60" y1="190" x2="160" y2="190" stroke="#2e3a50" stroke-width="2"/>
       <line x1="160" y1="190" x2="200" y2="190" stroke="#2e3a50" stroke-width="2"/>
-      <!-- Diode chain: D2→D1 -->
-      <line x1="240" y1="190" x2="265" y2="190" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="305" y1="190" x2="340" y2="190" stroke="#2e3a50" stroke-width="2"/>
-      <!-- VS to buzzer & bottom -->
-      <line x1="380" y1="190" x2="400" y2="190" stroke="#2e3a50" stroke-width="2"/>
+      <!-- Diode chain: D2 cathode → D1 anode, D1 cathode → VS anode -->
+      <line x1="218" y1="190" x2="265" y2="190" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="283" y1="190" x2="340" y2="190" stroke="#2e3a50" stroke-width="2"/>
+      <!-- VS cathode → buzzer & bottom -->
+      <line x1="360" y1="190" x2="400" y2="190" stroke="#2e3a50" stroke-width="2"/>
       <line x1="400" y1="100" x2="400" y2="190" stroke="#2e3a50" stroke-width="2"/>
       <line x1="220" y1="280" x2="400" y2="280" stroke="#2e3a50" stroke-width="2"/>
       <line x1="400" y1="190" x2="400" y2="280" stroke="#2e3a50" stroke-width="2"/>
