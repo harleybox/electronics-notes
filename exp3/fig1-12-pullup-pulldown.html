@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>上拉 / 下拉电阻 — 图1.12 / 1.13</title>
+<link rel="stylesheet" href="../assets/circuit.css">
+<style>
+  /* page-local helpers only (shared classes come from circuit.css) */
+  .mcu-read {
+    text-align: center;
+    padding: 6px 0 2px;
+  }
+  .mcu-read .num {
+    font-size: 56px;
+    line-height: 1;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    color: var(--green);
+    text-shadow: 0 0 16px #22d36a55;
+    transition: color 0.2s, text-shadow 0.2s;
+  }
+  .mcu-read .num.low {
+    color: var(--dim);
+    text-shadow: none;
+  }
+  .mcu-read .cap {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--faint);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .mode-row { display: flex; gap: 8px; }
+  .mode-row .btn { flex: 1; }
+  /* LED glow animation */
+  @keyframes led-glow {
+    0%,100% { opacity: 0.9; }
+    50% { opacity: 0.6; }
+  }
+  .led-on { animation: led-glow 1.4s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<h1>图1.12 / 1.13 — 上拉 / 下拉电阻</h1>
+
+<div class="stage">
+
+  <!-- Circuit -->
+  <div id="circuit-wrap">
+    <svg id="svg" width="440" height="370" viewBox="0 0 440 370">
+      <defs>
+        <radialGradient id="ledGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#7fffb0"/>
+          <stop offset="60%" stop-color="#22d36a"/>
+          <stop offset="100%" stop-color="#0e6b35"/>
+        </radialGradient>
+      </defs>
+
+      <!-- VCC rail (top) -->
+      <line x1="80" y1="50" x2="360" y2="50" stroke="#2e3a50" stroke-width="2"/>
+      <circle cx="80" cy="50" r="3" fill="#4a5a6a"/>
+      <text x="60" y="44" class="lbl" fill="#f5a623">VCC</text>
+      <text x="60" y="56" class="lbl" fill="#6a7a8a" font-size="9">+5V</text>
+
+      <!-- GND rail (bottom) -->
+      <line x1="80" y1="320" x2="360" y2="320" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="166" y1="320" x2="194" y2="320" stroke="#4a5a6a" stroke-width="2"/>
+      <line x1="170" y1="327" x2="190" y2="327" stroke="#4a5a6a" stroke-width="1.5"/>
+      <line x1="174" y1="334" x2="186" y2="334" stroke="#4a5a6a" stroke-width="1"/>
+      <text x="166" y="350" class="lbl" fill="#4a5a6a">GND</text>
+
+      <!-- ============================================================ -->
+      <!-- Main column at x=120 : VCC ─ (upper part) ─ NODE ─ (lower) ─ GND -->
+      <!-- NODE junction at y=185, x=120                                   -->
+      <!-- ============================================================ -->
+
+      <!-- vertical stubs to top/bottom rails -->
+      <line x1="120" y1="50"  x2="120" y2="80"  stroke="#2e3a50" stroke-width="2"/>
+      <line x1="120" y1="290" x2="120" y2="320" stroke="#2e3a50" stroke-width="2"/>
+
+      <!-- NODE junction dot + label + branch wire to right -->
+      <circle id="node-dot" cx="120" cy="185" r="4" fill="#4a5a6a"/>
+      <text x="132" y="180" class="lbl" fill="#8899aa">NODE</text>
+      <text x="132" y="192" class="lbl" fill="#6a7a8a" font-size="9">→ MCU 引脚</text>
+      <!-- wire NODE → MCU pin (right) -->
+      <line x1="120" y1="185" x2="300" y2="185" stroke="#2e3a50" stroke-width="2"/>
+      <!-- MCU pin block -->
+      <rect x="300" y="160" width="60" height="50" rx="4" fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
+      <text x="312" y="182" class="lbl" fill="#8899aa" font-size="10">MCU</text>
+      <text x="308" y="198" class="lbl" fill="#6a7a8a" font-size="9">输入引脚</text>
+
+      <!-- ===== UPPER element (between VCC@80 and NODE@185), at x=120 ===== -->
+      <!-- Resistor (shown in PULL-UP mode) -->
+      <g id="up-res">
+        <line x1="120" y1="80"  x2="120" y2="100" stroke="#2e3a50" stroke-width="2"/>
+        <rect x="112" y="100" width="16" height="50" rx="3" fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
+        <line x1="120" y1="150" x2="120" y2="185" stroke="#2e3a50" stroke-width="2"/>
+        <text x="92" y="128" class="lbl" fill="#8899aa">R</text>
+        <text x="84" y="140" class="lbl" fill="#6a7a8a" font-size="9">10k</text>
+      </g>
+      <!-- LED (shown in PULL-DOWN mode), anode at top (VCC side) -->
+      <g id="dn-led" style="display:none">
+        <line x1="120" y1="80"  x2="120" y2="108" stroke="#2e3a50" stroke-width="2"/>
+        <!-- triangle pointing down (current flows VCC→NODE) -->
+        <polygon id="dn-led-tri" points="106,108 134,108 120,132" fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
+        <line id="dn-led-bar" x1="106" y1="132" x2="134" y2="132" stroke="#4a5a6a" stroke-width="2.5"/>
+        <line x1="120" y1="132" x2="120" y2="185" stroke="#2e3a50" stroke-width="2"/>
+        <!-- glow halo -->
+        <circle id="dn-led-glow" cx="120" cy="120" r="20" fill="url(#ledGrad)" opacity="0"/>
+        <text x="138" y="124" class="lbl" fill="#8899aa">LED</text>
+      </g>
+
+      <!-- ===== LOWER element (between NODE@185 and GND@320), at x=120 ===== -->
+      <!-- LED (shown in PULL-UP mode), anode at top (NODE side) -->
+      <g id="up-led">
+        <line x1="120" y1="185" x2="120" y2="228" stroke="#2e3a50" stroke-width="2"/>
+        <!-- triangle pointing down (current flows NODE→GND) -->
+        <polygon id="up-led-tri" points="106,228 134,228 120,252" fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
+        <line id="up-led-bar" x1="106" y1="252" x2="134" y2="252" stroke="#4a5a6a" stroke-width="2.5"/>
+        <line x1="120" y1="252" x2="120" y2="290" stroke="#2e3a50" stroke-width="2"/>
+        <circle id="up-led-glow" cx="120" cy="240" r="20" fill="url(#ledGrad)" opacity="0"/>
+        <text x="138" y="244" class="lbl" fill="#8899aa">LED</text>
+      </g>
+      <!-- Resistor (shown in PULL-DOWN mode) -->
+      <g id="dn-res" style="display:none">
+        <line x1="120" y1="185" x2="120" y2="205" stroke="#2e3a50" stroke-width="2"/>
+        <rect x="112" y="205" width="16" height="50" rx="3" fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
+        <line x1="120" y1="255" x2="120" y2="290" stroke="#2e3a50" stroke-width="2"/>
+        <text x="92" y="233" class="lbl" fill="#8899aa">R</text>
+        <text x="84" y="245" class="lbl" fill="#6a7a8a" font-size="9">10k</text>
+      </g>
+
+      <!-- ============================================================ -->
+      <!-- Push button S : connects NODE to one rail when pressed.       -->
+      <!-- PULL-UP   : S between NODE and GND  (lower-right path)         -->
+      <!-- PULL-DOWN : S between NODE and VCC  (upper-right path)         -->
+      <!-- We draw S at x=240 vertical, branching off the NODE wire.      -->
+      <!-- ============================================================ -->
+
+      <!-- branch wire from NODE wire (at x=240) up or down -->
+      <!-- PULL-UP variant: NODE → S → GND -->
+      <g id="sw-up">
+        <line x1="240" y1="185" x2="240" y2="232" stroke="#2e3a50" stroke-width="2"/>
+        <!-- switch terminals -->
+        <circle cx="240" cy="232" r="3" fill="#4a5a6a"/>
+        <circle cx="240" cy="272" r="3" fill="#4a5a6a"/>
+        <line id="sw-up-arm" x1="240" y1="232" x2="262" y2="256" stroke="#4a5a6a" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="240" y1="272" x2="240" y2="320" stroke="#2e3a50" stroke-width="2"/>
+        <text x="248" y="256" class="lbl" fill="#8899aa">S</text>
+        <text x="216" y="226" class="lbl" fill="#6a7a8a" font-size="9">→GND</text>
+      </g>
+      <!-- PULL-DOWN variant: NODE → S → VCC -->
+      <g id="sw-dn" style="display:none">
+        <line x1="240" y1="185" x2="240" y2="138" stroke="#2e3a50" stroke-width="2"/>
+        <circle cx="240" cy="138" r="3" fill="#4a5a6a"/>
+        <circle cx="240" cy="98"  r="3" fill="#4a5a6a"/>
+        <line id="sw-dn-arm" x1="240" y1="138" x2="262" y2="114" stroke="#4a5a6a" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="240" y1="98" x2="240" y2="50" stroke="#2e3a50" stroke-width="2"/>
+        <text x="248" y="120" class="lbl" fill="#8899aa">S</text>
+        <text x="216" y="158" class="lbl" fill="#6a7a8a" font-size="9">→VCC</text>
+      </g>
+
+      <!-- Animated current particles -->
+      <g id="particles"></g>
+    </svg>
+  </div>
+
+  <!-- Side Panel -->
+  <div class="panel">
+
+    <div>
+      <div class="panel-title">接法模式</div>
+      <div class="mode-row">
+        <button id="btn-up" class="btn small on">上拉 (图1.12)</button>
+        <button id="btn-dn" class="btn small off">下拉 (图1.13)</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">按键 S</div>
+      <button id="btn-s" class="btn">按住 S</button>
+    </div>
+
+    <div>
+      <div class="panel-title">单片机读到</div>
+      <div class="mcu-read">
+        <div id="mcu-num" class="num">1</div>
+        <div class="cap">NODE 逻辑电平</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">状态</div>
+      <div id="st-node" class="status-item"><div class="status-dot"></div><span id="st-node-txt">NODE 高电平 (1)</span></div>
+      <div id="st-key"  class="status-item warn"><div class="status-dot"></div><span id="st-key-txt">S 未按下</span></div>
+      <div id="st-led"  class="status-item"><div class="status-dot"></div><span id="st-led-txt">LED 亮</span></div>
+    </div>
+
+    <div>
+      <div class="panel-title">说明</div>
+      <div id="stage-note" class="stage-note">
+        引脚悬空会随干扰漂移。上拉/下拉电阻把信号锁定在确定电平。<br>
+        当前：<b>上拉</b> — 程序应判断 <b>按下 = 0</b>。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── State ──
+let mode = 'up';      // 'up' | 'dn'
+let pressed = false;
+
+// ── DOM refs ──
+const btnUp  = document.getElementById('btn-up');
+const btnDn  = document.getElementById('btn-dn');
+const btnS   = document.getElementById('btn-s');
+const mcuNum = document.getElementById('mcu-num');
+const note   = document.getElementById('stage-note');
+
+const stNode = document.getElementById('st-node');
+const stNodeTxt = document.getElementById('st-node-txt');
+const stKey  = document.getElementById('st-key');
+const stKeyTxt = document.getElementById('st-key-txt');
+const stLed  = document.getElementById('st-led');
+const stLedTxt = document.getElementById('st-led-txt');
+
+// circuit groups
+const gUpRes = document.getElementById('up-res');
+const gUpLed = document.getElementById('up-led');
+const gDnRes = document.getElementById('dn-res');
+const gDnLed = document.getElementById('dn-led');
+const gSwUp  = document.getElementById('sw-up');
+const gSwDn  = document.getElementById('sw-dn');
+
+const nodeDot = document.getElementById('node-dot');
+
+// LED visuals
+const upLedTri  = document.getElementById('up-led-tri');
+const upLedBar  = document.getElementById('up-led-bar');
+const upLedGlow = document.getElementById('up-led-glow');
+const dnLedTri  = document.getElementById('dn-led-tri');
+const dnLedBar  = document.getElementById('dn-led-bar');
+const dnLedGlow = document.getElementById('dn-led-glow');
+
+// switch arms
+const swUpArm = document.getElementById('sw-up-arm');
+const swDnArm = document.getElementById('sw-dn-arm');
+
+const particles = document.getElementById('particles');
+
+// ============================================================
+//  Truth table  →  derive logic from (mode, pressed)
+//  pull-up   : released → HIGH(1), LED on  | pressed → LOW(0),  LED off
+//  pull-down : released → LOW(0),  LED on  | pressed → HIGH(1), LED off
+// ============================================================
+function computeState() {
+  let nodeHigh, ledOn;
+  if (mode === 'up') {
+    nodeHigh = !pressed;        // released=high, pressed=low
+  } else {
+    nodeHigh = pressed;         // released=low,  pressed=high
+  }
+  // In both wirings the LED conducts only when the node is at the
+  // resistor-clamped (idle) level, i.e. LED lights when NOT pressed.
+  ledOn = !pressed;
+  return { nodeHigh, ledOn, mcuVal: nodeHigh ? 1 : 0 };
+}
+
+// ============================================================
+//  Apply visuals for current mode/press state
+// ============================================================
+function render() {
+  const { nodeHigh, ledOn, mcuVal } = computeState();
+
+  // MCU big number
+  mcuNum.textContent = mcuVal;
+  mcuNum.classList.toggle('low', mcuVal === 0);
+
+  // NODE status
+  stNode.classList.toggle('active', nodeHigh);
+  stNodeTxt.textContent = nodeHigh ? 'NODE 高电平 (1)' : 'NODE 低电平 (0)';
+
+  // NODE dot color
+  nodeDot.setAttribute('fill', nodeHigh ? '#22d36a' : '#4a5a6a');
+
+  // Key status (warn dot)
+  stKey.classList.toggle('active', pressed);
+  stKeyTxt.textContent = pressed ? 'S 已按下' : 'S 未按下';
+
+  // LED status
+  stLed.classList.toggle('active', ledOn);
+  stLedTxt.textContent = ledOn ? 'LED 亮' : 'LED 灭';
+
+  // LED glow visuals (only the visible LED for this mode)
+  applyLed(mode === 'up' ? 'up' : 'dn', ledOn);
+
+  // Switch arm: closed (touches both terminals) when pressed
+  if (mode === 'up') {
+    if (pressed) { swUpArm.setAttribute('x2','240'); swUpArm.setAttribute('y2','272'); swUpArm.setAttribute('stroke','#22d36a'); }
+    else         { swUpArm.setAttribute('x2','262'); swUpArm.setAttribute('y2','256'); swUpArm.setAttribute('stroke','#4a5a6a'); }
+  } else {
+    if (pressed) { swDnArm.setAttribute('x2','240'); swDnArm.setAttribute('y2','98');  swDnArm.setAttribute('stroke','#22d36a'); }
+    else         { swDnArm.setAttribute('x2','262'); swDnArm.setAttribute('y2','114'); swDnArm.setAttribute('stroke','#4a5a6a'); }
+  }
+
+  // Button label
+  btnS.classList.toggle('pressed', pressed);
+  btnS.textContent = pressed ? '松开 S' : '按住 S';
+
+  // Note
+  const modeName = mode === 'up' ? '上拉' : '下拉';
+  const judge = mode === 'up' ? '按下 = 0' : '按下 = 1';
+  note.innerHTML =
+    '引脚悬空会随干扰漂移。上拉/下拉电阻把信号锁定在确定电平。<br>' +
+    '当前：<b>' + modeName + '</b> — 程序应判断 <b>' + judge + '</b>。';
+}
+
+function applyLed(which, on) {
+  const tri  = which === 'up' ? upLedTri  : dnLedTri;
+  const bar  = which === 'up' ? upLedBar  : dnLedBar;
+  const glow = which === 'up' ? upLedGlow : dnLedGlow;
+  if (on) {
+    tri.setAttribute('fill', '#22d36a');
+    tri.setAttribute('stroke', '#7fffb0');
+    bar.setAttribute('stroke', '#22d36a');
+    glow.setAttribute('opacity', '0.55');
+    glow.classList.add('led-on');
+  } else {
+    tri.setAttribute('fill', '#1e2535');
+    tri.setAttribute('stroke', '#4a5a6a');
+    bar.setAttribute('stroke', '#4a5a6a');
+    glow.setAttribute('opacity', '0');
+    glow.classList.remove('led-on');
+  }
+}
+
+// ============================================================
+//  Mode switching — swap which element groups are visible
+// ============================================================
+function setMode(m) {
+  mode = m;
+  const up = (m === 'up');
+  // toggle buttons
+  btnUp.classList.toggle('on', up);
+  btnUp.classList.toggle('off', !up);
+  btnDn.classList.toggle('on', !up);
+  btnDn.classList.toggle('off', up);
+  // swap SVG groups
+  gUpRes.style.display = up ? '' : 'none';
+  gUpLed.style.display = up ? '' : 'none';
+  gDnRes.style.display = up ? 'none' : '';
+  gDnLed.style.display = up ? 'none' : '';
+  gSwUp.style.display  = up ? '' : 'none';
+  gSwDn.style.display  = up ? 'none' : '';
+  // clear particles on mode change
+  clearParticles();
+  render();
+}
+
+// ============================================================
+//  Current particles — flow along the conducting branch.
+//  Conduction happens through the LED branch when NOT pressed
+//  (idle clamped state), and through the switch branch when pressed.
+//  pull-up idle  : VCC → R → NODE → LED → GND
+//  pull-down idle: VCC → LED → NODE → R → GND
+//  pressed (both): tiny current via switch+resistor; we animate the
+//  switch shorting path to make the action visible.
+// ============================================================
+let pArr = [];
+function currentPath() {
+  if (mode === 'up') {
+    if (!pressed) {
+      // VCC(120,50) → R → NODE(120,185) → LED → GND(120,320)
+      return [[120,50],[120,185],[120,320]];
+    } else {
+      // VCC → R → NODE → S → GND  (node pulled low through switch)
+      return [[120,50],[120,185],[240,185],[240,272],[240,320]];
+    }
+  } else {
+    if (!pressed) {
+      // VCC(120,50) → LED → NODE(120,185) → R → GND(120,320)
+      return [[120,50],[120,185],[120,320]];
+    } else {
+      // VCC → S → NODE → R → GND (node pulled high through switch)
+      return [[240,50],[240,138],[240,185],[120,185],[120,320]];
+    }
+  }
+}
+
+function pathLen(path) {
+  let L = 0;
+  for (let i = 0; i < path.length - 1; i++) {
+    L += Math.hypot(path[i+1][0]-path[i][0], path[i+1][1]-path[i][1]);
+  }
+  return L;
+}
+
+function spawnParticle() {
+  const p = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  p.setAttribute('r','3.5');
+  p.setAttribute('fill', pressed ? '#f5a623' : '#22d36a');
+  p.setAttribute('opacity','0.9');
+  particles.appendChild(p);
+  pArr.push({ el: p, idx: 0, frac: 0, speed: 0.03 });
+}
+
+function updateParticles() {
+  const path = currentPath();
+  pArr = pArr.filter(o => {
+    if (o.idx >= path.length - 1) { o.el.remove(); return false; }
+    // step proportional to segment length so speed looks uniform
+    const seg = Math.hypot(path[o.idx+1][0]-path[o.idx][0], path[o.idx+1][1]-path[o.idx][1]) || 1;
+    o.frac += (o.speed * 120) / seg;
+    while (o.frac >= 1) { o.frac -= 1; o.idx++; if (o.idx >= path.length - 1) break; }
+    if (o.idx >= path.length - 1) { o.el.remove(); return false; }
+    const [x0,y0] = path[o.idx];
+    const [x1,y1] = path[o.idx+1];
+    o.el.setAttribute('cx', x0 + (x1-x0)*o.frac);
+    o.el.setAttribute('cy', y0 + (y1-y0)*o.frac);
+    return true;
+  });
+}
+
+function clearParticles() {
+  pArr.forEach(o => o.el.remove());
+  pArr = [];
+}
+
+let spawnTimer = 0;
+function tick(ts) {
+  if (ts - spawnTimer > 380) { spawnParticle(); spawnTimer = ts; }
+  updateParticles();
+  requestAnimationFrame(tick);
+}
+
+// ============================================================
+//  Events
+// ============================================================
+function startPress() { pressed = true; render(); }
+function stopPress()  { pressed = false; render(); }
+
+btnS.addEventListener('mousedown', startPress);
+btnS.addEventListener('touchstart', e => { e.preventDefault(); startPress(); });
+document.addEventListener('mouseup',   () => { if (pressed) stopPress(); });
+document.addEventListener('touchend',  () => { if (pressed) stopPress(); });
+btnS.addEventListener('mouseleave', () => { if (pressed) stopPress(); });
+
+btnUp.addEventListener('click', () => setMode('up'));
+btnDn.addEventListener('click', () => setMode('dn'));
+
+// init
+setMode('up');
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

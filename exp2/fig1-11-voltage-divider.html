@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电阻分压 — 图1.11</title>
+<link rel="stylesheet" href="../assets/circuit.css">
+<style>
+  /* ── Page-specific styles ── */
+  /* Vertical voltage bar inside the panel */
+  .vbar-wrap {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .vbar {
+    position: relative;
+    width: 34px;
+    height: 150px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+    background: var(--panel-2);
+    flex-shrink: 0;
+  }
+  /* Top segment = U1 drop (R1), bottom segment = U2 drop (R2) */
+  .vseg {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    transition: height 0.08s linear, top 0.08s linear;
+  }
+  #vseg-u1 { top: 0; background: linear-gradient(180deg, #6b4a1a, var(--warn)); }
+  #vseg-u2 { bottom: 0; background: linear-gradient(180deg, #1a6b3a, var(--green)); }
+  /* Tap line marking node voltage */
+  #vtap {
+    position: absolute;
+    left: -3px;
+    width: calc(100% + 6px);
+    height: 0;
+    border-top: 2px dashed #e0e0e0;
+    transition: top 0.08s linear;
+    pointer-events: none;
+  }
+  .vbar-legend {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .vbar-legend .row { display: flex; align-items: center; gap: 6px; }
+  .vbar-legend .sw { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .vbar-legend b { font-variant-numeric: tabular-nums; }
+  .preset-row { display: flex; gap: 8px; }
+  .preset-row .btn { width: auto; flex: 1; }
+</style>
+</head>
+<body>
+
+<h1>图1.11 — 电阻分压</h1>
+
+<div class="stage">
+
+  <!-- Circuit -->
+  <div id="circuit-wrap">
+    <svg id="svg" width="440" height="370" viewBox="0 0 440 370">
+      <defs>
+        <marker id="arr" viewBox="0 0 8 8" refX="6" refY="4"
+                markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M1 1L7 4L1 7" fill="none" stroke="#22d36a" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- ── Wires (static gray) ── -->
+      <!-- Top: +12V rail across to R1 top -->
+      <line x1="80" y1="70" x2="300" y2="70" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="300" y1="70" x2="300" y2="110" stroke="#2e3a50" stroke-width="2"/>
+      <!-- R1 bottom to node -->
+      <line x1="300" y1="160" x2="300" y2="200" stroke="#2e3a50" stroke-width="2"/>
+      <!-- Node to R2 top -->
+      <line x1="300" y1="200" x2="300" y2="220" stroke="#2e3a50" stroke-width="2"/>
+      <!-- R2 bottom to GND rail -->
+      <line x1="300" y1="270" x2="300" y2="310" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="80" y1="310" x2="300" y2="310" stroke="#2e3a50" stroke-width="2"/>
+      <!-- Battery left rail -->
+      <line x1="80" y1="70" x2="80" y2="150" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="80" y1="230" x2="80" y2="310" stroke="#2e3a50" stroke-width="2"/>
+      <!-- Tap wire to node label -->
+      <line x1="300" y1="200" x2="350" y2="200" stroke="#2e3a50" stroke-width="2"/>
+
+      <!-- ── Battery (12V source) ── -->
+      <!-- + long plate -->
+      <line x1="64" y1="150" x2="96" y2="150" stroke="#f5a623" stroke-width="2.5"/>
+      <line x1="74" y1="162" x2="86" y2="162" stroke="#8899aa" stroke-width="2"/>
+      <line x1="64" y1="174" x2="96" y2="174" stroke="#f5a623" stroke-width="2.5"/>
+      <line x1="74" y1="186" x2="86" y2="186" stroke="#8899aa" stroke-width="2"/>
+      <line x1="64" y1="198" x2="96" y2="198" stroke="#f5a623" stroke-width="2.5"/>
+      <line x1="74" y1="210" x2="86" y2="210" stroke="#8899aa" stroke-width="2"/>
+      <text x="40" y="158" class="lbl" fill="#f5a623">+</text>
+      <text x="44" y="216" class="lbl" fill="#8899aa">−</text>
+      <text x="20" y="186" class="lbl" fill="#f5a623">12V</text>
+
+      <!-- ── R1 ── -->
+      <rect x="284" y="110" width="32" height="50" rx="3"
+            fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
+      <text x="324" y="132" class="lbl" fill="#8899aa">R₁</text>
+      <text id="r1-drop" x="324" y="148" class="lbl" fill="#f5a623" font-size="10">U₁</text>
+
+      <!-- ── R2 ── -->
+      <rect x="284" y="220" width="32" height="50" rx="3"
+            fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
+      <text x="324" y="242" class="lbl" fill="#8899aa">R₂</text>
+      <text id="r2-drop" x="324" y="258" class="lbl" fill="#22d36a" font-size="10">U₂</text>
+
+      <!-- ── Tap node ── -->
+      <circle cx="300" cy="200" r="4" fill="#22d36a"/>
+      <text x="356" y="196" class="lbl" fill="#22d36a">抽头</text>
+      <text id="node-v" x="356" y="210" class="lbl" fill="#22d36a" font-size="10">U₂</text>
+
+      <!-- GND symbol -->
+      <line x1="66" y1="310" x2="94" y2="310" stroke="#4a5a6a" stroke-width="2"/>
+      <line x1="70" y1="317" x2="90" y2="317" stroke="#4a5a6a" stroke-width="1.5"/>
+      <line x1="74" y1="324" x2="86" y2="324" stroke="#4a5a6a" stroke-width="1"/>
+      <text x="62" y="340" class="lbl" fill="#4a5a6a">GND</text>
+
+      <!-- ── Animated current particles ── -->
+      <g id="particles"></g>
+    </svg>
+  </div>
+
+  <!-- Side Panel -->
+  <div class="panel">
+
+    <div>
+      <div class="panel-title">电阻调节</div>
+      <div class="slider-row">
+        <div class="slider-head">R₁ <b id="r1-val">1000 Ω</b></div>
+        <input type="range" id="r1" min="100" max="10000" step="100" value="1000">
+      </div>
+      <div class="slider-row">
+        <div class="slider-head">R₂ <b id="r2-val">1000 Ω</b></div>
+        <input type="range" id="r2" min="100" max="10000" step="100" value="1000">
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">电压分配</div>
+      <div class="vbar-wrap">
+        <div class="vbar">
+          <div class="vseg" id="vseg-u1"></div>
+          <div class="vseg" id="vseg-u2"></div>
+          <div id="vtap"></div>
+        </div>
+        <div class="vbar-legend">
+          <div class="row"><span class="sw" style="background:var(--warn)"></span>
+            U₁ <b id="leg-u1">6.00 V</b></div>
+          <div class="row"><span class="sw" style="background:var(--green)"></span>
+            U₂ <b id="leg-u2">6.00 V</b></div>
+          <div style="color:var(--dim);font-size:10px">虚线=抽头节点电压</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">电压读数</div>
+      <div class="readout" id="ro-u2">
+        U₂ = R₂/(R₁+R₂)×12V = <b>6.00 V</b>
+      </div>
+      <div class="readout" id="ro-u1" style="margin-top:8px">
+        U₁ = R₁/(R₁+R₂)×12V = <b>6.00 V</b>
+      </div>
+      <div class="readout" id="ro-i" style="margin-top:8px">
+        I = 12V/(R₁+R₂) = <b>6.00 mA</b>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">预设比例</div>
+      <div class="preset-row">
+        <button class="btn small" id="p-eq">相等 1:1</button>
+        <button class="btn small" id="p-21">R₁:R₂ = 2:1</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">说明</div>
+      <div class="stage-note">
+        分压核心：调节 R₁/R₂ 的比值，就能从固定的 12V 电源取出任意电压。
+        谁的阻值大谁分到的电压就多（成正比），R₁=R₂ 时正好平分 6V。
+        传感器接口、ADC 参考电压都靠它。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const VS = 12.0; // supply voltage
+
+const r1El = document.getElementById('r1');
+const r2El = document.getElementById('r2');
+const r1Val = document.getElementById('r1-val');
+const r2Val = document.getElementById('r2-val');
+const legU1 = document.getElementById('leg-u1');
+const legU2 = document.getElementById('leg-u2');
+const segU1 = document.getElementById('vseg-u1');
+const segU2 = document.getElementById('vseg-u2');
+const vtap  = document.getElementById('vtap');
+const roU1 = document.getElementById('ro-u1');
+const roU2 = document.getElementById('ro-u2');
+const roI  = document.getElementById('ro-i');
+const r1Drop = document.getElementById('r1-drop');
+const r2Drop = document.getElementById('r2-drop');
+const nodeV  = document.getElementById('node-v');
+const particles = document.getElementById('particles');
+
+const BAR_H = 150; // px, matches .vbar height
+
+let current = 0.006; // A, drives particle speed
+
+function recompute() {
+  const R1 = +r1El.value;
+  const R2 = +r2El.value;
+  const sum = R1 + R2;
+  const u2 = R2 / sum * VS;   // node voltage / R2 drop
+  const u1 = R1 / sum * VS;   // R1 drop
+  const i  = VS / sum;        // loop current (A)
+  current = i;
+
+  // Slider heads
+  r1Val.textContent = R1 + ' Ω';
+  r2Val.textContent = R2 + ' Ω';
+
+  // Vertical bar: top = U1 (R1 drop), bottom = U2 (R2 drop)
+  const h1 = u1 / VS * BAR_H;
+  const h2 = u2 / VS * BAR_H;
+  segU1.style.height = h1 + 'px';
+  segU2.style.height = h2 + 'px';
+  vtap.style.top = h1 + 'px'; // boundary between the two = node potential
+
+  // Legend
+  legU1.textContent = u1.toFixed(2) + ' V';
+  legU2.textContent = u2.toFixed(2) + ' V';
+
+  // Readouts (with numbers substituted)
+  roU2.innerHTML = 'U₂ = ' + R2 + '/' + sum + '×12V = <b>' + u2.toFixed(2) + ' V</b>';
+  roU1.innerHTML = 'U₁ = ' + R1 + '/' + sum + '×12V = <b>' + u1.toFixed(2) + ' V</b>';
+  roI.innerHTML  = 'I = 12V/' + sum + ' = <b>' + (i * 1000).toFixed(2) + ' mA</b>';
+
+  // SVG component drop labels + node voltage
+  r1Drop.textContent = u1.toFixed(2) + 'V';
+  r2Drop.textContent = u2.toFixed(2) + 'V';
+  nodeV.textContent  = u2.toFixed(2) + 'V';
+}
+
+r1El.addEventListener('input', recompute);
+r2El.addEventListener('input', recompute);
+
+document.getElementById('p-eq').addEventListener('click', () => {
+  r1El.value = 1000; r2El.value = 1000; recompute();
+});
+document.getElementById('p-21').addEventListener('click', () => {
+  r1El.value = 2000; r2El.value = 1000; recompute();
+});
+
+// ── Current particle animation (loop the series circuit) ──
+// Path follows the wires: battery+ → top rail → R1 → node → R2 → GND rail → battery−
+const PATH = [
+  [80,150],[80,70],[300,70],   // + plate up, top rail
+  [300,110],[300,160],         // through R1
+  [300,200],                   // node
+  [300,220],[300,270],         // through R2
+  [300,310],[80,310],          // GND rail
+  [80,230]                     // back to − plate
+];
+// Precompute segment lengths for constant-speed motion
+const segLen = [];
+let totalLen = 0;
+for (let k = 0; k < PATH.length - 1; k++) {
+  const dx = PATH[k+1][0] - PATH[k][0];
+  const dy = PATH[k+1][1] - PATH[k][1];
+  const L = Math.hypot(dx, dy);
+  segLen.push(L);
+  totalLen += L;
+}
+
+let pArr = [];
+function spawnParticle() {
+  const p = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  p.setAttribute('r','4');
+  p.setAttribute('fill','#22d36a');
+  p.setAttribute('opacity','0.85');
+  particles.appendChild(p);
+  pArr.push({ el: p, dist: 0 });
+}
+
+function posAtDist(d) {
+  d = d % totalLen;
+  for (let k = 0; k < segLen.length; k++) {
+    if (d <= segLen[k]) {
+      const f = segLen[k] === 0 ? 0 : d / segLen[k];
+      const [x0,y0] = PATH[k];
+      const [x1,y1] = PATH[k+1];
+      return [x0 + (x1-x0)*f, y0 + (y1-y0)*f];
+    }
+    d -= segLen[k];
+  }
+  return PATH[PATH.length-1];
+}
+
+let lastTs = 0;
+let spawnAcc = 0;
+function tick(ts) {
+  const dt = lastTs ? (ts - lastTs) : 16;
+  lastTs = ts;
+
+  // Speed scales with current. I ranges roughly 0.6mA..60mA.
+  // pxPerSec maps current onto a visible range.
+  const pxPerSec = 30 + current * 1000 * 6; // higher current → faster
+  const step = pxPerSec * dt / 1000;
+
+  // Maintain a roughly constant particle spacing along the loop
+  const targetCount = 6;
+  spawnAcc += dt;
+  if (pArr.length < targetCount && spawnAcc > 250) {
+    spawnParticle();
+    spawnAcc = 0;
+  }
+
+  pArr.forEach(o => {
+    o.dist += step;
+    const [x,y] = posAtDist(o.dist);
+    o.el.setAttribute('cx', x);
+    o.el.setAttribute('cy', y);
+  });
+
+  requestAnimationFrame(tick);
+}
+
+recompute();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
