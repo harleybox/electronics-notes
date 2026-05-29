@@ -86,22 +86,17 @@
       <line x1="300" y1="270" x2="300" y2="310" stroke="#2e3a50" stroke-width="2"/>
       <line x1="80" y1="310" x2="300" y2="310" stroke="#2e3a50" stroke-width="2"/>
       <!-- Battery left rail -->
-      <line x1="80" y1="70" x2="80" y2="150" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="80" y1="230" x2="80" y2="310" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="80" y1="70" x2="80" y2="174" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="80" y1="188" x2="80" y2="310" stroke="#2e3a50" stroke-width="2"/>
       <!-- Tap wire to node label -->
       <line x1="300" y1="200" x2="350" y2="200" stroke="#2e3a50" stroke-width="2"/>
 
-      <!-- ── Battery (12V source) ── -->
-      <!-- + long plate -->
-      <line x1="64" y1="150" x2="96" y2="150" stroke="#f5a623" stroke-width="2.5"/>
-      <line x1="74" y1="162" x2="86" y2="162" stroke="#8899aa" stroke-width="2"/>
-      <line x1="64" y1="174" x2="96" y2="174" stroke="#f5a623" stroke-width="2.5"/>
-      <line x1="74" y1="186" x2="86" y2="186" stroke="#8899aa" stroke-width="2"/>
-      <line x1="64" y1="198" x2="96" y2="198" stroke="#f5a623" stroke-width="2.5"/>
-      <line x1="74" y1="210" x2="86" y2="210" stroke="#8899aa" stroke-width="2"/>
-      <text x="40" y="158" class="lbl" fill="#f5a623">+</text>
-      <text x="44" y="216" class="lbl" fill="#8899aa">−</text>
-      <text x="20" y="186" class="lbl" fill="#f5a623">12V</text>
+      <!-- ── Battery (12V source) — single cell: long(+) orange / short(−) gray ── -->
+      <line x1="66" y1="174" x2="94" y2="174" stroke="#f5a623" stroke-width="2.5"/>
+      <line x1="74" y1="188" x2="86" y2="188" stroke="#8899aa" stroke-width="2.5"/>
+      <text x="98" y="172" class="lbl" fill="#f5a623" font-size="13">+</text>
+      <text x="98" y="194" class="lbl" fill="#8899aa" font-size="13">−</text>
+      <text x="40" y="186" class="lbl" fill="#f5a623">12V</text>
 
       <!-- ── R1 ── -->
       <rect x="284" y="110" width="32" height="50" rx="3"
