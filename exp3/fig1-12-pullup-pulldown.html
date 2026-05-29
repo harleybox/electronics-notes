@@ -49,7 +49,7 @@
 
   <!-- Circuit -->
   <div id="circuit-wrap">
-    <svg id="svg" width="440" height="370" viewBox="0 0 440 370">
+    <svg id="svg" width="344" height="337" viewBox="30 31 344 337">
       <defs>
         <radialGradient id="ledGrad" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stop-color="#aaffcc" stop-opacity="0.85"/>
@@ -415,7 +415,7 @@ function pathLen(path) {
 function spawnParticle() {
   const p = document.createElementNS('http://www.w3.org/2000/svg','circle');
   p.setAttribute('r','3.5');
-  p.setAttribute('fill', pressed ? '#f5a623' : '#22d36a');
+  p.setAttribute('fill', '#22d36a'); // normal conduction is always green
   p.setAttribute('opacity','0.9');
   particles.appendChild(p);
   pArr.push({ el: p, idx: 0, frac: 0, speed: 0.03 });

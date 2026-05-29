@@ -253,6 +253,46 @@
 
   </div>
 
+  <h1 style="margin-top:36px">电流动画 · 含义约定</h1>
+  <div class="sub">动画里电流粒子的<b style="color:var(--muted)">颜色</b>和<b style="color:var(--muted)">速度</b>都带信息。</div>
+  <div class="grid">
+    <div class="card">
+      <div class="symbolbox"><svg viewBox="0 0 140 60" width="140" height="60">
+        <line x1="16" y1="30" x2="124" y2="30" stroke="#2e3a50" stroke-width="2"/>
+        <circle cx="40" cy="30" r="4" fill="#22d36a"/><circle cx="70" cy="30" r="4" fill="#22d36a"/><circle cx="100" cy="30" r="4" fill="#22d36a"/>
+      </svg></div>
+      <div class="name" style="color:#22d36a">绿色 = 正常</div>
+      <div class="note">电路正常导通时的电流</div>
+    </div>
+    <div class="card">
+      <div class="symbolbox"><svg viewBox="0 0 140 60" width="140" height="60">
+        <line x1="16" y1="30" x2="124" y2="30" stroke="#2e3a50" stroke-width="2"/>
+        <circle cx="40" cy="30" r="4" fill="#f5a623"/><circle cx="70" cy="30" r="4" fill="#f5a623"/><circle cx="100" cy="30" r="4" fill="#f5a623"/>
+      </svg></div>
+      <div class="name" style="color:#f5a623">黄色 = 警告 / 触发</div>
+      <div class="note">电流偏大、或进入报警/触发状态（如过流、定时触发蜂鸣）</div>
+    </div>
+    <div class="card">
+      <div class="symbolbox"><svg viewBox="0 0 140 60" width="140" height="60">
+        <line x1="16" y1="30" x2="124" y2="30" stroke="#2e3a50" stroke-width="2"/>
+        <circle cx="40" cy="30" r="4" fill="#e05050"/><circle cx="70" cy="30" r="4" fill="#e05050"/>
+        <text x="86" y="34" class="lbl" fill="#e05050" font-size="11">✕ 停</text>
+      </svg></div>
+      <div class="name" style="color:#e05050">红色 / 停止 = 危险</div>
+      <div class="note">元件损坏（如电流过大烧毁），粒子停止</div>
+    </div>
+    <div class="card">
+      <div class="symbolbox"><svg viewBox="0 0 140 60" width="140" height="60">
+        <line x1="16" y1="20" x2="124" y2="20" stroke="#2e3a50" stroke-width="2"/>
+        <circle cx="34" cy="20" r="4" fill="#22d36a"/><circle cx="70" cy="20" r="4" fill="#22d36a"/><circle cx="106" cy="20" r="4" fill="#22d36a"/>
+        <line x1="16" y1="44" x2="124" y2="44" stroke="#2e3a50" stroke-width="2"/>
+        <circle cx="28" cy="44" r="4" fill="#22d36a"/><circle cx="46" cy="44" r="4" fill="#22d36a"/><circle cx="64" cy="44" r="4" fill="#22d36a"/><circle cx="82" cy="44" r="4" fill="#22d36a"/><circle cx="100" cy="44" r="4" fill="#22d36a"/>
+      </svg></div>
+      <div class="name">速度 = 电流大小</div>
+      <div class="note">粒子越密/越快 = 电流越大；越疏/越慢 = 越小</div>
+    </div>
+  </div>
+
   <div class="footer">
     <b>配色约定：</b>导线 灰 #2e3a50 · 正极/电压 橙 #f5a623 · 电流/导通 绿 #22d36a · 警告 黄 #f5a623 · 危险 红 #e05050<br>
     <a href="index.html" style="color:var(--green);text-decoration:none">← 返回首页（全部交互图）</a>
