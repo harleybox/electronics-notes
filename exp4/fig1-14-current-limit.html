@@ -60,22 +60,13 @@
       <line x1="55" y1="190" x2="85" y2="190" stroke="#4a5a6a" stroke-width="3"/>
       <line x1="62" y1="200" x2="78" y2="200" stroke="#4a5a6a" stroke-width="2"/>
       <line x1="70" y1="210" x2="70" y2="240" stroke="#2e3a50" stroke-width="2"/>
-      <text x="30" y="155" class="lbl" fill="#f5a623">+5V</text>
-      <text x="92" y="148" class="lbl" fill="#8899aa" font-size="9">电源</text>
+      <text x="30" y="178" class="lbl" fill="#f5a623">5V</text>
 
-      <!-- ── R1 (adjustable resistor) ── -->
-      <rect x="200" y="120" width="40" height="60" rx="4"
+      <!-- ── R1 (limiting resistor — plain fixed box, like the other figures & 图1.14) ── -->
+      <rect x="210" y="120" width="20" height="60" rx="3"
             fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
-      <!-- zig-zag hint -->
-      <polyline points="210,132 230,140 210,150 230,158 210,166"
-                fill="none" stroke="#6a7a8a" stroke-width="1.5"
-                stroke-linejoin="round"/>
-      <!-- adjustable arrow across the body -->
-      <line id="r-arrow" x1="188" y1="178" x2="252" y2="120"
-            stroke="#22d36a" stroke-width="1.5"
-            marker-end="url(#none)"/>
-      <text x="248" y="148" class="lbl" fill="#8899aa">R₁</text>
-      <text x="248" y="162" class="lbl" id="r-val-svg" fill="#22d36a" font-size="10">220Ω</text>
+      <text x="240" y="148" class="lbl" fill="#8899aa">R₁</text>
+      <text x="240" y="162" class="lbl" id="r-val-svg" fill="#22d36a" font-size="10">220Ω</text>
 
       <!-- ── D1 (LED) ── -->
       <!-- glow halo behind -->
