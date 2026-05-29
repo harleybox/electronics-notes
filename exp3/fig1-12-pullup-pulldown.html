@@ -58,13 +58,13 @@
         </radialGradient>
       </defs>
 
-      <!-- VCC rail (top) -->
-      <line x1="80" y1="50" x2="360" y2="50" stroke="#2e3a50" stroke-width="2"/>
+      <!-- VCC rail (top) — ends at the switch tap (x=240); nothing connects further right -->
+      <line x1="80" y1="50" x2="240" y2="50" stroke="#2e3a50" stroke-width="2"/>
       <circle cx="80" cy="50" r="3" fill="#4a5a6a"/>
       <text x="60" y="54" class="lbl" fill="#f5a623">5V</text>
 
-      <!-- GND rail (bottom) -->
-      <line x1="80" y1="320" x2="360" y2="320" stroke="#2e3a50" stroke-width="2"/>
+      <!-- GND rail (bottom) — ends at the switch tap (x=240) -->
+      <line x1="80" y1="320" x2="240" y2="320" stroke="#2e3a50" stroke-width="2"/>
       <line x1="166" y1="320" x2="194" y2="320" stroke="#4a5a6a" stroke-width="2"/>
       <line x1="170" y1="327" x2="190" y2="327" stroke="#4a5a6a" stroke-width="1.5"/>
       <line x1="174" y1="334" x2="186" y2="334" stroke="#4a5a6a" stroke-width="1"/>
