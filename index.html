@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电子笔记 · 交互动画</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f1117; color: #e0e0e0;
+    font-family: 'Courier New', monospace;
+    min-height: 100vh; padding: 48px 20px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 16px; letter-spacing: 0.15em; color: #aaa; text-transform: uppercase; margin-bottom: 8px; }
+  .sub { font-size: 12px; color: #5a6b7d; margin-bottom: 32px; }
+  .group-title { font-size: 11px; letter-spacing: 0.2em; color: #4a5568; text-transform: uppercase; margin: 24px 0 12px; }
+  a.card {
+    display: block; text-decoration: none;
+    background: #161b27; border: 1px solid #2a3040; border-radius: 10px;
+    padding: 16px 18px; margin-bottom: 10px; transition: all 0.15s;
+  }
+  a.card:hover { border-color: #22d36a; transform: translateX(3px); }
+  .card-title { font-size: 13px; color: #e0e0e0; }
+  .card-desc { font-size: 11px; color: #6b7a8d; margin-top: 4px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>电子笔记 · 交互动画</h1>
+    <div class="sub">学习电路过程中的可交互电路图，用于嵌入 Notion 笔记。</div>
+
+    <div class="group-title">实验5</div>
+    <a class="card" href="exp5/fig1-20-rc-timer.html">
+      <div class="card-title">图1.20 — RC 定时器电路</div>
+      <div class="card-desc">按住 S 给 C₁ 充电，达到门槛触发 VS 导通、蜂鸣器响；松开经 R₂ 放电复位。</div>
+    </a>
+  </div>
+</body>
+</html>
