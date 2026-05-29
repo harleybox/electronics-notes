@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电路组件图例库</title>
+<link rel="stylesheet" href="assets/circuit.css">
+<style>
+  /* top-align this long page (override centered body) */
+  body { justify-content: flex-start; padding: 40px 20px 60px; }
+  .lib { width: 100%; max-width: 960px; margin: 0 auto; }
+  .sub { font-size: 12px; color: var(--dim); margin: -8px 0 28px; text-align: center; line-height: 1.7; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+  .symbolbox {
+    background: #10141d;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 10px;
+  }
+  .card svg { display: block; margin: 0 auto; }
+  .name { font-size: 13px; color: var(--txt); }
+  .note { font-size: 10px; color: var(--dim); margin-top: 5px; line-height: 1.55; }
+  .footer { font-size: 11px; color: var(--dim); margin-top: 28px; line-height: 1.8; text-align: center; }
+  .footer b { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- shared gradient for LED glow -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <radialGradient id="ledGrad" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#aaffcc" stop-opacity="0.85"/>
+    <stop offset="45%" stop-color="#22d36a" stop-opacity="0.4"/>
+    <stop offset="100%" stop-color="#22d36a" stop-opacity="0"/>
+  </radialGradient>
+</defs></svg>
+
+<div class="lib">
+  <h1>电路组件 · 图例库</h1>
+  <div class="sub">这套图里所有电路图统一使用的标准符号。<br>新组件第一次用到时定下画法、之后全图沿用——保持一致。</div>
+
+  <div class="grid">
+
+    <!-- 电源 -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <line x1="70" y1="22" x2="70" y2="40" stroke="#2e3a50" stroke-width="2"/>
+          <line x1="54" y1="40" x2="86" y2="40" stroke="#f5a623" stroke-width="2.5"/>
+          <line x1="62" y1="54" x2="78" y2="54" stroke="#8899aa" stroke-width="2.5"/>
+          <line x1="70" y1="54" x2="70" y2="72" stroke="#2e3a50" stroke-width="2"/>
+          <text x="90" y="38" class="lbl" fill="#f5a623" font-size="13">+</text>
+          <text x="90" y="59" class="lbl" fill="#8899aa" font-size="13">−</text>
+          <text x="30" y="51" class="lbl" fill="#f5a623">5V</text>
+        </svg>
+      </div>
+      <div class="name">电源 / 电池</div>
+      <div class="note">长板=正极(橙)，短板=负极(灰)；标数字电压</div>
+    </div>
+
+    <!-- 固定电阻 -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <line x1="70" y1="14" x2="70" y2="34" stroke="#2e3a50" stroke-width="2"/>
+          <rect x="60" y="34" width="20" height="30" rx="3" fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
+          <line x1="70" y1="64" x2="70" y2="84" stroke="#2e3a50" stroke-width="2"/>
+          <text x="86" y="53" class="lbl" fill="#8899aa">R</text>
+        </svg>
+      </div>
+      <div class="name">固定电阻</div>
+      <div class="note">纯矩形方块；即使可调也用方块</div>
+    </div>
+
+    <!-- 电容 -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <line x1="70" y1="16" x2="70" y2="42" stroke="#2e3a50" stroke-width="2"/>
+          <line x1="50" y1="42" x2="90" y2="42" stroke="#4a7aaa" stroke-width="2.5"/>
+          <line x1="50" y1="52" x2="90" y2="52" stroke="#4a7aaa" stroke-width="2.5"/>
+          <line x1="70" y1="52" x2="70" y2="80" stroke="#2e3a50" stroke-width="2"/>
+          <text x="94" y="50" class="lbl" fill="#8899aa">C</text>
+        </svg>
+      </div>
+      <div class="name">电容</div>
+      <div class="note">两条等长平行板；储存电荷</div>
+    </div>
+
+    <!-- LED -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <circle cx="70" cy="49" r="15" fill="url(#ledGrad)"/>
+          <line x1="70" y1="14" x2="70" y2="37" stroke="#2e3a50" stroke-width="2"/>
+          <polygon points="58,37 82,37 70,59" fill="#22d36a" stroke="#7fffb0" stroke-width="1.5"/>
+          <line x1="58" y1="59" x2="82" y2="59" stroke="#22d36a" stroke-width="2.5"/>
+          <line x1="70" y1="59" x2="70" y2="82" stroke="#2e3a50" stroke-width="2"/>
+          <g stroke="#22d36a" stroke-width="1.3" stroke-linecap="round">
+            <line x1="84" y1="34" x2="94" y2="26"/>
+            <line x1="88" y1="40" x2="98" y2="32"/>
+          </g>
+        </svg>
+      </div>
+      <div class="name">LED 发光二极管</div>
+      <div class="note">三角+阴极杠+柔和光晕；通电发光</div>
+    </div>
+
+    <!-- 二极管 -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <line x1="70" y1="16" x2="70" y2="38" stroke="#2e3a50" stroke-width="2"/>
+          <polygon points="58,38 82,38 70,60" fill="#3a5a7a" stroke="#4a7aaa" stroke-width="1.5"/>
+          <line x1="58" y1="60" x2="82" y2="60" stroke="#4a7aaa" stroke-width="2.5"/>
+          <line x1="70" y1="60" x2="70" y2="82" stroke="#2e3a50" stroke-width="2"/>
+          <text x="86" y="52" class="lbl" fill="#8899aa">D</text>
+        </svg>
+      </div>
+      <div class="name">二极管</div>
+      <div class="note">三角+阴极杠；单向导通（不发光）</div>
+    </div>
+
+    <!-- 电压表 -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 100" width="140" height="100">
+          <line x1="70" y1="6" x2="70" y2="22" stroke="#2e3a50" stroke-width="2"/>
+          <circle cx="70" cy="50" r="25" fill="#10141d" stroke="#4a7aaa" stroke-width="1.5"/>
+          <text x="70" y="48" text-anchor="middle" class="lbl" fill="#22d36a" font-size="12">+6.00</text>
+          <text x="70" y="60" text-anchor="middle" class="lbl" fill="#6a7a8a" font-size="8">Volts</text>
+          <text x="44" y="30" class="lbl" fill="#f5a623" font-size="11">+</text>
+          <text x="44" y="80" class="lbl" fill="#8899aa" font-size="12">−</text>
+          <line x1="70" y1="75" x2="70" y2="92" stroke="#2e3a50" stroke-width="2"/>
+          <text x="100" y="54" class="lbl" fill="#8899aa" font-size="10">DC</text>
+        </svg>
+      </div>
+      <div class="name">电压表</div>
+      <div class="note">圆圈+读数；并联测电压，几乎不取电流</div>
+    </div>
+
+    <!-- 开关 -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <line x1="18" y1="50" x2="48" y2="50" stroke="#2e3a50" stroke-width="2"/>
+          <circle cx="50" cy="50" r="3" fill="#4a5a6a"/>
+          <line x1="50" y1="50" x2="86" y2="33" stroke="#8899aa" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="90" cy="50" r="3" fill="#4a5a6a"/>
+          <line x1="92" y1="50" x2="122" y2="50" stroke="#2e3a50" stroke-width="2"/>
+          <text x="64" y="74" class="lbl" fill="#8899aa">S</text>
+        </svg>
+      </div>
+      <div class="name">开关</div>
+      <div class="note">可断开/闭合的触点；斜臂=断开</div>
+    </div>
+
+    <!-- 按键 -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <line x1="18" y1="60" x2="48" y2="60" stroke="#2e3a50" stroke-width="2"/>
+          <circle cx="50" cy="60" r="3" fill="#4a5a6a"/>
+          <circle cx="90" cy="60" r="3" fill="#4a5a6a"/>
+          <line x1="92" y1="60" x2="122" y2="60" stroke="#2e3a50" stroke-width="2"/>
+          <line x1="46" y1="44" x2="94" y2="44" stroke="#8899aa" stroke-width="2.5"/>
+          <line x1="70" y1="44" x2="70" y2="30" stroke="#8899aa" stroke-width="2"/>
+          <line x1="60" y1="30" x2="80" y2="30" stroke="#8899aa" stroke-width="2.5"/>
+          <text x="60" y="82" class="lbl" fill="#8899aa">按键</text>
+        </svg>
+      </div>
+      <div class="name">按键（轻触开关）</div>
+      <div class="note">按住导通、松开断开</div>
+    </div>
+
+    <!-- 接地 -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <line x1="70" y1="18" x2="70" y2="44" stroke="#2e3a50" stroke-width="2"/>
+          <line x1="50" y1="44" x2="90" y2="44" stroke="#4a5a6a" stroke-width="2.5"/>
+          <line x1="57" y1="53" x2="83" y2="53" stroke="#4a5a6a" stroke-width="2"/>
+          <line x1="64" y1="62" x2="76" y2="62" stroke="#4a5a6a" stroke-width="1.5"/>
+          <text x="56" y="84" class="lbl" fill="#4a5a6a">GND</text>
+        </svg>
+      </div>
+      <div class="name">接地 GND</div>
+      <div class="note">0V 参考点 / 电源负极返回</div>
+    </div>
+
+    <!-- 连接点 -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <!-- connected: filled dot -->
+          <line x1="16" y1="40" x2="56" y2="40" stroke="#2e3a50" stroke-width="2"/>
+          <line x1="36" y1="20" x2="36" y2="60" stroke="#2e3a50" stroke-width="2"/>
+          <circle cx="36" cy="40" r="4" fill="#22d36a"/>
+          <text x="20" y="80" class="lbl" fill="#8899aa" font-size="9">实心点=相连</text>
+          <!-- crossover hop: not connected -->
+          <line x1="84" y1="40" x2="100" y2="40" stroke="#2e3a50" stroke-width="2"/>
+          <path d="M100 40 Q104 31 108 40" fill="none" stroke="#2e3a50" stroke-width="2"/>
+          <line x1="108" y1="40" x2="124" y2="40" stroke="#2e3a50" stroke-width="2"/>
+          <line x1="104" y1="20" x2="104" y2="60" stroke="#2e3a50" stroke-width="2"/>
+          <text x="92" y="80" class="lbl" fill="#8899aa" font-size="9">跨越=不相连</text>
+        </svg>
+      </div>
+      <div class="name">连接点</div>
+      <div class="note">实心点=相连；跨越小弧=不相连</div>
+    </div>
+
+    <!-- 电流粒子 -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <line x1="16" y1="48" x2="124" y2="48" stroke="#2e3a50" stroke-width="2"/>
+          <circle cx="40" cy="48" r="3.5" fill="#22d36a"/>
+          <circle cx="68" cy="48" r="3.5" fill="#22d36a"/>
+          <circle cx="96" cy="48" r="3.5" fill="#22d36a"/>
+          <path d="M110 43 L120 48 L110 53" fill="none" stroke="#22d36a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="40" y="74" class="lbl" fill="#8899aa" font-size="9">电流方向</text>
+        </svg>
+      </div>
+      <div class="name">电流（动画粒子）</div>
+      <div class="note">绿色粒子沿导线流动，走闭合回路</div>
+    </div>
+
+    <!-- 芯片 / MCU -->
+    <div class="card">
+      <div class="symbolbox">
+        <svg viewBox="0 0 140 95" width="140" height="95">
+          <line x1="14" y1="50" x2="42" y2="50" stroke="#2e3a50" stroke-width="2"/>
+          <rect x="42" y="28" width="62" height="44" rx="4" fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
+          <text x="73" y="48" text-anchor="middle" class="lbl" fill="#8899aa" font-size="10">MCU</text>
+          <text x="73" y="62" text-anchor="middle" class="lbl" fill="#6a7a8a" font-size="8">输入引脚</text>
+        </svg>
+      </div>
+      <div class="name">芯片 / MCU 块</div>
+      <div class="note">圆角方块；高阻输入只读电压</div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <b>配色约定：</b>导线 灰 #2e3a50 · 正极/电压 橙 #f5a623 · 电流/导通 绿 #22d36a · 警告 黄 #f5a623 · 危险 红 #e05050<br>
+    <a href="index.html" style="color:var(--green);text-decoration:none">← 返回首页（全部交互图）</a>
+  </div>
+</div>
+
+</body>
+</html>
