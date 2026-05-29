@@ -115,9 +115,9 @@
       <text x="324" y="242" class="lbl" fill="#8899aa">R₂</text>
       <text id="r2-drop" x="324" y="258" class="lbl" fill="#22d36a" font-size="10">U₂</text>
 
-      <!-- ── Tap node ── -->
+      <!-- ── Output (tap) node ── -->
       <circle cx="300" cy="200" r="4" fill="#22d36a"/>
-      <text x="356" y="196" class="lbl" fill="#22d36a">抽头</text>
+      <text x="356" y="196" class="lbl" fill="#22d36a">输出点</text>
       <text id="node-v" x="356" y="210" class="lbl" fill="#22d36a" font-size="10">U₂</text>
 
       <!-- GND symbol -->
@@ -159,7 +159,7 @@
             U₁ <b id="leg-u1">6.00 V</b></div>
           <div class="row"><span class="sw" style="background:var(--green)"></span>
             U₂ <b id="leg-u2">6.00 V</b></div>
-          <div style="color:var(--dim);font-size:10px">虚线=抽头节点电压</div>
+          <div style="color:var(--dim);font-size:10px">虚线 = 输出点电压 U₂</div>
         </div>
       </div>
     </div>
@@ -190,7 +190,8 @@
       <div class="stage-note">
         分压核心：调节 R₁/R₂ 的比值，就能从固定的 12V 电源取出任意电压。
         谁的阻值大谁分到的电压就多（成正比），R₁=R₂ 时正好平分 6V。
-        传感器接口、ADC 参考电压都靠它。
+        传感器接口、ADC 参考电压都靠它。<br>
+        <span style="color:var(--dim)">注：「输出点」就是 R₁、R₂ 之间引出电压的那个连接点，专业上叫「抽头」。</span>
       </div>
     </div>
 

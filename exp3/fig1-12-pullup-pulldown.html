@@ -52,9 +52,9 @@
     <svg id="svg" width="440" height="370" viewBox="0 0 440 370">
       <defs>
         <radialGradient id="ledGrad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#7fffb0"/>
-          <stop offset="60%" stop-color="#22d36a"/>
-          <stop offset="100%" stop-color="#0e6b35"/>
+          <stop offset="0%" stop-color="#aaffcc" stop-opacity="0.85"/>
+          <stop offset="45%" stop-color="#22d36a" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#22d36a" stop-opacity="0"/>
         </radialGradient>
       </defs>
 
@@ -82,8 +82,7 @@
 
       <!-- NODE junction dot + label + branch wire to right -->
       <circle id="node-dot" cx="120" cy="185" r="4" fill="#4a5a6a"/>
-      <text x="132" y="180" class="lbl" fill="#8899aa">NODE</text>
-      <text x="132" y="192" class="lbl" fill="#6a7a8a" font-size="9">→ MCU 引脚</text>
+      <text x="136" y="176" class="lbl" fill="#8899aa">NODE 节点</text>
       <!-- wire NODE → MCU pin (right) -->
       <line x1="120" y1="185" x2="300" y2="185" stroke="#2e3a50" stroke-width="2"/>
       <!-- MCU pin block -->
@@ -102,26 +101,27 @@
       </g>
       <!-- LED (shown in PULL-DOWN mode), anode at top (VCC side) -->
       <g id="dn-led" style="display:none">
+        <!-- glow halo (behind the symbol) -->
+        <circle id="dn-led-glow" cx="120" cy="120" r="16" fill="url(#ledGrad)" opacity="0"/>
         <line x1="120" y1="80"  x2="120" y2="108" stroke="#2e3a50" stroke-width="2"/>
         <!-- triangle pointing down (current flows VCC→NODE) -->
         <polygon id="dn-led-tri" points="106,108 134,108 120,132" fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
         <line id="dn-led-bar" x1="106" y1="132" x2="134" y2="132" stroke="#4a5a6a" stroke-width="2.5"/>
         <line x1="120" y1="132" x2="120" y2="185" stroke="#2e3a50" stroke-width="2"/>
-        <!-- glow halo -->
-        <circle id="dn-led-glow" cx="120" cy="120" r="20" fill="url(#ledGrad)" opacity="0"/>
-        <text x="138" y="124" class="lbl" fill="#8899aa">LED</text>
+        <text x="150" y="124" class="lbl" fill="#8899aa">LED</text>
       </g>
 
       <!-- ===== LOWER element (between NODE@185 and GND@320), at x=120 ===== -->
       <!-- LED (shown in PULL-UP mode), anode at top (NODE side) -->
       <g id="up-led">
+        <!-- glow halo (behind the symbol) -->
+        <circle id="up-led-glow" cx="120" cy="240" r="16" fill="url(#ledGrad)" opacity="0"/>
         <line x1="120" y1="185" x2="120" y2="228" stroke="#2e3a50" stroke-width="2"/>
         <!-- triangle pointing down (current flows NODE→GND) -->
         <polygon id="up-led-tri" points="106,228 134,228 120,252" fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
         <line id="up-led-bar" x1="106" y1="252" x2="134" y2="252" stroke="#4a5a6a" stroke-width="2.5"/>
         <line x1="120" y1="252" x2="120" y2="290" stroke="#2e3a50" stroke-width="2"/>
-        <circle id="up-led-glow" cx="120" cy="240" r="20" fill="url(#ledGrad)" opacity="0"/>
-        <text x="138" y="244" class="lbl" fill="#8899aa">LED</text>
+        <text x="150" y="244" class="lbl" fill="#8899aa">LED</text>
       </g>
       <!-- Resistor (shown in PULL-DOWN mode) -->
       <g id="dn-res" style="display:none">
