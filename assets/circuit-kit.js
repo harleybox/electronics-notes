@@ -59,10 +59,14 @@
     // Battery / DC source, vertical. pins: pos (top), neg (bottom).
     source(x, y, o = {}) {
       const g = this._add(el('g', {}));
-      g.appendChild(el('line', { x1: x, y1: y - 28, x2: x, y2: y - 7,  stroke: C.wire, 'stroke-width': 2 }));
+      const lTop = el('line', { x1: x, y1: y - 28, x2: x, y2: y - 7,  stroke: C.wire, 'stroke-width': 2 });
+      const lBot = el('line', { x1: x, y1: y + 7, x2: x, y2: y + 28, stroke: C.wire, 'stroke-width': 2 });
+      g.appendChild(lTop);
       g.appendChild(el('line', { x1: x - 15, y1: y - 7, x2: x + 15, y2: y - 7, stroke: C.amber, 'stroke-width': 2.5 }));
       g.appendChild(el('line', { x1: x - 8,  y1: y + 7, x2: x + 8,  y2: y + 7, stroke: C.gray,  'stroke-width': 2.5 }));
-      g.appendChild(el('line', { x1: x, y1: y + 7, x2: x, y2: y + 28, stroke: C.wire, 'stroke-width': 2 }));
+      g.appendChild(lBot);
+      // register the source leads so they light with the loop
+      this.wires.push({ el: lTop, a: [x, y - 28], b: [x, y - 7] }, { el: lBot, a: [x, y + 7], b: [x, y + 28] });
       g.appendChild(txt(x + 19, y - 4, '+', C.amber, 13));
       g.appendChild(txt(x + 19, y + 15, '−', C.gray, 13));
       let labelEl = null;
@@ -123,18 +127,24 @@
     // Horizontal switch. pins a (left), b (right). setClosed(bool).
     switchH(x, y, o = {}) {
       const g = this._add(el('g', {}));
-      g.appendChild(el('line', { x1: x - 30, y1: y, x2: x - 12, y2: y, stroke: C.wire, 'stroke-width': 2 }));
-      g.appendChild(el('line', { x1: x + 12, y1: y, x2: x + 30, y2: y, stroke: C.wire, 'stroke-width': 2 }));
-      g.appendChild(el('circle', { cx: x - 12, cy: y, r: 3, fill: C.faint }));
-      g.appendChild(el('circle', { cx: x + 12, cy: y, r: 3, fill: C.faint }));
+      const lead1 = el('line', { x1: x - 30, y1: y, x2: x - 12, y2: y, stroke: C.wire, 'stroke-width': 2 });
+      const lead2 = el('line', { x1: x + 12, y1: y, x2: x + 30, y2: y, stroke: C.wire, 'stroke-width': 2 });
+      g.appendChild(lead1); g.appendChild(lead2);
+      // register leads as real wires so lightLoop()/lightAll() recolor them too
+      this.wires.push({ el: lead1, a: [x - 30, y], b: [x - 12, y] }, { el: lead2, a: [x + 12, y], b: [x + 30, y] });
+      const d1 = el('circle', { cx: x - 12, cy: y, r: 3, fill: C.faint });
+      const d2 = el('circle', { cx: x + 12, cy: y, r: 3, fill: C.faint });
+      g.appendChild(d1); g.appendChild(d2);
       const arm = el('line', { x1: x - 12, y1: y, x2: x + 8, y2: y - 14, stroke: C.faint, 'stroke-width': 2.5, 'stroke-linecap': 'round' });
       g.appendChild(arm);
       if (o.label) g.appendChild(txt(x - 4, y - 20, o.label, C.gray, 12));
       return {
         a: [x - 30, y], b: [x + 30, y],
         setClosed(on) {
-          if (on) { arm.setAttribute('x2', x + 12); arm.setAttribute('y2', y); arm.setAttribute('stroke', C.green); }
-          else    { arm.setAttribute('x2', x + 8);  arm.setAttribute('y2', y - 14); arm.setAttribute('stroke', C.faint); }
+          const col = on ? C.green : C.faint;
+          d1.setAttribute('fill', col); d2.setAttribute('fill', col); arm.setAttribute('stroke', col);
+          if (on) { arm.setAttribute('x2', x + 12); arm.setAttribute('y2', y); }
+          else    { arm.setAttribute('x2', x + 8);  arm.setAttribute('y2', y - 14); }
         }
       };
     }
