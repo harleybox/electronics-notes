@@ -120,8 +120,41 @@
       return { top: [x, y] };
     }
 
+    // Horizontal switch. pins a (left), b (right). setClosed(bool).
+    switchH(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      g.appendChild(el('line', { x1: x - 30, y1: y, x2: x - 12, y2: y, stroke: C.wire, 'stroke-width': 2 }));
+      g.appendChild(el('line', { x1: x + 12, y1: y, x2: x + 30, y2: y, stroke: C.wire, 'stroke-width': 2 }));
+      g.appendChild(el('circle', { cx: x - 12, cy: y, r: 3, fill: C.faint }));
+      g.appendChild(el('circle', { cx: x + 12, cy: y, r: 3, fill: C.faint }));
+      const arm = el('line', { x1: x - 12, y1: y, x2: x + 8, y2: y - 14, stroke: C.faint, 'stroke-width': 2.5, 'stroke-linecap': 'round' });
+      g.appendChild(arm);
+      if (o.label) g.appendChild(txt(x - 4, y - 20, o.label, C.gray, 12));
+      return {
+        a: [x - 30, y], b: [x + 30, y],
+        setClosed(on) {
+          if (on) { arm.setAttribute('x2', x + 12); arm.setAttribute('y2', y); arm.setAttribute('stroke', C.green); }
+          else    { arm.setAttribute('x2', x + 8);  arm.setAttribute('y2', y - 14); arm.setAttribute('stroke', C.faint); }
+        }
+      };
+    }
+    // small open (unconnected) terminal marker
+    openTerm(x, y) { this.dotLayer.appendChild(el('circle', { cx: x, cy: y, r: 4, fill: '#161b27', stroke: C.faint, 'stroke-width': 1.5 })); return [x, y]; }
+    // dashed lead (for a floating/not-connected leg)
+    dashed(a, b) { this.wireLayer.appendChild(el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: C.wire, 'stroke-width': 2, 'stroke-dasharray': '4,3' })); }
+
     /* ---- light the whole loop (all wires) by state ---- */
     lightAll(color) { this.wires.forEach(w => w.el.setAttribute('stroke', color)); }
+    // light only wires lying on the active loop (green); dead branches stay gray
+    lightLoop(loop, color) {
+      const sd = (p, a, b) => { const dx = b[0]-a[0], dy = b[1]-a[1], L = dx*dx+dy*dy, u = L ? ((p[0]-a[0])*dx+(p[1]-a[1])*dy)/L : 0, uu = Math.max(0, Math.min(1, u)); return Math.hypot(p[0]-(a[0]+uu*dx), p[1]-(a[1]+uu*dy)); };
+      this.wires.forEach(w => {
+        const m = [(w.a[0]+w.b[0])/2, (w.a[1]+w.b[1])/2];
+        let on = false;
+        for (let k = 0; k < loop.length - 1; k++) { if (sd(m, loop[k], loop[k+1]) <= 4) { on = true; break; } }
+        w.el.setAttribute('stroke', on ? color : C.wire);
+      });
+    }
 
     /* ---- current particles along an ordered loop of points ---- */
     particles(loop, o = {}) {

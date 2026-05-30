@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图1.6 — 导线与 LED 点亮（引擎版）</title>
+<link rel="stylesheet" href="../assets/circuit.css">
+</head>
+<body>
+
+<h1>图1.6 — 导线与 LED 点亮（引擎版）</h1>
+
+<div class="stage">
+  <div id="circuit-wrap">
+    <svg id="svg" width="380" height="300" viewBox="0 60 380 300"></svg>
+  </div>
+
+  <div class="panel">
+    <div>
+      <div class="panel-title">电流读数</div>
+      <div class="gauge-label">回路电流 I</div>
+      <div class="gauge-track"><div class="gauge-fill" id="i-fill"></div></div>
+      <div class="gauge-value" id="i-val">0.0 mA</div>
+      <div class="readout" style="margin-top:10px">
+        R₁ 压降：<b id="ro-vr">0.0 V</b><br>
+        D₁ 压降：<b id="ro-vd">0.0 V</b>
+      </div>
+    </div>
+    <div>
+      <div class="panel-title">电路状态</div>
+      <div id="st-loop" class="status-item"><div class="status-dot"></div>回路闭合（导线导通）</div>
+      <div id="st-led"  class="status-item warn"><div class="status-dot"></div>D₁ 点亮</div>
+      <div id="st-d2"   class="status-item danger active"><div class="status-dot"></div>D₂ 未接入（常灭）</div>
+    </div>
+    <div>
+      <div class="panel-title">操作</div>
+      <button class="btn" id="btn-s">闭合开关 S</button>
+    </div>
+    <div>
+      <div class="panel-title">说明</div>
+      <div class="stage-note" id="note"></div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/circuit-kit.js"></script>
+<script>
+const svg = document.getElementById('svg');
+svg.insertAdjacentHTML('afterbegin', Circuit.defs());
+const c = new Circuit(svg);
+
+// ── DECLARE the circuit ──
+const SRC = c.source(60, 180, { label: '5V' });    // pos(60,152) neg(60,208)
+const SW  = c.switchH(180, 90, { label: 'S' });    // a(150,90) b(210,90)
+const R   = c.resistor(320, 150, { label: 'R₁', value: '220Ω' }); // a(320,120) b(320,180)
+const D1  = c.led(320, 250, { label: 'D₁' });      // anode(320,238) cathode(320,262)
+const D2  = c.led(190, 255, { label: 'D₂' });      // (comparison, one leg floating)
+D2.set({ color: 'off' });                          // never lights
+const GND = c.ground(60, 310);
+
+c.wire(SRC.pos, SW.a, { vfirst: true }); // + → top rail → switch
+c.wire(SW.b, R.a);                       // switch → top-right → resistor
+c.wire(R.b, D1.anode);                   // resistor → D1
+c.wire(D1.cathode, [320, 310]);          // D1 → bottom rail
+c.wire([320, 310], SRC.neg);             // bottom rail → battery −
+c.node([60, 310]);
+// D2: bottom leg on the rail, top leg floating (not in the loop)
+c.wire(D2.cathode, [190, 310]);
+c.dashed(D2.anode, [190, 218]);
+c.openTerm(190, 214);
+
+const LOOP = [[60,152],[60,90],[320,90],[320,310],[60,310],[60,152]];
+const flow = c.particles(LOOP);
+
+// D2 floating caption (raw text)
+[['悬空脚',230],['未接入回路',244]].forEach(([s,yy])=>{
+  const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',108); t.setAttribute('y',yy); t.setAttribute('class','lbl');
+  t.setAttribute('fill','#e05050'); t.setAttribute('font-size',9); t.textContent=s; svg.appendChild(t);
+});
+
+// ── interactivity ──
+const $ = id => document.getElementById(id);
+let closed = false;
+function update() {
+  if (closed) {
+    SW.setClosed(true); c.lightLoop(LOOP, '#22d36a'); flow.set({ on: true, color: '#22d36a', speed: 1 });
+    D1.set({ color: 'green', b: 1 });
+    $('i-fill').style.width = '100%'; $('i-val').textContent = '13.6 mA';
+    $('ro-vr').textContent = '3.0 V'; $('ro-vd').textContent = '2.0 V';
+    $('st-loop').classList.add('active'); $('st-led').classList.add('active');
+    $('btn-s').classList.add('on'); $('btn-s').textContent = '断开开关 S';
+    $('note').className = 'stage-note';
+    $('note').innerHTML = '回路闭合：电流 I = (5−2)V ÷ 220Ω ≈ <b>13.6 mA</b>，处处相等。<br>R₁ 限流分 3V，D₁ 分 2V 而发光。';
+  } else {
+    SW.setClosed(false); c.lightAll('#2e3a50'); flow.set({ on: false });
+    D1.set({ color: 'off' });
+    $('i-fill').style.width = '0%'; $('i-val').textContent = '0.0 mA';
+    $('ro-vr').textContent = '0.0 V'; $('ro-vd').textContent = '0.0 V';
+    $('st-loop').classList.remove('active'); $('st-led').classList.remove('active');
+    $('btn-s').classList.remove('on'); $('btn-s').textContent = '闭合开关 S';
+    $('note').className = 'stage-note';
+    $('note').innerHTML = '开关断开：回路被切断，无电流，D₁ 熄灭。<br>导线只有接成<b>完整回路</b>才导通电流。';
+  }
+}
+$('btn-s').addEventListener('click', () => { closed = !closed; update(); });
+update();
+</script>
+</body>
+</html>
