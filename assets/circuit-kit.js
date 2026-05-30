@@ -138,6 +138,11 @@
         g.appendChild(tri); g.appendChild(bar); g.appendChild(rays);
         if (o.label) g.appendChild(txt(x + 22, y + 5, o.label, C.gray, 12));
       }
+      // burnt "✕" mark (hidden until burnt)
+      const burnX = el('g', { opacity: 0, stroke: C.danger, 'stroke-width': 2.5, 'stroke-linecap': 'round' });
+      burnX.appendChild(el('line', { x1: x - 11, y1: y - 11, x2: x + 11, y2: y + 11 }));
+      burnX.appendChild(el('line', { x1: x + 11, y1: y - 11, x2: x - 11, y2: y + 11 }));
+      g.appendChild(burnX);
       return {
         anode: h ? [x - 12, y] : [x, y - 12], cathode: h ? [x + 12, y] : [x, y + 12],
         set(state) { // 'green'|'amber'|'off'|'burnt', brightness 0..1
@@ -153,6 +158,7 @@
             glow.setAttribute('r', 14 + (state.b == null ? 0.5 : state.b) * 14);
             rays.setAttribute('stroke', col); rays.setAttribute('opacity', state.b == null ? 1 : state.b.toFixed(2));
           }
+          burnX.setAttribute('opacity', state.color === 'burnt' ? 1 : 0);
         }
       };
     }

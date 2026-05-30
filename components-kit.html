@@ -34,23 +34,26 @@
 <script src="assets/circuit-kit.js"></script>
 <script>
 // Each entry renders ONE component via the engine, centered in a small card SVG.
+// 横/竖两个朝向放在一起，便于对照。
 const ITEMS = [
-  { name: '电源 / 电池', note: '长板正极(橙) / 短板负极(灰) + 数字电压',
+  { name: '电源 · 竖版', note: '长板正极(橙) / 短板负极(灰) + 数字电压',
     draw: (c) => c.source(75, 55, { label: '5V' }) },
-  { name: '固定电阻',   note: '矩形方块；阻值标在旁边',
+  { name: '电源 · 横版', note: 'dir:"h" — 左负右正',
+    draw: (c) => c.source(75, 55, { label: '5V', dir: 'h' }) },
+  { name: '固定电阻 · 竖版', note: '矩形方块；上下两脚',
     draw: (c) => c.resistor(72, 55, { label: 'R', value: '10k' }) },
-  { name: 'LED 发光二极管', note: '三角+阴极杠+柔和光晕；通电发光',
+  { name: '固定电阻 · 横版', note: 'dir:"h" — 左右两脚',
+    draw: (c) => c.resistor(75, 50, { label: 'R', value: '10k', dir: 'h' }) },
+  { name: 'LED · 竖版（亮）', note: '三角+阴极杠+柔和光晕；通电发光',
     draw: (c) => { const d = c.led(72, 52, { label: 'D' }); d.set({ color: 'green', b: 1 }); return d; } },
+  { name: 'LED · 横版（亮）', note: 'dir:"h" — 三角朝右，阳极左/阴极右',
+    draw: (c) => { const d = c.led(72, 52, { label: 'D', dir: 'h' }); d.set({ color: 'green', b: 1 }); return d; } },
+  { name: 'LED · 烧毁', note: '过流损坏 → 变灰 + 红叉（12V 那个状态）',
+    draw: (c) => { const d = c.led(72, 52, { label: 'D' }); d.set({ color: 'burnt' }); return d; } },
   { name: '开关', note: '可断开/闭合的触点（这里画闭合态）',
     draw: (c) => { const s = c.switchH(75, 55, { label: 'S' }); s.setClosed(true); return s; } },
   { name: '接地 GND', note: '0V 参考点 / 电源负极返回',
     draw: (c) => c.ground(75, 40) },
-  { name: '电源（横版）', note: 'dir:"h" — 左负右正，横竖都能用',
-    draw: (c) => c.source(75, 55, { label: '5V', dir: 'h' }) },
-  { name: '电阻（横版）', note: 'dir:"h" — 左右两脚',
-    draw: (c) => c.resistor(75, 50, { label: 'R', value: '10k', dir: 'h' }) },
-  { name: 'LED（横版）', note: 'dir:"h" — 三角朝右，阳极左/阴极右',
-    draw: (c) => { const d = c.led(72, 52, { label: 'D', dir: 'h' }); d.set({ color: 'green', b: 1 }); return d; } },
 ];
 
 const grid = document.getElementById('grid');
