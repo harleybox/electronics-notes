@@ -56,6 +56,8 @@ const ITEMS = [
     draw: (c) => { const s = c.switchH(75, 55, { label: 'S' }); s.setClosed(true); return s; } },
   { name: '接地 GND', note: '0V 参考点 / 电源负极返回',
     draw: (c) => c.ground(75, 40) },
+  { name: '电压表', note: '圆圈+读数；并联测电压，理想内阻∞、不取电流',
+    draw: (c) => { const v = c.voltmeter(70, 55); v.setReading('+6.00'); return v; } },
 ];
 
 const grid = document.getElementById('grid');

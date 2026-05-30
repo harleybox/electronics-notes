@@ -171,6 +171,21 @@
       return { top: [x, y] };
     }
 
+    // Voltmeter (ideal, vertical). pins plus (top), minus (bottom). setReading(text).
+    // Leads are NOT registered as current-carrying wires — a voltmeter draws no current.
+    voltmeter(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      g.appendChild(el('line', { x1: x, y1: y - 40, x2: x, y2: y - 26, stroke: C.wire, 'stroke-width': 2 }));
+      g.appendChild(el('line', { x1: x, y1: y + 26, x2: x, y2: y + 40, stroke: C.wire, 'stroke-width': 2 }));
+      g.appendChild(el('circle', { cx: x, cy: y, r: 26, fill: '#10141d', stroke: C.blue, 'stroke-width': 1.5 }));
+      const read = txt(x, y - 1, o.reading || '+0.00', C.green, 13); read.setAttribute('text-anchor', 'middle'); g.appendChild(read);
+      const u = txt(x, y + 12, 'Volts', '#6a7a8a', 8); u.setAttribute('text-anchor', 'middle'); g.appendChild(u);
+      const tp = txt(x + 9, y - 30, '+', C.amber, 12); tp.setAttribute('text-anchor', 'middle'); g.appendChild(tp);
+      const tn = txt(x + 9, y + 35, '−', C.gray, 13); tn.setAttribute('text-anchor', 'middle'); g.appendChild(tn);
+      g.appendChild(txt(x + 34, y + 4, 'DC', C.gray, 10));
+      return { plus: [x, y - 40], minus: [x, y + 40], setReading(t) { read.textContent = t; } };
+    }
+
     // Horizontal switch. pins a (left), b (right). setClosed(bool).
     switchH(x, y, o = {}) {
       const g = this._add(el('g', {}));
