@@ -78,8 +78,8 @@
         g.appendChild(el('line', { x1: x + 7, y1: y - 14, x2: x + 7, y2: y + 14, stroke: C.amber, 'stroke-width': 2.5 }));
         g.appendChild(lR);
         this.wires.push({ el: lL, a: [x - 20, y], b: [x - 7, y] }, { el: lR, a: [x + 7, y], b: [x + 20, y] });
-        const hn = txt(x - 7, y - 13, '−', C.gray, 13); hn.setAttribute('text-anchor', 'middle'); g.appendChild(hn);
-        const hp = txt(x + 7, y - 13, '+', C.amber, 13); hp.setAttribute('text-anchor', 'middle'); g.appendChild(hp);
+        const hn = txt(x - 7, y - 12, '−', C.gray, 13); hn.setAttribute('text-anchor', 'middle'); g.appendChild(hn);
+        const hp = txt(x + 7, y - 18, '+', C.amber, 13); hp.setAttribute('text-anchor', 'middle'); g.appendChild(hp);
         let lbl = null;
         if (o.label) { lbl = txt(x, y + 26, o.label, C.amber, 12); lbl.setAttribute('text-anchor', 'middle'); g.appendChild(lbl); }
         return { neg: [x - 20, y], pos: [x + 20, y], labelEl: lbl };
@@ -107,8 +107,8 @@
         : { x: x - 10, y: y - 30, width: 20, height: 60, rx: 3, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
       let v = null;
       if (h) {
-        if (o.label) g.appendChild(txt(x - 6, y - 16, o.label, C.gray, 12));
-        if (o.value) { v = txt(x - 16, y + 26, o.value, C.green, 10); g.appendChild(v); }
+        if (o.label) { const t = txt(x, y - 16, o.label, C.gray, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+        if (o.value) { v = txt(x, y + 24, o.value, C.green, 10); v.setAttribute('text-anchor', 'middle'); g.appendChild(v); }
       } else {
         if (o.label) g.appendChild(txt(x + 18, y - 6, o.label, C.gray, 12));
         if (o.value) { v = txt(x + 18, y + 9, o.value, C.green, 10); g.appendChild(v); }
@@ -136,7 +136,7 @@
         rays.appendChild(el('line', { x1: x + 18, y1: y - 10, x2: x + 30, y2: y - 20 }));
         rays.appendChild(el('line', { x1: x + 24, y1: y - 2, x2: x + 38, y2: y - 10 }));
         g.appendChild(tri); g.appendChild(bar); g.appendChild(rays);
-        if (o.label) g.appendChild(txt(x + 22, y + 5, o.label, C.gray, 12));
+        if (o.label) g.appendChild(txt(x + 36, y + 18, o.label, C.gray, 12));
       }
       // burnt "✕" mark (hidden until burnt)
       const burnX = el('g', { opacity: 0, stroke: C.danger, 'stroke-width': 2.5, 'stroke-linecap': 'round' });
