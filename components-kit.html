@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>组件图例库（引擎生成）</title>
+<link rel="stylesheet" href="assets/circuit.css">
+<style>
+  body { justify-content: flex-start; padding: 40px 20px 60px; }
+  .lib { width: 100%; max-width: 960px; margin: 0 auto; }
+  .sub { font-size: 12px; color: var(--dim); margin: -8px 0 28px; text-align: center; line-height: 1.7; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+  .symbolbox { background: #10141d; border: 1px solid var(--border); border-radius: 8px; padding: 4px; margin-bottom: 10px; }
+  .card svg { display: block; margin: 0 auto; }
+  .name { font-size: 13px; color: var(--txt); }
+  .note { font-size: 10px; color: var(--dim); margin-top: 5px; line-height: 1.55; }
+  .footer { font-size: 11px; color: var(--dim); margin-top: 28px; line-height: 1.8; text-align: center; }
+  .footer a { color: var(--green); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="lib">
+  <h1>组件图例库 · 引擎生成</h1>
+  <div class="sub">下面每个符号都是用 <b style="color:var(--muted)">circuit-kit.js</b> 引擎当场画的——<br>
+    和实际电路图里用的<b style="color:var(--muted)">完全是同一份代码</b>，不会再各画各的、对不上。</div>
+  <div class="grid" id="grid"></div>
+  <div class="footer">
+    随引擎组件增多，这里会自动长出更多符号（电容 / 二极管 / 电压表 / MCU 块…迁移中）。<br>
+    <a href="index.html">← 返回首页</a>
+  </div>
+</div>
+
+<script src="assets/circuit-kit.js"></script>
+<script>
+// Each entry renders ONE component via the engine, centered in a small card SVG.
+const ITEMS = [
+  { name: '电源 / 电池', note: '长板正极(橙) / 短板负极(灰) + 数字电压',
+    draw: (c) => c.source(75, 55, { label: '5V' }) },
+  { name: '固定电阻',   note: '矩形方块；阻值标在旁边',
+    draw: (c) => c.resistor(72, 55, { label: 'R', value: '10k' }) },
+  { name: 'LED 发光二极管', note: '三角+阴极杠+柔和光晕；通电发光',
+    draw: (c) => { const d = c.led(72, 52, { label: 'D' }); d.set({ color: 'green', b: 1 }); return d; } },
+  { name: '开关', note: '可断开/闭合的触点（这里画闭合态）',
+    draw: (c) => { const s = c.switchH(75, 55, { label: 'S' }); s.setClosed(true); return s; } },
+  { name: '接地 GND', note: '0V 参考点 / 电源负极返回',
+    draw: (c) => c.ground(75, 40) },
+];
+
+const grid = document.getElementById('grid');
+ITEMS.forEach(item => {
+  const card = document.createElement('div'); card.className = 'card';
+  const box = document.createElement('div'); box.className = 'symbolbox';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 150 110'); svg.setAttribute('width', '150'); svg.setAttribute('height', '110');
+  svg.insertAdjacentHTML('afterbegin', Circuit.defs());
+  box.appendChild(svg);
+  const c = new Circuit(svg);
+  item.draw(c);
+  const name = document.createElement('div'); name.className = 'name'; name.textContent = item.name;
+  const note = document.createElement('div'); note.className = 'note'; note.textContent = item.note;
+  card.appendChild(box); card.appendChild(name); card.appendChild(note);
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>
