@@ -59,6 +59,20 @@
     // Battery / DC source, vertical. pins: pos (top), neg (bottom).
     source(x, y, o = {}) {
       const g = this._add(el('g', {}));
+      if (o.dir === 'h') { // horizontal: − on left, + on right
+        const lL = el('line', { x1: x - 28, y1: y, x2: x - 7, y2: y, stroke: C.wire, 'stroke-width': 2 });
+        const lR = el('line', { x1: x + 7, y1: y, x2: x + 28, y2: y, stroke: C.wire, 'stroke-width': 2 });
+        g.appendChild(lL);
+        g.appendChild(el('line', { x1: x - 7, y1: y - 8, x2: x - 7, y2: y + 8, stroke: C.gray, 'stroke-width': 2.5 }));
+        g.appendChild(el('line', { x1: x + 7, y1: y - 15, x2: x + 7, y2: y + 15, stroke: C.amber, 'stroke-width': 2.5 }));
+        g.appendChild(lR);
+        this.wires.push({ el: lL, a: [x - 28, y], b: [x - 7, y] }, { el: lR, a: [x + 7, y], b: [x + 28, y] });
+        g.appendChild(txt(x - 13, y - 12, '−', C.gray, 13));
+        g.appendChild(txt(x + 9, y - 12, '+', C.amber, 13));
+        let lbl = null;
+        if (o.label) { lbl = txt(x - 12, y + 26, o.label, C.amber, 12); g.appendChild(lbl); }
+        return { neg: [x - 28, y], pos: [x + 28, y], labelEl: lbl };
+      }
       const lTop = el('line', { x1: x, y1: y - 28, x2: x, y2: y - 7,  stroke: C.wire, 'stroke-width': 2 });
       const lBot = el('line', { x1: x, y1: y + 7, x2: x, y2: y + 28, stroke: C.wire, 'stroke-width': 2 });
       g.appendChild(lTop);
@@ -73,30 +87,48 @@
       if (o.label) { labelEl = txt(x - 40, y + 5, o.label, C.amber, 12); g.appendChild(labelEl); }
       return { pos: [x, y - 28], neg: [x, y + 28], labelEl };
     }
-    // Resistor box, vertical by default. pins a (top), b (bottom).
+    // Resistor box. dir 'v' (default) → pins a(top) b(bottom); 'h' → a(left) b(right).
     resistor(x, y, o = {}) {
       const g = this._add(el('g', {}));
-      g.appendChild(el('rect', { x: x - 10, y: y - 30, width: 20, height: 60, rx: 3,
-        fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
-      if (o.label) g.appendChild(txt(x + 18, y - 6, o.label, C.gray, 12));
-      if (o.value) { const v = txt(x + 18, y + 9, o.value, C.green, 10); g.appendChild(v); this._rv = v; }
-      return { a: [x, y - 30], b: [x, y + 30], _valEl: this._rv };
+      const h = o.dir === 'h';
+      g.appendChild(el('rect', h
+        ? { x: x - 30, y: y - 10, width: 60, height: 20, rx: 3, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }
+        : { x: x - 10, y: y - 30, width: 20, height: 60, rx: 3, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
+      let v = null;
+      if (h) {
+        if (o.label) g.appendChild(txt(x - 6, y - 16, o.label, C.gray, 12));
+        if (o.value) { v = txt(x - 16, y + 26, o.value, C.green, 10); g.appendChild(v); }
+      } else {
+        if (o.label) g.appendChild(txt(x + 18, y - 6, o.label, C.gray, 12));
+        if (o.value) { v = txt(x + 18, y + 9, o.value, C.green, 10); g.appendChild(v); }
+      }
+      return h ? { a: [x - 30, y], b: [x + 30, y], _valEl: v } : { a: [x, y - 30], b: [x, y + 30], _valEl: v };
     }
     // LED, vertical, current flows top→bottom (anode top). pins anode, cathode.
     led(x, y, o = {}) {
       const g = this._add(el('g', {}));
+      const h = o.dir === 'h';
       const glow = el('circle', { cx: x, cy: y, r: 16, fill: 'url(#kitGlow)', opacity: 0 });
       g.appendChild(glow);
-      const tri = el('polygon', { points: `${x-14},${y-12} ${x+14},${y-12} ${x},${y+12}`,
-        fill: '#1a6b3a', stroke: C.green, 'stroke-width': 1.5 });
-      const bar = el('line', { x1: x - 14, y1: y + 12, x2: x + 14, y2: y + 12, stroke: C.green, 'stroke-width': 2.5 });
+      let tri, bar;
       const rays = el('g', { opacity: 0, stroke: C.green, 'stroke-width': 1.5, 'stroke-linecap': 'round' });
-      rays.appendChild(el('line', { x1: x + 18, y1: y - 10, x2: x + 30, y2: y - 20 }));
-      rays.appendChild(el('line', { x1: x + 24, y1: y - 2, x2: x + 38, y2: y - 10 }));
-      g.appendChild(tri); g.appendChild(bar); g.appendChild(rays);
-      if (o.label) g.appendChild(txt(x + 22, y + 5, o.label, C.gray, 12));
+      if (h) { // triangle points right: anode left, cathode (bar) right
+        tri = el('polygon', { points: `${x-12},${y-14} ${x-12},${y+14} ${x+12},${y}`, fill: '#1a6b3a', stroke: C.green, 'stroke-width': 1.5 });
+        bar = el('line', { x1: x + 12, y1: y - 14, x2: x + 12, y2: y + 14, stroke: C.green, 'stroke-width': 2.5 });
+        rays.appendChild(el('line', { x1: x + 2, y1: y - 16, x2: x + 12, y2: y - 28 }));
+        rays.appendChild(el('line', { x1: x + 10, y1: y - 12, x2: x + 20, y2: y - 24 }));
+        g.appendChild(tri); g.appendChild(bar); g.appendChild(rays);
+        if (o.label) g.appendChild(txt(x - 6, y + 30, o.label, C.gray, 12));
+      } else { // triangle points down: anode top, cathode (bar) bottom
+        tri = el('polygon', { points: `${x-14},${y-12} ${x+14},${y-12} ${x},${y+12}`, fill: '#1a6b3a', stroke: C.green, 'stroke-width': 1.5 });
+        bar = el('line', { x1: x - 14, y1: y + 12, x2: x + 14, y2: y + 12, stroke: C.green, 'stroke-width': 2.5 });
+        rays.appendChild(el('line', { x1: x + 18, y1: y - 10, x2: x + 30, y2: y - 20 }));
+        rays.appendChild(el('line', { x1: x + 24, y1: y - 2, x2: x + 38, y2: y - 10 }));
+        g.appendChild(tri); g.appendChild(bar); g.appendChild(rays);
+        if (o.label) g.appendChild(txt(x + 22, y + 5, o.label, C.gray, 12));
+      }
       return {
-        anode: [x, y - 12], cathode: [x, y + 12],
+        anode: h ? [x - 12, y] : [x, y - 12], cathode: h ? [x + 12, y] : [x, y + 12],
         set(state) { // 'green'|'amber'|'off'|'burnt', brightness 0..1
           const col = state.color === 'amber' ? C.amber : C.green;
           if (state.color === 'off' || state.color === 'burnt') {
