@@ -52,7 +52,7 @@
   </div>
 </div>
 
-<script src="../assets/circuit-kit.js?v=4"></script>
+<script src="../assets/circuit-kit.js?v=5"></script>
 <script>
 const svg = document.getElementById('svg');
 svg.insertAdjacentHTML('afterbegin', Circuit.defs());
@@ -69,7 +69,6 @@ c.wire([210, 70], R.a);                        // corner → down a bit → R₁
 c.wire(R.b, D1.anode);                         // R₁ → LED
 c.wire(D1.cathode, [210, 270]);                // LED → bottom rail
 c.wire([210, 270], SRC.neg);                   // bottom rail → battery −
-c.node([60, 270]);
 
 // particle loop (ordered rectangle) — through the same pins
 const LOOP = [[60,130],[60,70],[210,70],[210,270],[60,270],[60,130]];

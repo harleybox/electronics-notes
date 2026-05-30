@@ -43,7 +43,7 @@
   </div>
 </div>
 
-<script src="../assets/circuit-kit.js?v=4"></script>
+<script src="../assets/circuit-kit.js?v=5"></script>
 <script>
 const svg = document.getElementById('svg');
 svg.insertAdjacentHTML('afterbegin', Circuit.defs());
@@ -63,7 +63,6 @@ c.wire(SW.b, R.a);                       // switch → top-right → resistor
 c.wire(R.b, D1.anode);                   // resistor → D1
 c.wire(D1.cathode, [320, 310]);          // D1 → bottom rail
 c.wire([320, 310], SRC.neg);             // bottom rail → battery −
-c.node([60, 310]);
 // D2: bottom leg on the rail, top leg floating (not in the loop)
 c.wire(D2.cathode, [190, 310]);
 c.dashed(D2.anode, [190, 218]);

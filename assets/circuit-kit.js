@@ -160,9 +160,11 @@
         }
       };
     }
-    // Ground symbol. pin top.
+    // Ground symbol. pin top. Includes its own connection dot (GND taps the
+    // circuit, forming a junction there).
     ground(x, y) {
       const g = this._add(el('g', {}));
+      this.dotLayer.appendChild(el('circle', { cx: x, cy: y, r: 3.5, fill: C.faint }));
       g.appendChild(el('line', { x1: x, y1: y, x2: x, y2: y + 10, stroke: C.wire, 'stroke-width': 2 }));
       g.appendChild(el('line', { x1: x - 14, y1: y + 10, x2: x + 14, y2: y + 10, stroke: C.faint, 'stroke-width': 2 }));
       g.appendChild(el('line', { x1: x - 9,  y1: y + 17, x2: x + 9,  y2: y + 17, stroke: C.faint, 'stroke-width': 1.5 }));
