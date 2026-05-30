@@ -46,16 +46,15 @@
       <line id="w5" x1="380" y1="237" x2="380" y2="310" stroke="#2e3a50" stroke-width="2.5"/>
       <!-- bottom rail → GND -->
       <line id="w6" x1="380" y1="310" x2="60" y2="310" stroke="#2e3a50" stroke-width="2.5"/>
-      <!-- left rail up to battery + -->
-      <line id="w7" x1="60" y1="310" x2="60" y2="70" stroke="#2e3a50" stroke-width="2.5"/>
+      <!-- (left rail is the two battery leads w7/w8, drawn in the battery block below) -->
 
       <!-- ════ Battery / 5V source (left side) ════ -->
       <!-- long plate (+) -->
       <line x1="46" y1="172" x2="74" y2="172" stroke="#f5a623" stroke-width="2.5"/>
       <!-- short plate (-) -->
       <line x1="54" y1="186" x2="66" y2="186" stroke="#8899aa" stroke-width="2.5"/>
-      <line x1="60" y1="70"  x2="60" y2="172" stroke="#2e3a50" stroke-width="2.5"/>
-      <line x1="60" y1="186" x2="60" y2="310" stroke="#2e3a50" stroke-width="2.5"/>
+      <line id="w7" x1="60" y1="70"  x2="60" y2="172" stroke="#2e3a50" stroke-width="2.5"/>
+      <line id="w8" x1="60" y1="186" x2="60" y2="310" stroke="#2e3a50" stroke-width="2.5"/>
       <text x="16" y="183" class="lbl" fill="#f5a623">5V</text>
       <text x="78" y="170" class="lbl" fill="#f5a623" font-size="13">+</text>
       <text x="78" y="192" class="lbl" fill="#8899aa" font-size="13">−</text>
@@ -225,7 +224,7 @@ function tick(ts) {
 }
 
 function setWireColor(c) {
-  ['w1','w2','w3','w4','w5','w6','w7'].forEach(id =>
+  ['w1','w2','w3','w4','w5','w6','w7','w8'].forEach(id =>
     document.getElementById(id).setAttribute('stroke', c));
 }
 
