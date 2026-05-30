@@ -56,7 +56,7 @@
       <line x1="56" y1="172" x2="84" y2="172" stroke="#f5a623" stroke-width="2.5"/>
       <line x1="64" y1="186" x2="76" y2="186" stroke="#8899aa" stroke-width="2.5"/>
       <line x1="70" y1="186" x2="70" y2="240" stroke="#2e3a50" stroke-width="2"/>
-      <text x="30" y="183" class="lbl" fill="#f5a623">5V</text>
+      <text id="vsrc-label" x="30" y="183" class="lbl" fill="#f5a623">5V</text>
       <text x="88" y="170" class="lbl" fill="#f5a623" font-size="13">+</text>
       <text x="88" y="192" class="lbl" fill="#8899aa" font-size="13">−</text>
 
@@ -102,6 +102,15 @@
   <div class="panel">
 
     <div>
+      <div class="panel-title">电源电压</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn small on"  id="v-5"  data-v="5">5V</button>
+        <button class="btn small off" id="v-9"  data-v="9">9V</button>
+        <button class="btn small off" id="v-12" data-v="12">12V</button>
+      </div>
+    </div>
+
+    <div>
       <div class="panel-title">电阻调节</div>
       <div class="slider-row">
         <div class="slider-head"><span>R₁ 阻值</span><b id="r-label">220 Ω</b></div>
@@ -142,10 +151,9 @@
 </div>
 
 <script>
-const VCC = 5.0;        // supply voltage
-const VLED = 2.0;       // LED forward drop (constant-drop model)
-const VR = VCC - VLED;  // voltage across R1 = 3.0 V (constant)
-const I_REF = 13.6;     // mA reference "normal bright" at R=220
+let   VCC = 5.0;        // supply voltage — selectable 5 / 9 / 12 V
+const VLED = 2.0;       // LED forward drop (≈constant — a property of the LED)
+const I_REF = 13.6;     // mA reference "normal bright" (R=220 @ 5V)
 
 // ── DOM refs ──
 const slider  = document.getElementById('r-slider');
@@ -180,8 +188,9 @@ const PATH = [
 ];
 
 function compute(R) {
-  // I = (VCC - VLED) / R, in mA
-  return (VR / R) * 1000;
+  // I = (VCC - VLED) / R, in mA. The LED holds ~2V regardless of supply;
+  // R1 takes the rest (VCC - 2), so a higher supply means a bigger current.
+  return ((VCC - VLED) / R) * 1000;
 }
 
 function setStatus(el, on) { el.classList.toggle('active', on); }
@@ -206,7 +215,7 @@ function update() {
   // ── readouts ──
   roI.textContent  = I.toFixed(1);
   roVd.textContent = VLED.toFixed(1);
-  roVr.textContent = VR.toFixed(1);
+  roVr.textContent = (VCC - VLED).toFixed(1);
 
   // gauge: 0..50mA range
   const pct = Math.min(100, (I / 50) * 100);
@@ -236,9 +245,10 @@ function update() {
     roI.classList.add('danger');
     iGval.textContent = I.toFixed(1) + ' mA';
     note.className = 'stage-note danger';
+    const Rsafe = Math.ceil((VCC - VLED) / 0.020 / 10) * 10; // R for 20mA at this supply
     note.innerHTML = '🔥 电流超过 40mA，D₁ 已烧毁！' +
-      '<br>R₁ 太小，限流不足，LED 过热损坏。' +
-      '<br>把滑块拖回安全区（R ≥ 150Ω）可“换上新 LED”恢复。';
+      '<br>' + VCC + 'V 下 R₁=' + parseInt(slider.value, 10) + 'Ω 太小，限流不足。' +
+      '<br>把滑块拖回 R ≥ ' + Rsafe + 'Ω（安全区）可“换上新 LED”恢复。';
   } else {
     burnMark.setAttribute('opacity', 0);
     currentI = I;
@@ -278,7 +288,7 @@ function update() {
       iGval.style.color = '#22d36a';
       note.className = 'stage-note';
       note.innerHTML = '✅ 安全工作（I ≤ 20mA）。R₁ 把电流限制在 LED 安全范围。' +
-        '<br>R 越小电流越大、LED 越亮；3V 始终落在 R₁ 上、2V 落在 D₁ 上。';
+        '<br>当前 ' + VCC + 'V：D₁ 恒占 <b>2V</b>，R₁ 扛剩下的 <b>' + (VCC - VLED).toFixed(0) + 'V</b>。电源越高、要的电阻越大。';
     }
   }
 }
@@ -330,6 +340,16 @@ function tick(ts) {
 
 // ── Events (mouse + touch via input event) ──
 slider.addEventListener('input', update);
+
+// ── Supply-voltage selector (5 / 9 / 12 V) ──
+const vsrcLabel = document.getElementById('vsrc-label');
+const vBtns = [document.getElementById('v-5'), document.getElementById('v-9'), document.getElementById('v-12')];
+vBtns.forEach(b => b.addEventListener('click', () => {
+  VCC = parseFloat(b.dataset.v);
+  vBtns.forEach(x => { const on = x === b; x.classList.toggle('on', on); x.classList.toggle('off', !on); });
+  vsrcLabel.textContent = VCC + 'V';
+  update();
+}));
 
 update();
 requestAnimationFrame(tick);
