@@ -60,14 +60,15 @@ const c = new Circuit(svg);
 
 // ── DECLARE the circuit: place components, connect pins. No raw coordinates. ──
 const SRC = c.source(60, 150, { label: '5V' });   // pos (60,122) · neg (60,178)
-const R   = c.resistor(210, 100, { label: 'R₁', value: '220Ω' }); // a (210,70) · b (210,130)
-const D1  = c.led(210, 190, { label: 'D₁' });     // anode (210,178) · cathode (210,202)
+const R   = c.resistor(210, 130, { label: 'R₁', value: '220Ω' }); // a (210,100) · b (210,160)
+const D1  = c.led(210, 215, { label: 'D₁' });     // anode (210,203) · cathode (210,227)
 const GND = c.ground(60, 270);
 
-c.wire(SRC.pos, R.a, { vfirst: true });   // + → top rail → resistor top
-c.wire(R.b, D1.anode);                    // resistor → LED
-c.wire(D1.cathode, [210, 270]);           // LED down to bottom rail
-c.wire([210, 270], SRC.neg);              // bottom rail → up to battery −
+c.wire(SRC.pos, [210, 70], { vfirst: true }); // + → up → top rail (right corner)
+c.wire([210, 70], R.a);                        // corner → down a bit → R₁ (leaves wire above R₁)
+c.wire(R.b, D1.anode);                         // R₁ → LED
+c.wire(D1.cathode, [210, 270]);                // LED → bottom rail
+c.wire([210, 270], SRC.neg);                   // bottom rail → battery −
 c.node([60, 270]);
 
 // particle loop (ordered rectangle) — through the same pins
