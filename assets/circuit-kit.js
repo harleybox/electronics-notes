@@ -36,13 +36,15 @@
     }
     _add(node) { this.partLayer.appendChild(node); return node; }
 
-    /* fit the viewBox to the drawn content + an even margin (call after building) */
-    fit(margin = 24) {
+    /* Frame the content with a small EVEN margin, displayed at `scale` size.
+       margin = gap from content to edge (small, even on all sides);
+       scale  = how big to render the whole thing (bigger canvas). */
+    fit(margin = 12, scale = 1.25) {
       const b = this.svg.getBBox();
-      const m = margin;
-      this.svg.setAttribute('viewBox', `${(b.x - m).toFixed(1)} ${(b.y - m).toFixed(1)} ${(b.width + 2 * m).toFixed(1)} ${(b.height + 2 * m).toFixed(1)}`);
-      this.svg.setAttribute('width', (b.width + 2 * m).toFixed(1));
-      this.svg.setAttribute('height', (b.height + 2 * m).toFixed(1));
+      const m = margin, w = b.width + 2 * m, h = b.height + 2 * m;
+      this.svg.setAttribute('viewBox', `${(b.x - m).toFixed(1)} ${(b.y - m).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`);
+      this.svg.setAttribute('width', (w * scale).toFixed(0));
+      this.svg.setAttribute('height', (h * scale).toFixed(0));
     }
 
     /* ---- wire: orthogonal connection between two pins (no gaps) ---- */
