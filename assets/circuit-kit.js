@@ -73,10 +73,9 @@
       if (o.dir === 'h') { // horizontal: − on left, + on right
         const lL = el('line', { x1: x - 20, y1: y, x2: x - 7, y2: y, stroke: C.wire, 'stroke-width': 2 });
         const lR = el('line', { x1: x + 7, y1: y, x2: x + 20, y2: y, stroke: C.wire, 'stroke-width': 2 });
-        g.appendChild(lL);
-        g.appendChild(el('line', { x1: x - 7, y1: y - 8, x2: x - 7, y2: y + 8, stroke: C.gray, 'stroke-width': 2.5 }));
-        g.appendChild(el('line', { x1: x + 7, y1: y - 14, x2: x + 7, y2: y + 14, stroke: C.amber, 'stroke-width': 2.5 }));
-        g.appendChild(lR);
+        g.appendChild(lL); g.appendChild(lR);
+        g.appendChild(el('line', { x1: x - 7, y1: y - 8, x2: x - 7, y2: y + 8, stroke: C.gray, 'stroke-width': 2.5 }));   // − plate on top (caps the lead)
+        g.appendChild(el('line', { x1: x + 7, y1: y - 14, x2: x + 7, y2: y + 14, stroke: C.amber, 'stroke-width': 2.5 })); // + plate on top
         this.wires.push({ el: lL, a: [x - 20, y], b: [x - 7, y] }, { el: lR, a: [x + 7, y], b: [x + 20, y] });
         const hn = txt(x - 7, y - 12, '−', C.gray, 13); hn.setAttribute('text-anchor', 'middle'); g.appendChild(hn);
         const hp = txt(x + 7, y - 18, '+', C.amber, 13); hp.setAttribute('text-anchor', 'middle'); g.appendChild(hp);
@@ -86,14 +85,13 @@
       }
       const lTop = el('line', { x1: x, y1: y - 20, x2: x, y2: y - 7,  stroke: C.wire, 'stroke-width': 2 });
       const lBot = el('line', { x1: x, y1: y + 7, x2: x, y2: y + 20, stroke: C.wire, 'stroke-width': 2 });
-      g.appendChild(lTop);
-      g.appendChild(el('line', { x1: x - 15, y1: y - 7, x2: x + 15, y2: y - 7, stroke: C.amber, 'stroke-width': 2.5 }));
-      g.appendChild(el('line', { x1: x - 8,  y1: y + 7, x2: x + 8,  y2: y + 7, stroke: C.gray,  'stroke-width': 2.5 }));
-      g.appendChild(lBot);
+      g.appendChild(lTop); g.appendChild(lBot);
+      g.appendChild(el('line', { x1: x - 15, y1: y - 7, x2: x + 15, y2: y - 7, stroke: C.amber, 'stroke-width': 2.5 })); // + plate on top (caps the lead)
+      g.appendChild(el('line', { x1: x - 8,  y1: y + 7, x2: x + 8,  y2: y + 7, stroke: C.gray,  'stroke-width': 2.5 })); // − plate on top
       // register the source leads so they light with the loop
       this.wires.push({ el: lTop, a: [x, y - 20], b: [x, y - 7] }, { el: lBot, a: [x, y + 7], b: [x, y + 20] });
-      const vp = txt(x + 19, y - 3, '+', C.amber, 13); vp.setAttribute('text-anchor', 'middle'); g.appendChild(vp);
-      const vn = txt(x + 19, y + 12, '−', C.gray, 13); vn.setAttribute('text-anchor', 'middle'); g.appendChild(vn);
+      const vp = txt(x + 19, y - 7, '+', C.amber, 13); vp.setAttribute('text-anchor', 'middle'); vp.setAttribute('dominant-baseline', 'central'); g.appendChild(vp);
+      const vn = txt(x + 19, y + 7, '−', C.gray, 13); vn.setAttribute('text-anchor', 'middle'); vn.setAttribute('dominant-baseline', 'central'); g.appendChild(vn);
       let labelEl = null;
       if (o.label) { labelEl = txt(x - 28, y + 4, o.label, C.amber, 12); labelEl.setAttribute('text-anchor', 'middle'); g.appendChild(labelEl); }
       return { pos: [x, y - 20], neg: [x, y + 20], labelEl };
@@ -169,7 +167,7 @@
       g.appendChild(el('line', { x1: x - 14, y1: y + 10, x2: x + 14, y2: y + 10, stroke: C.faint, 'stroke-width': 2 }));
       g.appendChild(el('line', { x1: x - 9,  y1: y + 17, x2: x + 9,  y2: y + 17, stroke: C.faint, 'stroke-width': 1.5 }));
       g.appendChild(el('line', { x1: x - 4,  y1: y + 24, x2: x + 4,  y2: y + 24, stroke: C.faint, 'stroke-width': 1 }));
-      g.appendChild(txt(x - 16, y + 40, 'GND', C.faint, 11));
+      const gt = txt(x, y + 40, 'GND', C.faint, 11); gt.setAttribute('text-anchor', 'middle'); g.appendChild(gt);
       return { top: [x, y] };
     }
 
