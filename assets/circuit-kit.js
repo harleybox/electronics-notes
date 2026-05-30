@@ -36,6 +36,15 @@
     }
     _add(node) { this.partLayer.appendChild(node); return node; }
 
+    /* fit the viewBox to the drawn content + an even margin (call after building) */
+    fit(margin = 24) {
+      const b = this.svg.getBBox();
+      const m = margin;
+      this.svg.setAttribute('viewBox', `${(b.x - m).toFixed(1)} ${(b.y - m).toFixed(1)} ${(b.width + 2 * m).toFixed(1)} ${(b.height + 2 * m).toFixed(1)}`);
+      this.svg.setAttribute('width', (b.width + 2 * m).toFixed(1));
+      this.svg.setAttribute('height', (b.height + 2 * m).toFixed(1));
+    }
+
     /* ---- wire: orthogonal connection between two pins (no gaps) ---- */
     wire(a, b, opts = {}) {
       const pts = [];
