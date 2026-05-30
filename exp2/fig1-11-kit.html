@@ -76,7 +76,7 @@
   </div>
 </div>
 
-<script src="../assets/circuit-kit.js"></script>
+<script src="../assets/circuit-kit.js?v=4"></script>
 <script>
 const svg = document.getElementById('svg');
 svg.insertAdjacentHTML('afterbegin', Circuit.defs());
@@ -94,8 +94,8 @@ c.wire([200, 70], R1.a);                       // corner → R₁ (wire above R�
 c.wire(R1.b, R2.a);                            // R₁ → node → R₂ (series)
 c.node([200, 165]);                            // output node (R₁/R₂ junction)
 c.wire(R2.b, [200, 300]);                      // R₂ → bottom rail
-c.wire([200, 300], SRC.neg);                   // bottom rail → battery −
-c.node([60, 300]);
+c.wire([200, 300], SRC.neg);                   // bottom rail → battery − (corner, no dot needed)
+c.node([130, 300]);                            // GND tap on the bottom rail (T-junction)
 // voltmeter: parallel across R₂ (plus = node, minus = bottom rail) — no current
 c.wire([200, 165], VM.plus);
 c.wire(VM.minus, [295, 300]);
