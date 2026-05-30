@@ -5,283 +5,106 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>图1.6 — 导线与 LED 点亮</title>
 <link rel="stylesheet" href="../assets/circuit.css">
-<style>
-  /* Page-specific: LED glow filter & body */
-  #led-glow {
-    transition: opacity 0.2s;
-  }
-  .led-body { transition: fill 0.2s; }
-</style>
 </head>
 <body>
 
 <h1>图1.6 — 导线与 LED 点亮</h1>
 
 <div class="stage">
-
-  <!-- ── Circuit ── -->
   <div id="circuit-wrap">
-    <svg id="svg" width="440" height="370" viewBox="0 0 440 370">
-      <defs>
-        <!-- LED glow blur -->
-        <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
-          <feGaussianBlur stdDeviation="3" result="b"/>
-          <feMerge>
-            <feMergeNode in="b"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-      </defs>
-
-      <!-- ════ Main loop wires (5V → R1 → D1 → GND) ════ -->
-      <!-- Top rail: 5V node → switch left -->
-      <line id="w1" x1="60" y1="70" x2="170" y2="70" stroke="#2e3a50" stroke-width="2.5"/>
-      <!-- switch right → top-right corner -->
-      <line id="w2" x1="230" y1="70" x2="380" y2="70" stroke="#2e3a50" stroke-width="2.5"/>
-      <!-- right rail down to R1 top -->
-      <line id="w3" x1="380" y1="70" x2="380" y2="120" stroke="#2e3a50" stroke-width="2.5"/>
-      <!-- R1 bottom → D1 anode -->
-      <line id="w4" x1="380" y1="180" x2="380" y2="213" stroke="#2e3a50" stroke-width="2.5"/>
-      <!-- D1 cathode → bottom-right corner -->
-      <line id="w5" x1="380" y1="237" x2="380" y2="310" stroke="#2e3a50" stroke-width="2.5"/>
-      <!-- bottom rail → GND -->
-      <line id="w6" x1="380" y1="310" x2="60" y2="310" stroke="#2e3a50" stroke-width="2.5"/>
-      <!-- (left rail is the two battery leads w7/w8, drawn in the battery block below) -->
-
-      <!-- ════ Battery / 5V source (left side) ════ -->
-      <!-- long plate (+) -->
-      <line x1="46" y1="172" x2="74" y2="172" stroke="#f5a623" stroke-width="2.5"/>
-      <!-- short plate (-) -->
-      <line x1="54" y1="186" x2="66" y2="186" stroke="#8899aa" stroke-width="2.5"/>
-      <line id="w7" x1="60" y1="70"  x2="60" y2="172" stroke="#2e3a50" stroke-width="2.5"/>
-      <line id="w8" x1="60" y1="186" x2="60" y2="310" stroke="#2e3a50" stroke-width="2.5"/>
-      <text x="16" y="183" class="lbl" fill="#f5a623">5V</text>
-      <text x="78" y="170" class="lbl" fill="#f5a623" font-size="13">+</text>
-      <text x="78" y="192" class="lbl" fill="#8899aa" font-size="13">−</text>
-
-      <!-- ════ Switch S (top) ════ -->
-      <circle cx="170" cy="70" r="3.5" fill="#4a5a6a"/>
-      <circle cx="230" cy="70" r="3.5" fill="#4a5a6a"/>
-      <line id="sw-arm" x1="170" y1="70" x2="226" y2="50"
-            stroke="#4a5a6a" stroke-width="2.5" stroke-linecap="round"/>
-      <text x="192" y="40" class="lbl" fill="#8899aa">S</text>
-
-      <!-- ════ R1 (220Ω) ════ -->
-      <rect x="370" y="120" width="20" height="60" rx="3"
-            fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
-      <text x="398" y="148" class="lbl" fill="#8899aa">R₁</text>
-      <text x="398" y="164" class="lbl" fill="#6a7a8a" font-size="9">220Ω</text>
-
-      <!-- ════ D1 (yellow LED, in the loop) ════ -->
-      <!-- glow halo (toggled) -->
-      <circle id="led-glow" cx="380" cy="225" r="13" fill="#ffd23f"
-              opacity="0" filter="url(#glow)"/>
-      <!-- triangle (anode→cathode pointing down) -->
-      <polygon id="led-body" class="led-body" points="367,213 393,213 380,237"
-               fill="#3a3520" stroke="#8a7a2a" stroke-width="1.5"/>
-      <!-- cathode bar -->
-      <line x1="367" y1="237" x2="393" y2="237" stroke="#8a7a2a" stroke-width="2.5"/>
-      <!-- emission arrows -->
-      <g stroke="#8a7a2a" stroke-width="1.3" stroke-linecap="round">
-        <line x1="396" y1="216" x2="406" y2="208"/>
-        <line x1="400" y1="222" x2="410" y2="214"/>
-      </g>
-      <path d="M404 206 L406 208 L403 210" fill="none" stroke="#8a7a2a" stroke-width="1.3"/>
-      <text x="326" y="229" class="lbl" fill="#8899aa">D₁</text>
-
-      <!-- ════ GND symbol (bottom-left) ════ -->
-      <line x1="46" y1="310" x2="74" y2="310" stroke="#4a5a6a" stroke-width="2.5"/>
-      <line x1="50" y1="318" x2="70" y2="318" stroke="#4a5a6a" stroke-width="1.8"/>
-      <line x1="54" y1="326" x2="66" y2="326" stroke="#4a5a6a" stroke-width="1.2"/>
-      <text x="44" y="342" class="lbl" fill="#4a5568">GND</text>
-
-      <!-- ════ D2 — second LED, one leg floating (NOT in loop) ════ -->
-      <!-- a dead-end stub off the bottom rail -->
-      <line x1="200" y1="310" x2="200" y2="280" stroke="#2e3a50" stroke-width="2.5"/>
-      <!-- triangle -->
-      <polygon points="187,256 213,256 200,280"
-               fill="#2a2a32" stroke="#4a5a6a" stroke-width="1.5"/>
-      <line x1="187" y1="256" x2="213" y2="256" stroke="#4a5a6a" stroke-width="2.5"/>
-      <!-- floating leg (goes up, ends in open circle = not connected) -->
-      <line x1="200" y1="256" x2="200" y2="226" stroke="#2e3a50" stroke-width="2.5"
-            stroke-dasharray="4,3"/>
-      <circle cx="200" cy="222" r="4" fill="#161b27" stroke="#6a5a3a" stroke-width="1.5"/>
-      <text x="160" y="272" class="lbl" fill="#8899aa">D₂</text>
-      <text x="104" y="214" class="lbl" fill="#e05050" font-size="9">悬空脚</text>
-      <text x="104" y="227" class="lbl" fill="#e05050" font-size="9">未接入回路</text>
-
-      <!-- ════ Animated current particles ════ -->
-      <g id="particles"></g>
-    </svg>
+    <svg id="svg" width="380" height="300" viewBox="0 60 380 300"></svg>
   </div>
 
-  <!-- ── Side Panel ── -->
   <div class="panel">
-
     <div>
       <div class="panel-title">电流读数</div>
       <div class="gauge-label">回路电流 I</div>
-      <div class="gauge-track"><div class="gauge-fill" id="gfill"></div></div>
-      <div class="gauge-value" id="gval">0.0 mA</div>
-      <div class="readout" id="ro" style="margin-top:10px">
-        R₁ 压降：<b id="vr">0.0 V</b><br>
-        D₁ 压降：<b id="vd">0.0 V</b>
+      <div class="gauge-track"><div class="gauge-fill" id="i-fill"></div></div>
+      <div class="gauge-value" id="i-val">0.0 mA</div>
+      <div class="readout" style="margin-top:10px">
+        R₁ 压降：<b id="ro-vr">0.0 V</b><br>
+        D₁ 压降：<b id="ro-vd">0.0 V</b>
       </div>
     </div>
-
     <div>
       <div class="panel-title">电路状态</div>
       <div id="st-loop" class="status-item"><div class="status-dot"></div>回路闭合（导线导通）</div>
       <div id="st-led"  class="status-item warn"><div class="status-dot"></div>D₁ 点亮</div>
       <div id="st-d2"   class="status-item danger active"><div class="status-dot"></div>D₂ 未接入（常灭）</div>
     </div>
-
     <div>
       <div class="panel-title">操作</div>
-      <button id="btn-s" class="btn">闭合开关 S</button>
+      <button class="btn" id="btn-s">闭合开关 S</button>
     </div>
-
     <div>
       <div class="panel-title">说明</div>
-      <div class="stage-note" id="note">
-        闭合开关，电流沿导线从 5V 经 R₁、D₁ 流回 GND。
-        串联回路中<b>电流处处相等</b>。
-      </div>
+      <div class="stage-note" id="note"></div>
     </div>
-
   </div>
 </div>
 
+<script src="../assets/circuit-kit.js?v=9"></script>
 <script>
-// ── Circuit constants ──
-const VCC = 5.0;     // supply
-const VLED = 2.0;    // LED forward drop (yellow ≈ 2V)
-const R1 = 220;      // ohms
-const I_mA = ((VCC - VLED) / R1) * 1000; // = 13.6 mA
-const VR1 = VCC - VLED;                    // = 3.0 V
+const svg = document.getElementById('svg');
+svg.insertAdjacentHTML('afterbegin', Circuit.defs());
+const c = new Circuit(svg);
 
+// ── DECLARE the circuit ──
+const SRC = c.source(60, 180, { label: '5V' });    // pos(60,152) neg(60,208)
+const SW  = c.switchH(180, 90, { label: 'S' });    // a(150,90) b(210,90)
+const R   = c.resistor(320, 150, { label: 'R₁', value: '220Ω' }); // a(320,120) b(320,180)
+const D1  = c.led(320, 250, { label: 'D₁' });      // anode(320,238) cathode(320,262)
+const D2  = c.led(190, 255, { label: 'D₂' });      // (comparison, one leg floating)
+D2.set({ color: 'off' });                          // never lights
+const GND = c.ground(60, 310);
+
+c.wire(SRC.pos, SW.a, { vfirst: true }); // + → top rail → switch
+c.wire(SW.b, R.a);                       // switch → top-right → resistor
+c.wire(R.b, D1.anode);                   // resistor → D1
+c.wire(D1.cathode, [320, 310]);          // D1 → bottom rail
+c.wire([320, 310], SRC.neg);             // bottom rail → battery −
+// D2: bottom leg on the rail, top leg floating (not in the loop)
+c.wire(D2.cathode, [190, 310]);
+c.dashed(D2.anode, [190, 218]);
+c.openTerm(190, 214);
+
+const LOOP = [[60,160],[60,90],[320,90],[320,310],[60,310],[60,160]];
+const flow = c.particles(LOOP);
+c.fit();   // center content with an even, modest margin
+
+// D2 floating caption (raw text)
+[['悬空脚',230],['未接入回路',244]].forEach(([s,yy])=>{
+  const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',108); t.setAttribute('y',yy); t.setAttribute('class','lbl');
+  t.setAttribute('fill','#e05050'); t.setAttribute('font-size',9); t.textContent=s; svg.appendChild(t);
+});
+
+// ── interactivity ──
+const $ = id => document.getElementById(id);
 let closed = false;
-let rafId = null;
-
-const btn      = document.getElementById('btn-s');
-const gfill    = document.getElementById('gfill');
-const gval     = document.getElementById('gval');
-const vrEl     = document.getElementById('vr');
-const vdEl     = document.getElementById('vd');
-const note     = document.getElementById('note');
-const swArm    = document.getElementById('sw-arm');
-const ledGlow  = document.getElementById('led-glow');
-const ledBody  = document.getElementById('led-body');
-const particles= document.getElementById('particles');
-
-function setStatus(id, on) {
-  document.getElementById(id).classList.toggle('active', on);
-}
-
-// ── Current particle system (follows the loop) ──
-// Loop path, ordered along the direction of conventional current
-// (5V + plate → top → switch → R1 → D1 → bottom → back to + ).
-const LOOP = [
-  [60,172],[60,70],[170,70],[230,70],[380,70],
-  [380,120],[380,180],[380,210],[380,270],[380,310],
-  [60,310],[60,186]
-];
-
-let pArr = [];
-function spawnParticle() {
-  const p = document.createElementNS('http://www.w3.org/2000/svg','circle');
-  p.setAttribute('r','3.5');
-  p.setAttribute('fill','#22d36a');
-  p.setAttribute('opacity','0.9');
-  particles.appendChild(p);
-  pArr.push({ el: p, idx: 0, frac: 0, speed: 0.05 });
-}
-
-function updateParticles() {
-  pArr = pArr.filter(o => {
-    o.frac += o.speed;
-    while (o.frac >= 1) { o.frac -= 1; o.idx++; }
-    if (o.idx >= LOOP.length - 1) { o.el.remove(); return false; }
-    const [x0,y0] = LOOP[o.idx];
-    const [x1,y1] = LOOP[o.idx+1];
-    o.el.setAttribute('cx', x0 + (x1-x0)*o.frac);
-    o.el.setAttribute('cy', y0 + (y1-y0)*o.frac);
-    return true;
-  });
-}
-
-let spawnTimer = 0;
-function tick(ts) {
+function update() {
   if (closed) {
-    if (ts - spawnTimer > 200) { spawnParticle(); spawnTimer = ts; }
-  }
-  updateParticles();
-  if (closed || pArr.length) {
-    rafId = requestAnimationFrame(tick);
+    SW.setClosed(true); c.lightLoop(LOOP, '#22d36a'); flow.set({ on: true, color: '#22d36a', speed: 1 });
+    D1.set({ color: 'green', b: 1 });
+    $('i-fill').style.width = '100%'; $('i-val').textContent = '13.6 mA';
+    $('ro-vr').textContent = '3.0 V'; $('ro-vd').textContent = '2.0 V';
+    $('st-loop').classList.add('active'); $('st-led').classList.add('active');
+    $('btn-s').classList.add('on'); $('btn-s').textContent = '断开开关 S';
+    $('note').className = 'stage-note';
+    $('note').innerHTML = '回路闭合：电流 I = (5−2)V ÷ 220Ω ≈ <b>13.6 mA</b>，处处相等。<br>R₁ 限流分 3V，D₁ 分 2V 而发光。';
   } else {
-    rafId = null;
+    SW.setClosed(false); c.lightAll('#2e3a50'); flow.set({ on: false });
+    D1.set({ color: 'off' });
+    $('i-fill').style.width = '0%'; $('i-val').textContent = '0.0 mA';
+    $('ro-vr').textContent = '0.0 V'; $('ro-vd').textContent = '0.0 V';
+    $('st-loop').classList.remove('active'); $('st-led').classList.remove('active');
+    $('btn-s').classList.remove('on'); $('btn-s').textContent = '闭合开关 S';
+    $('note').className = 'stage-note';
+    $('note').innerHTML = '开关断开：回路被切断，无电流，D₁ 熄灭。<br>导线只有接成<b>完整回路</b>才导通电流。';
   }
 }
-
-function setWireColor(c) {
-  ['w1','w2','w3','w4','w5','w6','w7','w8'].forEach(id =>
-    document.getElementById(id).setAttribute('stroke', c));
-}
-
-function close() {
-  closed = true;
-  btn.classList.add('on');
-  btn.textContent = '断开开关 S';
-  // switch arm down (closed)
-  swArm.setAttribute('x2','230'); swArm.setAttribute('y2','70');
-  swArm.setAttribute('stroke','#22d36a');
-  setWireColor('#22d36a');
-  // LED on
-  ledGlow.setAttribute('opacity','0.7');
-  ledBody.setAttribute('fill','#ffd23f');
-  ledBody.setAttribute('stroke','#fff0a0');
-  // readouts
-  gfill.style.width = '100%';
-  gval.textContent = I_mA.toFixed(1) + ' mA';
-  vrEl.textContent = VR1.toFixed(1) + ' V';
-  vdEl.textContent = VLED.toFixed(1) + ' V';
-  setStatus('st-loop', true);
-  setStatus('st-led', true);
-  note.innerHTML = '回路闭合：电流 I = (5V − 2V) ÷ 220Ω ≈ <b>13.6 mA</b>，'
-    + '处处相等。R₁ 限流并分得 3V，D₁ 分得 2V 而发光。';
-  if (!rafId) rafId = requestAnimationFrame(tick);
-}
-
-function open() {
-  closed = false;
-  btn.classList.remove('on');
-  btn.textContent = '闭合开关 S';
-  // switch arm up (open)
-  swArm.setAttribute('x2','226'); swArm.setAttribute('y2','50');
-  swArm.setAttribute('stroke','#4a5a6a');
-  setWireColor('#2e3a50');
-  // LED off
-  ledGlow.setAttribute('opacity','0');
-  ledBody.setAttribute('fill','#3a3520');
-  ledBody.setAttribute('stroke','#8a7a2a');
-  // readouts → 0
-  gfill.style.width = '0%';
-  gval.textContent = '0.0 mA';
-  vrEl.textContent = '0.0 V';
-  vdEl.textContent = '0.0 V';
-  setStatus('st-loop', false);
-  setStatus('st-led', false);
-  note.innerHTML = '开关断开：回路被切断，无电流，D₁ 熄灭。'
-    + '导线只有接成<b>完整回路</b>时才能导通电流。';
-}
-
-function toggle() { closed ? open() : close(); }
-
-btn.addEventListener('click', toggle);
-btn.addEventListener('touchstart', e => { e.preventDefault(); toggle(); });
-
-// initial state: open
-open();
+$('btn-s').addEventListener('click', () => { closed = !closed; update(); });
+update();
 </script>
 </body>
 </html>

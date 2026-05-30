@@ -13,7 +13,8 @@
   }
   .wrap { max-width: 720px; margin: 0 auto; }
   h1 { font-size: 16px; letter-spacing: 0.15em; color: #aaa; text-transform: uppercase; margin-bottom: 8px; }
-  .sub { font-size: 12px; color: #5a6b7d; margin-bottom: 32px; }
+  .sub { font-size: 12px; color: #5a6b7d; margin-bottom: 32px; line-height: 1.8; }
+  .sub a { color: #22d36a; text-decoration: none; }
   .group-title { font-size: 11px; letter-spacing: 0.2em; color: #4a5568; text-transform: uppercase; margin: 24px 0 12px; }
   a.card {
     display: block; text-decoration: none;
@@ -22,65 +23,43 @@
   }
   a.card:hover { border-color: #22d36a; transform: translateX(3px); }
   .card-title { font-size: 13px; color: #e0e0e0; }
-  .card-desc { font-size: 11px; color: #6b7a8d; margin-top: 4px; }
+  .card-desc { font-size: 11px; color: #6b7a8d; margin-top: 4px; line-height: 1.5; }
 </style>
 </head>
 <body>
   <div class="wrap">
     <h1>电子笔记 · 交互动画</h1>
     <div class="sub">学习电路过程中的可交互电路图，用于嵌入 Notion 笔记。<br>
-      <a href="components-kit.html" style="color:#22d36a;text-decoration:none">🔧 组件图例库（引擎生成，随引擎增长）</a>　·
-      <a href="components.html" style="color:#6b7a8d;text-decoration:none">旧静态版</a></div>
-
-    <div class="group-title">🔧 引擎版（circuit-kit · 用组件库重做，迁移中）</div>
-    <a class="card" href="exp4/fig1-14-kit.html">
-      <div class="card-title">图1.14 — 限流电阻（引擎版）✅</div>
-      <div class="card-desc">电源电压 5/9/12V 切换、电阻滑块、实时公式、回路点亮、烧毁警告。</div>
-    </a>
-    <a class="card" href="exp1/fig1-6-kit.html">
-      <div class="card-title">图1.6 — 导线与 LED 点亮（引擎版）✅</div>
-      <div class="card-desc">开关通断、整圈点亮（电源/开关引线都亮）、D₂ 悬空支路保持灰。</div>
-    </a>
-    <a class="card" href="exp2/fig1-11-kit.html">
-      <div class="card-title">图1.11 — 电阻分压（引擎版）✅</div>
-      <div class="card-desc">拖 R₁/R₂ 滑块、电压表实时读 U₂、主回路点亮、电压表支路保持灰（不取电流）。</div>
-    </a>
-    <a class="card" href="exp3/fig1-12-kit.html">
-      <div class="card-title">图1.12/1.13 — 上拉/下拉电阻（引擎版）✅</div>
-      <div class="card-desc">切上拉/下拉模式、按住 S，实时显示 NODE 电平/单片机读 1·0/LED；活路径点亮，MCU 支路保持灰。</div>
-    </a>
-    <div class="card-desc" style="margin:0 0 8px 2px">⏳ 实例5 引擎版迁移中…</div>
-
-    <div class="group-title">— 以下为原手画版 —</div>
+      <a href="components-kit.html">🔧 组件图例库（统一符号库，引擎生成）</a></div>
 
     <div class="group-title">实例1 · 导线的应用</div>
     <a class="card" href="exp1/fig1-6-wire-led.html">
       <div class="card-title">图1.6 — 导线与 LED 点亮</div>
-      <div class="card-desc">闭合开关，电流沿回路流动点亮 D₁；对比未接入回路的 D₂ 始终不亮。</div>
+      <div class="card-desc">开关通断，电流沿回路点亮 D₁（电源/开关引线都亮）；未接入回路的 D₂ 悬空支路保持灰。</div>
     </a>
 
     <div class="group-title">实例2 · 电阻器的分压应用</div>
     <a class="card" href="exp2/fig1-11-voltage-divider.html">
       <div class="card-title">图1.11 — 电阻分压</div>
-      <div class="card-desc">拖动 R₁/R₂ 滑块，实时算出 U₁/U₂/I，电压条按比例分配。</div>
+      <div class="card-desc">拖 R₁/R₂ 滑块，电压表实时读 U₂，主回路点亮；电压表支路理想内阻不取电流（保持灰）。</div>
     </a>
 
     <div class="group-title">实例3 · 上/下拉电阻器应用</div>
     <a class="card" href="exp3/fig1-12-pullup-pulldown.html">
       <div class="card-title">图1.12 / 1.13 — 上拉 / 下拉电阻</div>
-      <div class="card-desc">按住按键切换节点高低电平与 LED 亮灭，显示单片机读到的 1/0；可切上拉/下拉。</div>
+      <div class="card-desc">切上拉/下拉模式、按住 S，实时显示 NODE 电平、单片机读到的 1·0 与 LED；活路径点亮，MCU 高阻支路保持灰。</div>
     </a>
 
     <div class="group-title">实例4 · 电阻器的限流应用</div>
     <a class="card" href="exp4/fig1-14-current-limit.html">
       <div class="card-title">图1.14 — 限流电阻</div>
-      <div class="card-desc">拖动电阻值，实时算电流、LED 亮度随之变化，电阻过小触发"烧毁"警告。</div>
+      <div class="card-desc">电源电压 5/9/12V 切换、拖动电阻值，实时算电流与动态公式；电阻过小触发"烧毁"警告。</div>
     </a>
 
     <div class="group-title">实例5 · 定时电容器应用</div>
     <a class="card" href="exp5/fig1-20-rc-timer.html">
       <div class="card-title">图1.20 — RC 定时器电路</div>
-      <div class="card-desc">按住 S 给 C₁ 充电，达到门槛触发 VS 导通、蜂鸣器响；松开经 R₂ 放电复位。</div>
+      <div class="card-desc">按住 S 给 C₁ 充电，达门槛触发 VS 导通、蜂鸣器响（可静音）；松开后 C₁ 经 R₂ 放电复位。</div>
     </a>
   </div>
 </body>

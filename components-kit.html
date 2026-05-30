@@ -26,12 +26,12 @@
     和实际电路图里用的<b style="color:var(--muted)">完全是同一份代码</b>，不会再各画各的、对不上。</div>
   <div class="grid" id="grid"></div>
   <div class="footer">
-    随引擎组件增多，这里会自动长出更多符号（电容 / 二极管 / 晶闸管 / 蜂鸣器…实例5 迁移中）。<br>
+    每个符号都由引擎当场绘制，和电路图共用同一份代码。<br>
     <a href="index.html">← 返回首页</a>
   </div>
 </div>
 
-<script src="assets/circuit-kit.js?v=6"></script>
+<script src="assets/circuit-kit.js?v=9"></script>
 <script>
 // Each entry renders ONE component via the engine, centered in a small card SVG.
 // 横/竖两个朝向放在一起，便于对照。
@@ -60,6 +60,18 @@ const ITEMS = [
     draw: (c) => { const v = c.voltmeter(70, 55); v.setReading('+6.00'); return v; } },
   { name: '单片机引脚', note: '高阻输入：只读电压、不取电流（支路保持灰）',
     draw: (c) => c.mcu(55, 55, { sub: '输入引脚' }) },
+  { name: '电容 · 竖版', note: '两块平行极板（蓝）；上下两脚，可显示充电量',
+    draw: (c) => { const cap = c.capacitor(75, 55, { label: 'C' }); cap.setCharge(0.7); return cap; } },
+  { name: '电容 · 横版', note: 'dir:"h" — 极板竖放，左右两脚',
+    draw: (c) => c.capacitor(75, 55, { label: 'C', dir: 'h' }) },
+  { name: '二极管 · 横版', note: '三角+阴极杠；阳极左/阴极右，单向导通',
+    draw: (c) => c.diode(75, 55, { label: 'D' }) },
+  { name: '二极管 · 竖版', note: 'dir:"v" — 阳极上/阴极下',
+    draw: (c) => c.diode(75, 52, { label: 'D', dir: 'v' }) },
+  { name: '晶闸管 VS（导通）', note: '三角+杠+门极；门极触发后导通（变红）',
+    draw: (c) => { const s = c.scr(70, 55, { label: 'VS', sub: 'S6012R' }); s.setOn(true); return s; } },
+  { name: '蜂鸣器（发声）', note: '喇叭符号 + 声波；通电时发出声波动画',
+    draw: (c) => { const b = c.buzzer(68, 55, { label: 'BUZ' }); b.setRinging(true); return b; } },
 ];
 
 const grid = document.getElementById('grid');

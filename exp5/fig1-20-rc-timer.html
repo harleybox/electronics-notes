@@ -3,179 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RC 定时器电路 — 图1.20</title>
+<title>图1.20 — RC 定时器电路</title>
+<link rel="stylesheet" href="../assets/circuit.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: #0f1117;
-    font-family: 'Courier New', monospace;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    color: #e0e0e0;
-  }
-
-  h1 {
-    font-size: 13px;
-    letter-spacing: 0.15em;
-    color: #888;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-
-  .stage {
-    display: flex;
-    gap: 28px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  /* ── Circuit SVG ── */
-  #circuit-wrap {
-    background: #161b27;
-    border: 1px solid #2a3040;
-    border-radius: 12px;
-    padding: 16px;
-    position: relative;
-  }
-
-  /* ── Side panel ── */
-  .panel {
-    background: #161b27;
-    border: 1px solid #2a3040;
-    border-radius: 12px;
-    padding: 20px;
-    width: 220px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-
-  .panel-title {
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: #4a5568;
-    text-transform: uppercase;
-    border-bottom: 1px solid #2a3040;
-    padding-bottom: 8px;
-  }
-
-  /* Voltage gauge */
-  .gauge-label {
-    font-size: 11px;
-    color: #8899aa;
-    margin-bottom: 6px;
-  }
-  .gauge-track {
-    background: #1e2535;
-    border-radius: 4px;
-    height: 20px;
-    overflow: hidden;
-    border: 1px solid #2a3040;
-  }
-  .gauge-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.05s linear;
-    background: linear-gradient(90deg, #1a6b3a, #22d36a);
-    width: 0%;
-  }
-  .gauge-value {
-    font-size: 12px;
-    color: #22d36a;
-    margin-top: 4px;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* Status list */
-  .status-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    color: #6b7a8d;
-    transition: color 0.3s;
-  }
-  .status-item.active { color: #e0e0e0; }
-  .status-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #2a3040;
-    flex-shrink: 0;
-    transition: background 0.3s, box-shadow 0.3s;
-  }
-  .status-item.active .status-dot {
-    background: #22d36a;
-    box-shadow: 0 0 6px #22d36a88;
-  }
-  .status-item.warn.active .status-dot {
-    background: #f5a623;
-    box-shadow: 0 0 6px #f5a62388;
-  }
-
-  /* Button */
-  #btn-s {
-    background: #1e2535;
-    border: 2px solid #3a4560;
-    color: #8899aa;
-    border-radius: 8px;
-    padding: 12px;
-    font-family: inherit;
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: all 0.15s;
-    width: 100%;
-    text-transform: uppercase;
-    user-select: none;
-  }
-  #btn-s:hover { border-color: #22d36a; color: #22d36a; }
-  #btn-mute {
-    background: #1e2535;
-    border: 2px solid #3a4560;
-    color: #8899aa;
-    border-radius: 8px;
-    padding: 9px;
-    font-family: inherit;
-    font-size: 11px;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all 0.15s;
-    width: 100%;
-    user-select: none;
-  }
-  #btn-mute:hover { border-color: #8899aa; color: #c0ccd8; }
-  #btn-mute.muted { color: #5a6b7d; border-color: #2a3040; }
-  #btn-s.pressed {
-    background: #1a3328;
-    border-color: #22d36a;
-    color: #22d36a;
-    box-shadow: 0 0 12px #22d36a44;
-  }
-
-  /* Stage note */
-  #stage-note {
-    font-size: 11px;
-    color: #5a6b7d;
-    line-height: 1.6;
-    min-height: 52px;
-    transition: color 0.3s;
-  }
-  #stage-note.buzzing { color: #f5a623; }
-
-  /* SVG component labels */
-  .lbl { font-family: 'Courier New', monospace; font-size: 11px; }
-
-  /* Buzzer animation */
-  @keyframes buzz-ring {
-    0%,100% { opacity: 0.15; r: 6; }
-    50% { opacity: 0.7; r: 10; }
-  }
-  .buzz-wave { animation: buzz-ring 0.4s ease-in-out infinite; }
+  .gauge-label { font-size:11px; color:var(--muted); margin-bottom:6px; }
+  .gauge-track { background:#1e2535; border:1px solid var(--border); border-radius:4px; height:20px; overflow:hidden; }
+  .gauge-fill  { height:100%; border-radius:3px; transition:width .05s linear; background:linear-gradient(90deg,#1a6b3a,#22d36a); width:0%; }
+  .gauge-value { font-size:12px; color:var(--green); margin-top:4px; font-variant-numeric:tabular-nums; }
+  #btn-mute { margin-top:10px; }
+  #btn-mute.muted { color:var(--faint); border-color:var(--border); }
+  #stage-note.buzzing { color:var(--amber); }
 </style>
 </head>
 <body>
@@ -183,126 +20,11 @@
 <h1>图1.20 — RC 定时器电路</h1>
 
 <div class="stage">
-
-  <!-- Circuit -->
   <div id="circuit-wrap">
-    <svg id="svg" width="440" height="370" viewBox="0 0 440 370">
-      <defs>
-        <marker id="arr" viewBox="0 0 8 8" refX="6" refY="4"
-                markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-          <path d="M1 1L7 4L1 7" fill="none" stroke="#22d36a" stroke-width="1.5"
-                stroke-linecap="round" stroke-linejoin="round"/>
-        </marker>
-      </defs>
-
-      <!-- ── Wires (static gray) ── -->
-      <!-- Left vertical: top node → R1 → C1 top plate (stops at the plate; no bridge across the cap) -->
-      <line x1="60" y1="100" x2="60" y2="210" stroke="#2e3a50" stroke-width="2"/>
-      <!-- Bottom horizontal: C1 bottom to GND junction -->
-      <line x1="60" y1="280" x2="220" y2="280" stroke="#2e3a50" stroke-width="2"/>
-      <!-- node → R2 top stub, and R2 bottom → GND junction -->
-      <line x1="160" y1="190" x2="160" y2="200" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="160" y1="240" x2="160" y2="280" stroke="#2e3a50" stroke-width="2"/>
-      <!-- Mid horizontal: R2 top / D2 left / C1 top area -->
-      <line x1="60" y1="190" x2="160" y2="190" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="160" y1="190" x2="200" y2="190" stroke="#2e3a50" stroke-width="2"/>
-      <!-- Diode chain: D2 cathode → D1 anode, D1 cathode → VS anode -->
-      <line x1="218" y1="190" x2="265" y2="190" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="283" y1="190" x2="340" y2="190" stroke="#2e3a50" stroke-width="2"/>
-      <!-- VS cathode → buzzer & bottom -->
-      <line x1="360" y1="190" x2="400" y2="190" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="400" y1="100" x2="400" y2="190" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="220" y1="280" x2="400" y2="280" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="400" y1="190" x2="400" y2="280" stroke="#2e3a50" stroke-width="2"/>
-      <!-- VCC line top -->
-      <line x1="60" y1="100" x2="220" y2="100" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="280" y1="100" x2="400" y2="100" stroke="#2e3a50" stroke-width="2"/>
-
-      <!-- ── R1 ── -->
-      <rect x="52" y="120" width="16" height="50" rx="3"
-            fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
-      <text x="36" y="148" class="lbl" fill="#8899aa">R₁</text>
-
-      <!-- ── C1 ── -->
-      <!-- Plates -->
-      <line x1="44" y1="210" x2="76" y2="210" stroke="#4a7aaa" stroke-width="2.5"/>
-      <line x1="44" y1="220" x2="76" y2="220" stroke="#4a7aaa" stroke-width="2.5"/>
-      <line x1="60" y1="175" x2="60" y2="210" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="60" y1="220" x2="60" y2="240" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="60" y1="240" x2="60" y2="280" stroke="#2e3a50" stroke-width="2"/>
-      <!-- C1 fill indicator -->
-      <rect id="c1fill" x="45" y="220" width="30" height="0" fill="#1a6b3a" opacity="0.5"/>
-      <text x="22" y="218" class="lbl" fill="#4a7aaa">C₁</text>
-
-      <!-- ── R2 ── -->
-      <rect x="152" y="200" width="16" height="40" rx="3"
-            fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
-      <text x="172" y="224" class="lbl" fill="#8899aa">R₂</text>
-
-      <!-- ── D2 (diode) ── -->
-      <polygon points="200,183 200,197 218,190" fill="#3a5a7a" stroke="#4a7aaa" stroke-width="1.5"/>
-      <line x1="218" y1="183" x2="218" y2="197" stroke="#4a7aaa" stroke-width="2"/>
-      <text x="204" y="176" class="lbl" fill="#8899aa">D₂</text>
-
-      <!-- ── D1 (diode) ── -->
-      <polygon points="265,183 265,197 283,190" fill="#3a5a7a" stroke="#4a7aaa" stroke-width="1.5"/>
-      <line x1="283" y1="183" x2="283" y2="197" stroke="#4a7aaa" stroke-width="2"/>
-      <text x="269" y="176" class="lbl" fill="#8899aa">D₁</text>
-
-      <!-- ── VS (SCR thyristor) ── -->
-      <!-- Triangle + bar + gate -->
-      <polygon id="vs-body" points="340,183 340,197 360,190"
-               fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
-      <line id="vs-bar" x1="360" y1="183" x2="360" y2="197"
-            stroke="#4a5a6a" stroke-width="2"/>
-      <!-- Gate (control pin goes down from cathode side) -->
-      <line x1="340" y1="190" x2="340" y2="210" stroke="#4a5a6a" stroke-width="1.5"
-            stroke-dasharray="3,2"/>
-      <line x1="310" y1="210" x2="340" y2="210" stroke="#4a5a6a" stroke-width="1.5"
-            stroke-dasharray="3,2"/>
-      <line x1="310" y1="190" x2="310" y2="210" stroke="#4a5a6a" stroke-width="1.5"
-            stroke-dasharray="3,2"/>
-      <text x="344" y="176" class="lbl" fill="#8899aa">VS</text>
-      <text x="336" y="168" class="lbl" fill="#6a7a8a" font-size="9">S6012R</text>
-
-      <!-- ── BUZ1 ── -->
-      <!-- Speaker symbol -->
-      <rect x="390" y="76" width="20" height="26" rx="2"
-            fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
-      <path d="M410 82 L422 74 L422 102 L410 94 Z"
-            fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
-      <!-- Buzzer sound waves (animated when active) -->
-      <circle id="bw1" cx="430" cy="88" r="5" fill="none"
-              stroke="#f5a623" stroke-width="1.5" opacity="0"/>
-      <circle id="bw2" cx="430" cy="88" r="10" fill="none"
-              stroke="#f5a623" stroke-width="1" opacity="0"/>
-      <text x="388" y="70" class="lbl" fill="#8899aa">BUZ₁</text>
-
-      <!-- ── S (switch) ── -->
-      <!-- two terminals + gap + contact arm -->
-      <circle cx="222" cy="100" r="3" fill="#4a5a6a"/>
-      <circle cx="278" cy="100" r="3" fill="#4a5a6a"/>
-      <line id="sw-arm" x1="222" y1="100" x2="255" y2="86"
-            stroke="#4a5a6a" stroke-width="2" stroke-linecap="round"/>
-      <text x="238" y="76" class="lbl" fill="#8899aa">S</text>
-
-      <!-- VCC label -->
-      <text x="284" y="104" class="lbl" fill="#f5a623">5V</text>
-
-      <!-- GND symbol -->
-      <line x1="206" y1="280" x2="234" y2="280" stroke="#4a5a6a" stroke-width="2"/>
-      <line x1="210" y1="287" x2="230" y2="287" stroke="#4a5a6a" stroke-width="1.5"/>
-      <line x1="214" y1="294" x2="226" y2="294" stroke="#4a5a6a" stroke-width="1"/>
-      <text x="214" y="308" class="lbl" fill="#4a5a6a">GND</text>
-
-      <!-- ── Animated current particles ── -->
-      <g id="particles"></g>
-    </svg>
+    <svg id="svg" width="500" height="380" viewBox="0 0 500 380"></svg>
   </div>
 
-  <!-- Side Panel -->
   <div class="panel">
-
     <div>
       <div class="panel-title">C₁ 充电电压</div>
       <div class="gauge-label">当前电压</div>
@@ -312,154 +34,136 @@
 
     <div>
       <div class="panel-title">电路状态</div>
-      <div id="st-s"     class="status-item"><div class="status-dot"></div>S 已按下（开始充电）</div>
-      <div id="st-chg"   class="status-item" style="margin-top:8px"><div class="status-dot"></div>C₁ 充电中</div>
-      <div id="st-trig"  class="status-item warn" style="margin-top:8px"><div class="status-dot"></div>VS 触发导通</div>
-      <div id="st-buz"   class="status-item warn" style="margin-top:8px"><div class="status-dot"></div>蜂鸣器响</div>
-      <div id="st-dis"   class="status-item" style="margin-top:8px"><div class="status-dot"></div>R₂ 放电（重置）</div>
+      <div id="st-s"    class="status-item"><div class="status-dot"></div><span>S 已按下（开始充电）</span></div>
+      <div id="st-chg"  class="status-item" style="margin-top:8px"><div class="status-dot"></div><span>C₁ 充电中</span></div>
+      <div id="st-trig" class="status-item warn" style="margin-top:8px"><div class="status-dot"></div><span>VS 触发导通</span></div>
+      <div id="st-buz"  class="status-item warn" style="margin-top:8px"><div class="status-dot"></div><span>蜂鸣器响</span></div>
+      <div id="st-dis"  class="status-item" style="margin-top:8px"><div class="status-dot"></div><span>R₂ 放电（重置）</span></div>
     </div>
 
     <div>
       <div class="panel-title">操作</div>
-      <button id="btn-s">按住 S 开始计时</button>
-      <button id="btn-mute" style="margin-top:10px">🔊 蜂鸣声：开</button>
+      <button class="btn" id="btn-s">按住 S 开始计时</button>
+      <button class="btn" id="btn-mute">🔊 蜂鸣声：开</button>
     </div>
 
     <div>
       <div class="panel-title">说明</div>
-      <div id="stage-note">
-        按住按键 S，5V 电源开始通过 R₁ 向 C₁ 充电。<br>松开后 C₁ 通过 R₂ 放电重置。
-      </div>
+      <div class="stage-note" id="stage-note">按住按键 S，5V 电源经 R₁ 给 C₁ 充电。<br>C₁ 电压升到门槛 → VS 导通、蜂鸣器响。松开后 C₁ 经 R₂ 放电复位。</div>
     </div>
-
   </div>
 </div>
 
+<script src="../assets/circuit-kit.js?v=9"></script>
 <script>
-const VCC = 5.0;
-const VTRIG = 2.8; // D1+D2 drop (~1.4V) + VS gate (~1.4V)
-const TAU = 4000;  // ms, simulated RC time constant
+const svg = document.getElementById('svg');
+const $ = id => document.getElementById(id);
+svg.innerHTML = Circuit.defs();
+const c = new Circuit(svg);
 
-let voltage = 0;
-let pressing = false;
-let buzzing = false;
-let startTime = null;
-let v0 = 0;
-let rafId = null;
-let dischargeStart = null;
-let vDischarge = 0;
+// ── place components ──
+const SRC = c.source(60, 195, { label: '5V' });                          // pos[60,175] neg[60,215]
+const SW  = c.switchH(140, 110, { label: 'S' });                         // a[110,110] b[170,110]
+const R1  = c.resistor(210, 160, { label: 'R₁', value: '10k' });         // a[210,130] b[210,190]
+const C1  = c.capacitor(210, 250, { label: 'C₁' });                      // a[210,225] b[210,275]
+const R2  = c.resistor(270, 250, { label: 'R₂', value: '47k' });         // a[270,220] b[270,280]
+const D2  = c.diode(320, 207, { label: 'D₂' });                          // anode[311,207] cathode[329,207]
+const D1  = c.diode(360, 207, { label: 'D₁' });                          // anode[351,207] cathode[369,207]
+const BUZ = c.buzzer(450, 165, { label: 'BUZ₁' });                       // a[450,137] b[450,193]
+const VS  = c.scr(450, 255, { label: 'VS', sub: 'S6012R', dir: 'v' });   // anode[450,246] cathode[450,264] gate[420,264]
+const GND = c.ground(135, 320);
 
-const btn = document.getElementById('btn-s');
-const gfill = document.getElementById('gfill');
-const gval = document.getElementById('gval');
-const note = document.getElementById('stage-note');
-const swArm = document.getElementById('sw-arm');
-const vsBody = document.getElementById('vs-body');
-const vsBar = document.getElementById('vs-bar');
-const bw1 = document.getElementById('bw1');
-const bw2 = document.getElementById('bw2');
-const c1fill = document.getElementById('c1fill');
-const particles = document.getElementById('particles');
-const btnMute = document.getElementById('btn-mute');
+// ── wiring ──
+// VCC rail (top): source + → up → switch → both branches
+c.wire(SRC.pos, [60, 110], { vfirst: true });
+c.wire([60, 110], SW.a);
+c.wire(SW.b, [210, 110]);
+c.wire([210, 110], [450, 110]);
+// charge branch: VCC → R1 → C1 → GND
+c.wire([210, 110], R1.a);
+c.wire(R1.b, C1.a); c.node([210, 207]);          // NODE (R1 / C1 / R2 / D2 junction)
+c.wire(C1.b, [210, 320]);
+// pulldown + discharge resistor: NODE → R2 → GND (parallel with C1)
+c.wire([210, 207], [270, 207]); c.node([270, 207]);
+c.wire([270, 207], R2.a);
+c.wire(R2.b, [270, 320]);
+// trigger chain: NODE → D2 → D1 → VS gate
+c.wire([270, 207], D2.anode);
+c.wire(D2.cathode, D1.anode);
+c.wire(D1.cathode, [420, 207]); c.wire([420, 207], VS.gate);
+// output branch: VCC → BUZ → VS → GND
+c.wire([450, 110], BUZ.a);
+c.wire(BUZ.b, VS.anode);
+c.wire(VS.cathode, [450, 320]);
+// GND rail (bottom)
+c.wire(SRC.neg, [60, 320], { vfirst: true });
+c.wire([60, 320], [450, 320]);
+// junction dots at the 3-way taps (consistent with the other figures)
+c.node([210, 110]);   // VCC rail ┬ charge branch
+c.node([210, 320]);   // GND rail ┬ C1
+c.node([270, 320]);   // GND rail ┬ R2
 
-// ── Web Audio buzzer ──
-let audioCtx = null;
-let buzzOsc = null;
-let buzzGain = null;
-let soundOn = true;
+c.fit();
 
-function ensureAudio() {
-  if (!audioCtx) {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    audioCtx = new AC();
-  }
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-}
+// ── current paths (each state = a set of live sub-paths) ──
+// charging (S down, before trigger): VCC→R1→{C1, R2}→GND
+const chargeSegs = [
+  [[60,188],[60,110],[210,110],[210,320],[60,320],[60,202]],   // main charge loop (covers battery leads)
+  [[210,207],[270,207],[270,320]]                              // R2 pulldown branch
+];
+// triggered: charge + R2 + trigger chain (NODE→D2→D1→gate) + output (BUZ→VS)
+const trigSegs = [
+  [[60,188],[60,110],[450,110],[450,320],[60,320],[60,202]],   // rails + BUZ + VS (output loop)
+  [[210,110],[210,320]],                                       // charge vertical (R1,C1)
+  [[210,207],[270,207],[270,320]],                             // R2 branch
+  [[270,207],[420,207],[420,264]]                              // trigger chain → gate
+];
+// discharging (S open): C1 ∥ R2 loop, NODE→R2→GND→back to C1
+const dischargeSegs = [
+  [[210,225],[210,207],[270,207],[270,320]],                   // C1+ → NODE → R2 → GND
+  [[210,275],[210,320],[270,320]]                              // C1− → bottom rail → R2 bottom
+];
+// particle flow paths (source + → ... → source −)
+const chargeFlow = [[60,175],[60,110],[210,110],[210,320],[60,320],[60,215]];
+const outFlow    = [[60,175],[60,110],[450,110],[450,320],[60,320],[60,215]];
+const pCharge = c.particles(chargeFlow);
+const pOut    = c.particles(outFlow);
+function allGray() { c.lightPaths([], '#22d36a'); }
 
-function startBuzzSound() {
-  if (!soundOn) return;
-  ensureAudio();
-  if (buzzOsc) return;
-  buzzOsc = audioCtx.createOscillator();
-  buzzGain = audioCtx.createGain();
-  buzzOsc.type = 'square';        // piezo-buzzer character
-  buzzOsc.frequency.value = 2700; // ~2.7 kHz typical active buzzer
-  buzzGain.gain.value = 0.0;
-  buzzOsc.connect(buzzGain).connect(audioCtx.destination);
-  buzzOsc.start();
-  // quick fade-in to avoid click
-  buzzGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 0.01);
-}
+// ── physics ──
+const VCC = 5.0, VTRIG = 2.8, TAU = 4000;
+let voltage = 0, pressing = false, buzzing = false;
+let startTime = null, v0 = 0, rafId = null;
+let dischargeStart = null, vDischarge = 0;
 
-function stopBuzzSound() {
-  if (!buzzOsc) return;
-  const osc = buzzOsc, g = buzzGain;
-  g.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.02);
-  setTimeout(() => { try { osc.stop(); } catch (e) {} }, 80);
-  buzzOsc = null;
-  buzzGain = null;
-}
-
-btnMute.addEventListener('click', () => {
-  soundOn = !soundOn;
-  btnMute.textContent = soundOn ? '🔊 蜂鸣声：开' : '🔇 蜂鸣声：关';
-  btnMute.classList.toggle('muted', !soundOn);
-  if (!soundOn) stopBuzzSound();
-  else if (buzzing) startBuzzSound(); // resume if currently buzzing
-});
-
-function setStatus(id, on) {
-  document.getElementById(id).classList.toggle('active', on);
-}
-
+function setStatus(id, on) { $(id).classList.toggle('active', on); }
 function updateGauge(v) {
   const pct = Math.min(100, (v / VCC) * 100);
-  gfill.style.width = pct + '%';
-  gval.textContent = v.toFixed(2) + ' V';
-  // C1 fill height (max 10px gap between plates)
-  const h = Math.min(10, (v / VCC) * 10);
-  c1fill.setAttribute('y', 220 - h);
-  c1fill.setAttribute('height', h);
-  gfill.style.background = v >= VTRIG
-    ? 'linear-gradient(90deg,#6b2020,#e05050)'
-    : 'linear-gradient(90deg,#1a6b3a,#22d36a)';
-  gval.style.color = v >= VTRIG ? '#e05050' : '#22d36a';
+  $('gfill').style.width = pct + '%';
+  $('gval').textContent = v.toFixed(2) + ' V';
+  C1.setCharge(v / VCC);
+  $('gfill').style.background = v >= VTRIG ? 'linear-gradient(90deg,#6b2020,#e05050)' : 'linear-gradient(90deg,#1a6b3a,#22d36a)';
+  $('gval').style.color = v >= VTRIG ? '#e05050' : '#22d36a';
 }
 
-// Particle system
-let pArr = [];
-function spawnParticle() {
-  const p = document.createElementNS('http://www.w3.org/2000/svg','circle');
-  p.setAttribute('r','4');
-  p.setAttribute('fill', buzzing ? '#f5a623' : '#22d36a');
-  p.setAttribute('opacity','0.85');
-  particles.appendChild(p);
-  // Path: top wire left→right, then down right side, then bottom left
-  const path = pressing
-    ? [ [60,100],[220,100],[280,100],[400,100],[400,190],[400,280],[220,280],[60,280],[60,190] ]
-    : [ [60,280],[60,190] ]; // discharge path
-  const t = { idx: 0, frac: 0, speed: pressing ? 0.008 : 0.02 };
-  pArr.push({ el: p, path, t });
+function trigger() {
+  buzzing = true;
+  setStatus('st-trig', true); setStatus('st-buz', true);
+  VS.setOn(true); BUZ.setRinging(true);
+  c.lightPaths(trigSegs, '#f5a623');
+  pOut.set({ on: true, color: '#f5a623', speed: 1.4 });
+  $('stage-note').className = 'stage-note buzzing';
+  $('stage-note').innerHTML = '⚠ C₁ 电压达到触发门槛！<br>VS 导通，电源经蜂鸣器→VS→地形成回路，蜂鸣器响，定时结束。';
+  startBuzzSound();
+}
+function untrigger() {
+  buzzing = false;
+  setStatus('st-trig', false); setStatus('st-buz', false);
+  VS.setOn(false); BUZ.setRinging(false);
+  pOut.set({ on: false });
+  stopBuzzSound();
 }
 
-function updateParticles() {
-  pArr = pArr.filter(obj => {
-    const { el, path, t } = obj;
-    if (t.idx >= path.length - 1) {
-      el.remove(); return false;
-    }
-    t.frac += t.speed;
-    if (t.frac >= 1) { t.frac -= 1; t.idx++; }
-    if (t.idx >= path.length - 1) { el.remove(); return false; }
-    const [x0,y0] = path[t.idx];
-    const [x1,y1] = path[t.idx+1];
-    el.setAttribute('cx', x0 + (x1-x0)*t.frac);
-    el.setAttribute('cy', y0 + (y1-y0)*t.frac);
-    return true;
-  });
-}
-
-let spawnTimer = 0;
 function tick(ts) {
   if (pressing) {
     if (!startTime) { startTime = ts; v0 = voltage; }
@@ -467,119 +171,90 @@ function tick(ts) {
     voltage = VCC - (VCC - v0) * Math.exp(-elapsed / TAU);
     updateGauge(voltage);
     setStatus('st-chg', true);
-
-    // Spawn particles
-    if (ts - spawnTimer > 280) { spawnParticle(); spawnTimer = ts; }
-
-    if (voltage >= VTRIG && !buzzing) {
-      buzzing = true;
-      setStatus('st-trig', true);
-      setStatus('st-buz', true);
-      vsBody.setAttribute('fill','#3a2010');
-      vsBody.setAttribute('stroke','#e05050');
-      vsBar.setAttribute('stroke','#e05050');
-      note.className = 'buzzing';
-      note.innerHTML = '⚠ C₁ 电压达到触发门槛！<br>VS 导通，蜂鸣器响，定时结束。';
-      startBuzzAnim();
-      startBuzzSound();
-    }
+    // charge current decreases as C1 fills → particle speed ∝ (VCC − v)
+    pCharge.set({ on: true, color: '#22d36a', speed: 0.5 + (VCC - voltage) / VCC * 1.2 });
+    if (!buzzing) c.lightPaths(chargeSegs, '#22d36a');
+    if (voltage >= VTRIG && !buzzing) trigger();
   }
-  updateParticles();
   rafId = requestAnimationFrame(tick);
 }
 
-let buzzAnim = null;
-function startBuzzAnim() {
-  if (buzzAnim) return;
-  let phase = 0;
-  buzzAnim = setInterval(() => {
-    phase = (phase + 0.15) % (Math.PI * 2);
-    const a1 = (Math.sin(phase) + 1) / 2;
-    const a2 = (Math.sin(phase + 1) + 1) / 2;
-    bw1.setAttribute('opacity', a1 * 0.8);
-    bw1.setAttribute('r', 5 + a1 * 7);
-    bw2.setAttribute('opacity', a2 * 0.5);
-    bw2.setAttribute('r', 10 + a2 * 12);
-  }, 40);
+// ── Web Audio buzzer ──
+let audioCtx = null, buzzOsc = null, buzzGain = null, soundOn = true;
+function ensureAudio() {
+  if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; audioCtx = new AC(); }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
 }
-function stopBuzzAnim() {
-  clearInterval(buzzAnim); buzzAnim = null;
-  bw1.setAttribute('opacity', 0);
-  bw2.setAttribute('opacity', 0);
+function startBuzzSound() {
+  if (!soundOn) return;
+  ensureAudio();
+  if (buzzOsc) return;
+  buzzOsc = audioCtx.createOscillator(); buzzGain = audioCtx.createGain();
+  buzzOsc.type = 'square'; buzzOsc.frequency.value = 2700; buzzGain.gain.value = 0.0;
+  buzzOsc.connect(buzzGain).connect(audioCtx.destination); buzzOsc.start();
+  buzzGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 0.01);
 }
+function stopBuzzSound() {
+  if (!buzzOsc) return;
+  const osc = buzzOsc, g = buzzGain;
+  g.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.02);
+  setTimeout(() => { try { osc.stop(); } catch (e) {} }, 80);
+  buzzOsc = null; buzzGain = null;
+}
+$('btn-mute').addEventListener('click', () => {
+  soundOn = !soundOn;
+  $('btn-mute').textContent = soundOn ? '🔊 蜂鸣声：开' : '🔇 蜂鸣声：关';
+  $('btn-mute').classList.toggle('muted', !soundOn);
+  if (!soundOn) stopBuzzSound(); else if (buzzing) startBuzzSound();
+});
 
+// ── press / release ──
 function startPress() {
-  if (soundOn) ensureAudio(); // unlock audio within the user gesture
-  pressing = true;
-  startTime = null;
-  dischargeStart = null;
-  setStatus('st-s', true);
-  setStatus('st-dis', false);
-  btn.classList.add('pressed');
-  btn.textContent = '松开 S 停止';
-  swArm.setAttribute('x2', '278');
-  swArm.setAttribute('y2', '100');
-  swArm.setAttribute('stroke','#22d36a');
+  if (soundOn) ensureAudio();
+  pressing = true; startTime = null; dischargeStart = null;
+  setStatus('st-s', true); setStatus('st-dis', false);
+  SW.setClosed(true);
+  $('btn-s').classList.add('on'); $('btn-s').textContent = '松开 S 停止';
   if (!rafId) rafId = requestAnimationFrame(tick);
 }
-
 function stopPress() {
-  pressing = false;
-  startTime = null;
-  btn.classList.remove('pressed');
-  btn.textContent = '按住 S 开始计时';
-  setStatus('st-s', false);
-  setStatus('st-chg', false);
-  swArm.setAttribute('x2', '255');
-  swArm.setAttribute('y2', '86');
-  swArm.setAttribute('stroke','#4a5a6a');
-  // Reset VS & buzzer
-  if (buzzing) {
-    buzzing = false;
-    stopBuzzAnim();
-    stopBuzzSound();
-    setStatus('st-trig', false);
-    setStatus('st-buz', false);
-    vsBody.setAttribute('fill','#1e2535');
-    vsBody.setAttribute('stroke','#4a5a6a');
-    vsBar.setAttribute('stroke','#4a5a6a');
-  }
-  // Discharge animation
-  vDischarge = voltage;
-  dischargeStart = performance.now();
+  pressing = false; startTime = null;
+  setStatus('st-s', false); setStatus('st-chg', false);
+  SW.setClosed(false);
+  $('btn-s').classList.remove('on'); $('btn-s').textContent = '按住 S 开始计时';
+  if (buzzing) untrigger();
+  pCharge.set({ on: false });
+  // discharge through R2
+  vDischarge = voltage; dischargeStart = performance.now();
   setStatus('st-dis', true);
-  note.className = '';
-  note.innerHTML = 'S 断开，C₁ 通过 R₂ 放电中…<br>电压归零后可再次计时。';
+  $('stage-note').className = 'stage-note';
+  $('stage-note').innerHTML = 'S 断开，C₁ 通过 R₂ 放电中…<br>电压归零后可再次计时。';
+  c.lightPaths(dischargeSegs, '#22d36a'); // C1 ∥ R2 discharge loop
   animDischarge();
 }
-
 function animDischarge() {
-  const now = performance.now();
   if (!dischargeStart) return;
-  const elapsed = now - dischargeStart;
+  const elapsed = performance.now() - dischargeStart;
   voltage = vDischarge * Math.exp(-elapsed / 800);
   updateGauge(voltage);
-  if (voltage > 0.01) {
-    // discharge particles
-    if (now - spawnTimer > 220) { spawnParticle(); spawnTimer = now; }
-    updateParticles();
+  if (voltage > 0.02) {
     requestAnimationFrame(animDischarge);
   } else {
     voltage = 0; updateGauge(0);
     setStatus('st-dis', false);
-    note.innerHTML = 'C₁ 已放电清零，可重新按 S 开始新的计时。';
-    pArr.forEach(o => o.el.remove()); pArr = [];
+    $('stage-note').innerHTML = 'C₁ 已放电清零，可重新按 S 开始新的计时。';
+    allGray();
     cancelAnimationFrame(rafId); rafId = null;
   }
 }
 
-// Event listeners (mouse + touch)
-btn.addEventListener('mousedown', startPress);
-btn.addEventListener('touchstart', e => { e.preventDefault(); startPress(); });
+$('btn-s').addEventListener('mousedown', startPress);
+$('btn-s').addEventListener('touchstart', e => { e.preventDefault(); startPress(); });
 document.addEventListener('mouseup', () => { if (pressing) stopPress(); });
 document.addEventListener('touchend', () => { if (pressing) stopPress(); });
 
 updateGauge(0);
+allGray();
 </script>
 </body>
 </html>

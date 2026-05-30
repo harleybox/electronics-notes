@@ -243,6 +243,114 @@
         }
       };
     }
+    // Capacitor. dir 'v' (default) → plates horizontal, pins a(top) b(bottom);
+    // 'h' → plates vertical, pins a(left) b(right). setCharge(frac 0..1) shows fill.
+    capacitor(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      const h = o.dir === 'h';
+      if (h) {
+        const lL = el('line', { x1: x - 25, y1: y, x2: x - 5, y2: y, stroke: C.wire, 'stroke-width': 2 });
+        const lR = el('line', { x1: x + 5, y1: y, x2: x + 25, y2: y, stroke: C.wire, 'stroke-width': 2 });
+        g.appendChild(lL); g.appendChild(lR);
+        g.appendChild(el('line', { x1: x - 5, y1: y - 14, x2: x - 5, y2: y + 14, stroke: C.blue, 'stroke-width': 2.5 }));
+        g.appendChild(el('line', { x1: x + 5, y1: y - 14, x2: x + 5, y2: y + 14, stroke: C.blue, 'stroke-width': 2.5 }));
+        this.wires.push({ el: lL, a: [x - 25, y], b: [x - 5, y] }, { el: lR, a: [x + 5, y], b: [x + 25, y] });
+        if (o.label) { const t = txt(x, y - 20, o.label, C.blue, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+        return { a: [x - 25, y], b: [x + 25, y], setCharge() {} };
+      }
+      const lT = el('line', { x1: x, y1: y - 25, x2: x, y2: y - 5, stroke: C.wire, 'stroke-width': 2 });
+      const lB = el('line', { x1: x, y1: y + 5, x2: x, y2: y + 25, stroke: C.wire, 'stroke-width': 2 });
+      g.appendChild(lT); g.appendChild(lB);
+      const fill = el('rect', { x: x - 15, y: y + 5, width: 30, height: 0, fill: C.green, opacity: 0.45 }); // charge level
+      g.appendChild(fill);
+      g.appendChild(el('line', { x1: x - 16, y1: y - 5, x2: x + 16, y2: y - 5, stroke: C.blue, 'stroke-width': 2.5 })); // + plate
+      g.appendChild(el('line', { x1: x - 16, y1: y + 5, x2: x + 16, y2: y + 5, stroke: C.blue, 'stroke-width': 2.5 })); // − plate
+      this.wires.push({ el: lT, a: [x, y - 25], b: [x, y - 5] }, { el: lB, a: [x, y + 5], b: [x, y + 25] });
+      if (o.label) { const t = txt(x - 24, y + 4, o.label, C.blue, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+      return {
+        a: [x, y - 25], b: [x, y + 25],
+        setCharge(frac) { const hh = Math.max(0, Math.min(1, frac)) * 9; fill.setAttribute('y', y + 5 - hh); fill.setAttribute('height', hh); }
+      };
+    }
+    // Plain diode. dir 'h' (default) → anode left, cathode right; 'v' → anode top, cathode bottom.
+    diode(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      if (o.dir === 'v') {
+        g.appendChild(el('polygon', { points: `${x-10},${y-9} ${x+10},${y-9} ${x},${y+9}`, fill: '#3a5a7a', stroke: C.blue, 'stroke-width': 1.5 }));
+        g.appendChild(el('line', { x1: x - 10, y1: y + 9, x2: x + 10, y2: y + 9, stroke: C.blue, 'stroke-width': 2.5 }));
+        if (o.label) g.appendChild(txt(x + 14, y + 2, o.label, C.gray, 12));
+        return { anode: [x, y - 9], cathode: [x, y + 9] };
+      }
+      g.appendChild(el('polygon', { points: `${x-9},${y-9} ${x-9},${y+9} ${x+9},${y}`, fill: '#3a5a7a', stroke: C.blue, 'stroke-width': 1.5 }));
+      g.appendChild(el('line', { x1: x + 9, y1: y - 9, x2: x + 9, y2: y + 9, stroke: C.blue, 'stroke-width': 2.5 }));
+      if (o.label) { const t = txt(x, y - 15, o.label, C.gray, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+      return { anode: [x - 9, y], cathode: [x + 9, y] };
+    }
+    // Thyristor / SCR. dir 'h' (default) → anode left, cathode right, gate below.
+    //                  dir 'v'           → anode top, cathode bottom, gate to the left.
+    // setOn(bool) lights the body when conducting.
+    scr(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      let tri, bar, gateStub, gateCtl, ret;
+      if (o.dir === 'v') { // current flows top → bottom; triangle points DOWN
+        tri = el('polygon', { points: `${x-10},${y-9} ${x+10},${y-9} ${x},${y+9}`, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 });
+        bar = el('line', { x1: x - 10, y1: y + 9, x2: x + 10, y2: y + 9, stroke: C.faint, 'stroke-width': 2.5 });
+        g.appendChild(tri); g.appendChild(bar);
+        gateStub = el('line', { x1: x - 10, y1: y + 9, x2: x - 18, y2: y + 9, stroke: C.faint, 'stroke-width': 1.5 });
+        gateCtl = el('line', { x1: x - 18, y1: y + 9, x2: x - 30, y2: y + 9, stroke: C.faint, 'stroke-width': 1.5, 'stroke-dasharray': '3,2' });
+        g.appendChild(gateStub); g.appendChild(gateCtl);
+        ret = { anode: [x, y - 9], cathode: [x, y + 9], gate: [x - 30, y + 9] };
+      } else { // horizontal: anode left, cathode right (bar), gate below
+        tri = el('polygon', { points: `${x-10},${y-10} ${x-10},${y+10} ${x+10},${y}`, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 });
+        bar = el('line', { x1: x + 10, y1: y - 10, x2: x + 10, y2: y + 10, stroke: C.faint, 'stroke-width': 2.5 });
+        g.appendChild(tri); g.appendChild(bar);
+        gateStub = el('line', { x1: x + 10, y1: y + 10, x2: x + 10, y2: y + 18, stroke: C.faint, 'stroke-width': 1.5 });
+        gateCtl = el('line', { x1: x + 10, y1: y + 18, x2: x + 10, y2: y + 30, stroke: C.faint, 'stroke-width': 1.5, 'stroke-dasharray': '3,2' });
+        g.appendChild(gateStub); g.appendChild(gateCtl);
+        ret = { anode: [x - 10, y], cathode: [x + 10, y], gate: [x + 10, y + 30] };
+      }
+      if (o.label) { const t = txt(x + (o.dir === 'v' ? 22 : 0), y + (o.dir === 'v' ? -2 : -16), o.label, C.gray, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+      if (o.sub) { const s = txt(x + (o.dir === 'v' ? 26 : 0), y + (o.dir === 'v' ? 12 : -28), o.sub, '#6a7a8a', 9); s.setAttribute('text-anchor', 'middle'); g.appendChild(s); }
+      ret.setOn = (on) => {
+        tri.setAttribute('fill', on ? '#3a2010' : C.body);
+        tri.setAttribute('stroke', on ? C.danger : C.faint);
+        bar.setAttribute('stroke', on ? C.danger : C.faint);
+        gateStub.setAttribute('stroke', on ? C.amber : C.faint);
+        gateCtl.setAttribute('stroke', on ? C.amber : C.faint);
+      };
+      return ret;
+    }
+    // Buzzer (speaker symbol), vertical mount: pins a(top) b(bottom). setRinging(bool) shows sound waves.
+    buzzer(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      const lT = el('line', { x1: x, y1: y - 28, x2: x, y2: y - 16, stroke: C.wire, 'stroke-width': 2 });
+      const lB = el('line', { x1: x, y1: y + 16, x2: x, y2: y + 28, stroke: C.wire, 'stroke-width': 2 });
+      g.appendChild(lT); g.appendChild(lB);
+      this.wires.push({ el: lT, a: [x, y - 28], b: [x, y - 16] }, { el: lB, a: [x, y + 16], b: [x, y + 28] });
+      // body box + horn opening to the right
+      g.appendChild(el('rect', { x: x - 12, y: y - 16, width: 12, height: 32, rx: 2, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
+      g.appendChild(el('path', { d: `M${x} ${y-12} L${x+14} ${y-20} L${x+14} ${y+20} L${x} ${y+12} Z`, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
+      const w1 = el('path', { d: `M${x+20} ${y-7} Q${x+27} ${y} ${x+20} ${y+7}`, fill: 'none', stroke: C.amber, 'stroke-width': 1.5, opacity: 0 });
+      const w2 = el('path', { d: `M${x+24} ${y-12} Q${x+34} ${y} ${x+24} ${y+12}`, fill: 'none', stroke: C.amber, 'stroke-width': 1.3, opacity: 0 });
+      g.appendChild(w1); g.appendChild(w2);
+      if (o.label) { const t = txt(x - 6, y - 32, o.label, C.gray, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+      let anim = null, phase = 0;
+      return {
+        a: [x, y - 28], b: [x, y + 28],
+        setRinging(on) {
+          if (on && !anim) {
+            anim = setInterval(() => {
+              phase += 0.18;
+              w1.setAttribute('opacity', (0.4 + 0.5 * Math.abs(Math.sin(phase))).toFixed(2));
+              w2.setAttribute('opacity', (0.2 + 0.4 * Math.abs(Math.sin(phase + 1))).toFixed(2));
+            }, 50);
+          } else if (!on && anim) {
+            clearInterval(anim); anim = null;
+            w1.setAttribute('opacity', 0); w2.setAttribute('opacity', 0);
+          }
+        }
+      };
+    }
     // small open (unconnected) terminal marker
     openTerm(x, y) { this.dotLayer.appendChild(el('circle', { cx: x, cy: y, r: 4, fill: '#161b27', stroke: C.faint, 'stroke-width': 1.5 })); return [x, y]; }
     // dashed lead (for a floating/not-connected leg)
@@ -250,16 +358,18 @@
 
     /* ---- light the whole loop (all wires) by state ---- */
     lightAll(color) { this.wires.forEach(w => w.el.setAttribute('stroke', color)); }
-    // light only wires lying on the active loop (green); dead branches stay gray
-    lightLoop(loop, color) {
+    // light only wires lying on ANY of the given polylines (color); others reset to gray.
+    lightPaths(paths, color) {
       const sd = (p, a, b) => { const dx = b[0]-a[0], dy = b[1]-a[1], L = dx*dx+dy*dy, u = L ? ((p[0]-a[0])*dx+(p[1]-a[1])*dy)/L : 0, uu = Math.max(0, Math.min(1, u)); return Math.hypot(p[0]-(a[0]+uu*dx), p[1]-(a[1]+uu*dy)); };
       this.wires.forEach(w => {
         const m = [(w.a[0]+w.b[0])/2, (w.a[1]+w.b[1])/2];
         let on = false;
-        for (let k = 0; k < loop.length - 1; k++) { if (sd(m, loop[k], loop[k+1]) <= 4) { on = true; break; } }
+        for (const loop of paths) { for (let k = 0; k < loop.length - 1; k++) { if (sd(m, loop[k], loop[k+1]) <= 4) { on = true; break; } } if (on) break; }
         w.el.setAttribute('stroke', on ? color : C.wire);
       });
     }
+    // light only wires lying on the active loop (color); dead branches stay gray
+    lightLoop(loop, color) { this.lightPaths([loop], color); }
 
     /* ---- current particles along an ordered loop of points ---- */
     particles(loop, o = {}) {

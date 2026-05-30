@@ -3,104 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>限流电阻 — 图1.14</title>
+<title>图1.14 — 限流电阻</title>
 <link rel="stylesheet" href="../assets/circuit.css">
-<style>
-  /* ── Page-specific: LED glow + burnt look ── */
-  #led-glow { transition: opacity 0.12s linear; }
-
-  @keyframes led-flicker {
-    0%, 100% { opacity: 0.85; }
-    50%      { opacity: 0.35; }
-  }
-  #led-body.flicker { animation: led-flicker 0.18s ease-in-out infinite; }
-
-  .burst { font-size: 11px; }
-</style>
 </head>
 <body>
 
-<h1>图1.14 — 限流电阻</h1>
+<h1>图1.14 — 限流电阻（引擎版 / circuit-kit）</h1>
 
 <div class="stage">
-
-  <!-- Circuit -->
   <div id="circuit-wrap">
-    <svg id="svg" width="262" height="270" viewBox="16 73 262 270">
-      <defs>
-        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"  stop-color="#22d36a" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#22d36a" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="glow-warn" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"  stop-color="#f5a623" stop-opacity="0.95"/>
-          <stop offset="100%" stop-color="#f5a623" stop-opacity="0"/>
-        </radialGradient>
-      </defs>
-
-      <!-- ── Wires (static gray) ── -->
-      <!-- 5V source down left side -->
-      <line x1="70"  y1="90"  x2="70"  y2="172" stroke="#2e3a50" stroke-width="2"/>
-      <!-- top rail: source to R1 -->
-      <line x1="70"  y1="90"  x2="220" y2="90"  stroke="#2e3a50" stroke-width="2"/>
-      <line x1="220" y1="90"  x2="220" y2="120" stroke="#2e3a50" stroke-width="2"/>
-      <!-- R1 down to LED anode -->
-      <line x1="220" y1="180" x2="220" y2="214" stroke="#2e3a50" stroke-width="2"/>
-      <!-- LED cathode down to bottom rail -->
-      <line x1="220" y1="240" x2="220" y2="300" stroke="#2e3a50" stroke-width="2"/>
-      <!-- bottom rail to GND -->
-      <line x1="220" y1="300" x2="70"  y2="300" stroke="#2e3a50" stroke-width="2"/>
-      <line x1="70"  y1="240" x2="70"  y2="300" stroke="#2e3a50" stroke-width="2"/>
-
-      <!-- ── 5V source (battery) ── -->
-      <line x1="56" y1="172" x2="84" y2="172" stroke="#f5a623" stroke-width="2.5"/>
-      <line x1="64" y1="186" x2="76" y2="186" stroke="#8899aa" stroke-width="2.5"/>
-      <line x1="70" y1="186" x2="70" y2="240" stroke="#2e3a50" stroke-width="2"/>
-      <text id="vsrc-label" x="30" y="183" class="lbl" fill="#f5a623">5V</text>
-      <text x="88" y="170" class="lbl" fill="#f5a623" font-size="13">+</text>
-      <text x="88" y="192" class="lbl" fill="#8899aa" font-size="13">−</text>
-
-      <!-- ── R1 (limiting resistor — plain fixed box, like the other figures & 图1.14) ── -->
-      <rect x="210" y="120" width="20" height="60" rx="3"
-            fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
-      <text x="240" y="148" class="lbl" fill="#8899aa">R₁</text>
-      <text x="240" y="162" class="lbl" id="r-val-svg" fill="#22d36a" font-size="10">220Ω</text>
-
-      <!-- ── D1 (LED) ── -->
-      <!-- glow halo behind -->
-      <circle id="led-glow" cx="220" cy="236" r="26" fill="url(#glow)" opacity="0"/>
-      <!-- triangle (anode → cathode) -->
-      <polygon id="led-body" points="206,214 234,214 220,240"
-               fill="#1a6b3a" stroke="#22d36a" stroke-width="1.5"/>
-      <!-- cathode bar -->
-      <line id="led-bar" x1="204" y1="240" x2="236" y2="240" stroke="#22d36a" stroke-width="2.5"/>
-      <!-- emission arrows -->
-      <g id="led-rays" opacity="0">
-        <line x1="240" y1="216" x2="252" y2="206" stroke="#22d36a" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="246" y1="224" x2="260" y2="216" stroke="#22d36a" stroke-width="1.5" stroke-linecap="round"/>
-      </g>
-      <text x="244" y="248" class="lbl" fill="#8899aa">D₁</text>
-
-      <!-- ── GND symbol ── -->
-      <line x1="56" y1="300" x2="84" y2="300" stroke="#4a5a6a" stroke-width="2"/>
-      <line x1="60" y1="307" x2="80" y2="307" stroke="#4a5a6a" stroke-width="1.5"/>
-      <line x1="64" y1="314" x2="76" y2="314" stroke="#4a5a6a" stroke-width="1"/>
-      <text x="50" y="330" class="lbl" fill="#4a5568">GND</text>
-
-      <!-- ── Animated current particles ── -->
-      <g id="particles"></g>
-
-      <!-- ── Burnt 'X' over LED (hidden until burnt) ── -->
-      <g id="burn-mark" opacity="0">
-        <line x1="200" y1="216" x2="240" y2="256" stroke="#e05050" stroke-width="3" stroke-linecap="round"/>
-        <line x1="240" y1="216" x2="200" y2="256" stroke="#e05050" stroke-width="3" stroke-linecap="round"/>
-      </g>
-    </svg>
+    <svg id="svg" width="300" height="330" viewBox="0 0 300 330"></svg>
   </div>
 
-  <!-- Side Panel -->
   <div class="panel">
-
     <div>
       <div class="panel-title">电源电压</div>
       <div style="display:flex;gap:8px">
@@ -109,7 +24,6 @@
         <button class="btn small off" id="v-12" data-v="12">12V</button>
       </div>
     </div>
-
     <div>
       <div class="panel-title">电阻调节</div>
       <div class="slider-row">
@@ -117,249 +31,102 @@
         <input type="range" id="r-slider" min="50" max="1000" step="10" value="220">
       </div>
     </div>
-
     <div>
       <div class="panel-title">电流 / 电压读数</div>
       <div class="readout">
-        <span id="ro-i-line">I = (5 − 2)V ÷ 220Ω = <b>13.6</b> mA</span><br>
+        <span id="ro-i">I = (5 − 2)V ÷ 220Ω = <b>13.6</b> mA</span><br>
         R₁ 压降 = <b id="ro-vr">3.0</b> V<br>
         D₁ 压降 = <b id="ro-vd">2.0</b> V
       </div>
-      <div class="gauge-label" style="margin-top:10px">电流大小</div>
-      <div class="gauge-track"><div class="gauge-fill" id="i-fill"></div></div>
-      <div class="gauge-value" id="i-gval">13.6 mA</div>
     </div>
-
     <div>
       <div class="panel-title">安全状态</div>
-      <div id="st-safe"  class="status-item"><div class="status-dot"></div>安全工作（I ≤ 20mA）</div>
-      <div id="st-over"  class="status-item warn"><div class="status-dot"></div>电流过大（20–40mA）</div>
-      <div id="st-burn"  class="status-item danger"><div class="status-dot"></div>LED 烧毁（I &gt; 40mA）</div>
+      <div id="st-safe" class="status-item"><div class="status-dot"></div>安全工作（I ≤ 20mA）</div>
+      <div id="st-over" class="status-item warn"><div class="status-dot"></div>电流过大（20–40mA）</div>
+      <div id="st-burn" class="status-item danger"><div class="status-dot"></div>LED 烧毁（I &gt; 40mA）</div>
     </div>
-
     <div>
       <div class="panel-title">说明</div>
-      <div class="stage-note" id="note">
-        限流电阻像“限速阀”，把电流控制在元件安全范围内。
-        同一个串联 R₁ 既<b>限流</b>又<b>分压</b>：理想模型下 LED 恒压降 2V，
-        多出的 3V 全落在 R₁ 上。<br>
-        R 越小 → 电流越大 → LED 越亮，太小就会烧毁。
-      </div>
+      <div class="stage-note" id="note"></div>
     </div>
-
   </div>
 </div>
 
+<script src="../assets/circuit-kit.js?v=9"></script>
 <script>
-let   VCC = 5.0;        // supply voltage — selectable 5 / 9 / 12 V
-const VLED = 2.0;       // LED forward drop (≈constant — a property of the LED)
-const I_REF = 13.6;     // mA reference "normal bright" (R=220 @ 5V)
+const svg = document.getElementById('svg');
+svg.insertAdjacentHTML('afterbegin', Circuit.defs());
+const c = new Circuit(svg);
 
-// ── DOM refs ──
-const slider  = document.getElementById('r-slider');
-const rLabel  = document.getElementById('r-label');
-const rValSvg = document.getElementById('r-val-svg');
-const roiLine = document.getElementById('ro-i-line');
-const roVr    = document.getElementById('ro-vr');
-const roVd    = document.getElementById('ro-vd');
-const iFill   = document.getElementById('i-fill');
-const iGval   = document.getElementById('i-gval');
-const note    = document.getElementById('note');
+// ── DECLARE the circuit: place components, connect pins. No raw coordinates. ──
+const SRC = c.source(60, 150, { label: '5V' });   // pos (60,122) · neg (60,178)
+const R   = c.resistor(210, 130, { label: 'R₁', value: '220Ω' }); // a (210,100) · b (210,160)
+const D1  = c.led(210, 215, { label: 'D₁' });     // anode (210,203) · cathode (210,227)
+const GND = c.ground(60, 270);
 
-const ledGlow = document.getElementById('led-glow');
-const ledBody = document.getElementById('led-body');
-const ledBar  = document.getElementById('led-bar');
-const ledRays = document.getElementById('led-rays');
-const burnMark= document.getElementById('burn-mark');
-const particles = document.getElementById('particles');
+c.wire(SRC.pos, [210, 70], { vfirst: true }); // + → up → top rail (right corner)
+c.wire([210, 70], R.a);                        // corner → down a bit → R₁ (leaves wire above R₁)
+c.wire(R.b, D1.anode);                         // R₁ → LED
+c.wire(D1.cathode, [210, 270]);                // LED → bottom rail
+c.wire([210, 270], SRC.neg);                   // bottom rail → battery −
 
-// connecting wires (gray) — collected once, recolored by state to "light up" the loop
-const wires = [...document.querySelectorAll('#svg line')].filter(l => (l.getAttribute('stroke')||'').toLowerCase().includes('2e3a50'));
-function setWires(c){ wires.forEach(w => w.setAttribute('stroke', c)); }
+// particle loop (ordered rectangle) — through the same pins
+const LOOP = [[60,130],[60,70],[210,70],[210,270],[60,270],[60,130]];
+const flow = c.particles(LOOP);
+c.fit();   // center content with an even, modest margin
 
-const stSafe = document.getElementById('st-safe');
-const stOver = document.getElementById('st-over');
-const stBurn = document.getElementById('st-burn');
-
-let burnt = false;     // once burnt, stays burnt until R back to safe
-let currentI = 0;      // mA, used by particle animation
-
-// Current path the particles travel (matches the wires)
-const PATH = [
-  [70,150],[70,90],[220,90],[220,120],   // source up, across top, into R1
-  [220,180],[220,214],                    // through R1 to LED
-  [220,262],[220,300],[70,300],[70,210]   // through LED, bottom rail, back to source
-];
-
-function compute(R) {
-  // I = (VCC - VLED) / R, in mA. The LED holds ~2V regardless of supply;
-  // R1 takes the rest (VCC - 2), so a higher supply means a bigger current.
-  return ((VCC - VLED) / R) * 1000;
-}
-
-function setStatus(el, on) { el.classList.toggle('active', on); }
+// ── interactivity / formula / notes (unchanged spirit of the old version) ──
+const VLED = 2.0, I_REF = 13.6;
+let VCC = 5;
+const $ = id => document.getElementById(id);
+const vsrcText = SRC.labelEl; // the source's "5V" label element
 
 function update() {
-  const R = parseInt(slider.value, 10);
-  rLabel.textContent  = R + ' Ω';
-  rValSvg.textContent = R + 'Ω';
+  const Rv = parseInt($('r-slider').value, 10);
+  $('r-label').textContent = Rv + ' Ω';
+  if (R._valEl) R._valEl.textContent = Rv + 'Ω';
+  const I = ((VCC - VLED) / Rv) * 1000;
+  const zone = I > 40 ? 'burn' : I > 20 ? 'over' : 'safe';
 
-  const I = compute(R);
+  $('ro-i').innerHTML = 'I = (' + VCC + ' − 2)V ÷ ' + Rv + 'Ω = <b>' + I.toFixed(1) + '</b> mA';
+  $('ro-vr').textContent = (VCC - VLED).toFixed(1);
+  $('ro-vd').textContent = VLED.toFixed(1);
+  $('ro-i').classList.toggle('danger', zone === 'burn');
 
-  // ── classify safety zone ──
-  let zone; // 'safe' | 'over' | 'burn'
-  if (I > 40)      zone = 'burn';
-  else if (I > 20) zone = 'over';
-  else             zone = 'safe';
-
-  // Burnt latches; recover only when slider returns to safe zone
-  if (zone === 'burn') burnt = true;
-  if (zone === 'safe') burnt = false;
-
-  // ── readouts ──
-  roiLine.innerHTML = 'I = (' + VCC + ' − ' + VLED + ')V ÷ ' + R + 'Ω = <b>' + I.toFixed(1) + '</b> mA';
-  roVd.textContent = VLED.toFixed(1);
-  roVr.textContent = (VCC - VLED).toFixed(1);
-
-  // gauge: 0..50mA range
-  const pct = Math.min(100, (I / 50) * 100);
-  iFill.style.width = pct + '%';
-  iGval.textContent = I.toFixed(1) + ' mA';
-
-  // reset status
-  setStatus(stSafe, false);
-  setStatus(stOver, false);
-  setStatus(stBurn, false);
-  ledBody.classList.remove('flicker');
-  roiLine.classList.remove('danger');
-  iGval.classList.remove('danger');
-
-  if (burnt) {
-    // ── BURNT ──
-    currentI = 0;
-    setWires('#2e3a50');   // dead circuit — wires go dark
-    setStatus(stBurn, true);
-    ledBody.setAttribute('fill', '#33373f');
-    ledBody.setAttribute('stroke', '#5a6b7d');
-    ledBar.setAttribute('stroke', '#5a6b7d');
-    ledGlow.setAttribute('opacity', 0);
-    ledRays.setAttribute('opacity', 0);
-    burnMark.setAttribute('opacity', 1);
-    iFill.style.background = 'linear-gradient(90deg,#6b2020,#e05050)';
-    iGval.classList.add('danger');
-    roiLine.classList.add('danger');
-    iGval.textContent = I.toFixed(1) + ' mA';
-    note.className = 'stage-note danger';
-    const Rsafe = Math.ceil((VCC - VLED) / 0.020 / 10) * 10; // R for 20mA at this supply
-    note.innerHTML = '🔥 电流超过 40mA，D₁ 已烧毁！' +
-      '<br>' + VCC + 'V 下 R₁=' + parseInt(slider.value, 10) + 'Ω 太小，限流不足。' +
-      '<br>把滑块拖回 R ≥ ' + Rsafe + 'Ω（安全区）可“换上新 LED”恢复。';
+  ['st-safe','st-over','st-burn'].forEach(s => $(s).classList.remove('active'));
+  const bright = Math.min(1, I / I_REF);
+  if (zone === 'burn') {
+    $('st-burn').classList.add('active');
+    D1.set({ color: 'burnt' });
+    c.lightAll('#2e3a50'); flow.set({ on: false });
+    const Rsafe = Math.ceil((VCC - VLED) / 0.020 / 10) * 10;
+    $('note').className = 'stage-note danger';
+    $('note').innerHTML = '🔥 电流超过 40mA，D₁ 已烧毁！<br>' + VCC + 'V 下 R₁=' + Rv +
+      'Ω 太小。拖回 R ≥ ' + Rsafe + 'Ω 可“换新 LED”恢复。';
+  } else if (zone === 'over') {
+    $('st-over').classList.add('active');
+    D1.set({ color: 'amber', b: bright });
+    c.lightAll('#f5a623'); flow.set({ on: true, color: '#f5a623', speed: I / I_REF });
+    $('note').className = 'stage-note warn';
+    $('note').innerHTML = '⚠ 电流偏大（20–40mA），LED 过亮发热。<br>再减小 R₁ 会超 40mA 烧毁。';
   } else {
-    burnMark.setAttribute('opacity', 0);
-    currentI = I;
-
-    // LED brightness ∝ current, relative to reference
-    const bright = Math.min(1, I / I_REF);
-
-    if (zone === 'over') {
-      // ── OVER-CURRENT ── yellow, too bright, flicker
-      setWires('#f5a623');   // loop lit amber = warning
-      setStatus(stOver, true);
-      ledBody.setAttribute('fill', '#7a5410');
-      ledBody.setAttribute('stroke', '#f5a623');
-      ledBar.setAttribute('stroke', '#f5a623');
-      ledBody.classList.add('flicker');
-      ledGlow.setAttribute('fill', 'url(#glow-warn)');
-      ledGlow.setAttribute('opacity', Math.min(1, 0.7 + bright * 0.3));
-      ledGlow.setAttribute('r', 26 + Math.min(14, (I - 20)));
-      ledRays.setAttribute('stroke', '#f5a623');
-      ledRays.setAttribute('opacity', 1);
-      iFill.style.background = 'linear-gradient(90deg,#7a5410,#f5a623)';
-      iGval.style.color = '#f5a623';
-      note.className = 'stage-note warn';
-      note.innerHTML = '⚠ 电流偏大（20–40mA），LED 过亮、发热升高。' +
-        '<br>继续减小 R₁ 电流将超过 40mA 而烧毁。';
-    } else {
-      // ── SAFE ── green, brightness scales with current
-      setWires('#22d36a');   // loop lit green = conducting normally
-      setStatus(stSafe, true);
-      ledBody.setAttribute('fill', '#1a6b3a');
-      ledBody.setAttribute('stroke', '#22d36a');
-      ledBar.setAttribute('stroke', '#22d36a');
-      ledGlow.setAttribute('fill', 'url(#glow)');
-      ledGlow.setAttribute('opacity', (bright * 0.9).toFixed(2));
-      ledGlow.setAttribute('r', 14 + bright * 14);
-      ledRays.setAttribute('stroke', '#22d36a');
-      ledRays.setAttribute('opacity', bright.toFixed(2));
-      iFill.style.background = 'linear-gradient(90deg,#1a6b3a,#22d36a)';
-      iGval.style.color = '#22d36a';
-      note.className = 'stage-note';
-      note.innerHTML = '✅ 安全工作（I ≤ 20mA）。R₁ 把电流限制在 LED 安全范围。' +
-        '<br>当前 ' + VCC + 'V：D₁ 恒占 <b>2V</b>，R₁ 扛剩下的 <b>' + (VCC - VLED).toFixed(0) + 'V</b>。电源越高、要的电阻越大。';
-    }
+    $('st-safe').classList.add('active');
+    D1.set({ color: 'green', b: bright });
+    c.lightAll('#22d36a'); flow.set({ on: true, color: '#22d36a', speed: Math.max(0.3, I / I_REF) });
+    $('note').className = 'stage-note';
+    $('note').innerHTML = '✅ 安全工作（I ≤ 20mA）。当前 ' + VCC + 'V：D₁ 恒占 2V，R₁ 扛 ' +
+      (VCC - VLED).toFixed(0) + 'V。电源越高、要的电阻越大。';
   }
 }
 
-// ── Particle animation: speed ∝ current ──
-let pArr = [];
-let spawnAcc = 0;
-let lastTs = 0;
-
-function spawnParticle() {
-  const p = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  p.setAttribute('r', '3.5');
-  p.setAttribute('fill', currentI > 20 ? '#f5a623' : '#22d36a');
-  p.setAttribute('opacity', '0.85');
-  particles.appendChild(p);
-  pArr.push({ el: p, idx: 0, frac: 0 });
-}
-
-function tick(ts) {
-  const dt = lastTs ? Math.min(50, ts - lastTs) : 16;
-  lastTs = ts;
-
-  if (currentI > 0.01) {
-    // spawn rate & speed both scale with current
-    const speedScale = currentI / I_REF;          // 1.0 at reference
-    const spawnInterval = Math.max(90, 320 / Math.max(0.3, speedScale));
-    spawnAcc += dt;
-    if (spawnAcc >= spawnInterval) { spawnParticle(); spawnAcc = 0; }
-
-    const step = 0.012 * speedScale * (dt / 16);
-
-    pArr = pArr.filter(o => {
-      o.frac += step;
-      while (o.frac >= 1) { o.frac -= 1; o.idx++; }
-      if (o.idx >= PATH.length - 1) { o.el.remove(); return false; }
-      const [x0, y0] = PATH[o.idx];
-      const [x1, y1] = PATH[o.idx + 1];
-      o.el.setAttribute('cx', x0 + (x1 - x0) * o.frac);
-      o.el.setAttribute('cy', y0 + (y1 - y0) * o.frac);
-      o.el.setAttribute('fill', currentI > 20 ? '#f5a623' : '#22d36a');
-      return true;
-    });
-  } else {
-    // burnt / no current: clear particles
-    if (pArr.length) { pArr.forEach(o => o.el.remove()); pArr = []; }
-  }
-  requestAnimationFrame(tick);
-}
-
-// ── Events (mouse + touch via input event) ──
-slider.addEventListener('input', update);
-
-// ── Supply-voltage selector (5 / 9 / 12 V) ──
-const vsrcLabel = document.getElementById('vsrc-label');
-const vBtns = [document.getElementById('v-5'), document.getElementById('v-9'), document.getElementById('v-12')];
-vBtns.forEach(b => b.addEventListener('click', () => {
-  VCC = parseFloat(b.dataset.v);
-  vBtns.forEach(x => { const on = x === b; x.classList.toggle('on', on); x.classList.toggle('off', !on); });
-  vsrcLabel.textContent = VCC + 'V';
+$('r-slider').addEventListener('input', update);
+['v-5','v-9','v-12'].forEach(id => $(id).addEventListener('click', () => {
+  VCC = parseFloat($(id).dataset.v);
+  ['v-5','v-9','v-12'].forEach(x => { const on = x === id; $(x).classList.toggle('on', on); $(x).classList.toggle('off', !on); });
+  if (vsrcText) vsrcText.textContent = VCC + 'V';
   update();
 }));
-
 update();
-requestAnimationFrame(tick);
 </script>
 </body>
 </html>
