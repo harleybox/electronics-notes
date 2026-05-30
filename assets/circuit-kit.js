@@ -117,7 +117,7 @@
     led(x, y, o = {}) {
       const g = this._add(el('g', {}));
       const h = o.dir === 'h';
-      const glow = el('circle', { cx: x, cy: y, r: 16, fill: 'url(#kitGlow)', opacity: 0 });
+      const glow = el('circle', { cx: x, cy: y, r: 28, fill: 'url(#kitGlow)', opacity: 0 }); // base r = max lit size so fit() reserves room
       g.appendChild(glow);
       let tri, bar;
       const rays = el('g', { opacity: 0, stroke: C.green, 'stroke-width': 1.5, 'stroke-linecap': 'round' });
