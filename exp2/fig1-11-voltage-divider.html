@@ -295,6 +295,16 @@ for (let k = 0; k < PATH.length - 1; k++) {
   totalLen += L;
 }
 
+// ── Light up the conducting loop (solid green). The series main path
+//    carries current; the voltmeter branch is ideal (no current) → stays gray. ──
+const wires = [...document.querySelectorAll('#svg line')].filter(l => (l.getAttribute('stroke')||'').toLowerCase().includes('2e3a50'));
+function segDist(p,x1,y1,x2,y2){var dx=x2-x1,dy=y2-y1,L=dx*dx+dy*dy,u=L?((p[0]-x1)*dx+(p[1]-y1)*dy)/L:0;u=Math.max(0,Math.min(1,u));return Math.hypot(p[0]-(x1+u*dx),p[1]-(y1+u*dy));}
+function onLoop(p){for(let k=0;k<PATH.length-1;k++){if(segDist(p,PATH[k][0],PATH[k][1],PATH[k+1][0],PATH[k+1][1])<=4)return true;}return false;}
+wires.forEach(w=>{
+  const mid=[(w.x1.baseVal.value+w.x2.baseVal.value)/2,(w.y1.baseVal.value+w.y2.baseVal.value)/2];
+  w.setAttribute('stroke', onLoop(mid) ? '#22d36a' : '#2e3a50');
+});
+
 let pArr = [];
 function spawnParticle() {
   const p = document.createElementNS('http://www.w3.org/2000/svg','circle');

@@ -93,7 +93,8 @@
       <circle id="node-dot" cx="120" cy="185" r="4" fill="#4a5a6a"/>
       <text x="136" y="176" class="lbl" fill="#8899aa">NODE 节点</text>
       <!-- wire NODE → MCU pin (right) -->
-      <line x1="120" y1="185" x2="300" y2="185" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="120" y1="185" x2="240" y2="185" stroke="#2e3a50" stroke-width="2"/>
+      <line x1="240" y1="185" x2="300" y2="185" stroke="#2e3a50" stroke-width="2"/>
       <!-- MCU pin block -->
       <rect x="300" y="160" width="60" height="50" rx="4" fill="#1e2535" stroke="#4a5a6a" stroke-width="1.5"/>
       <text x="312" y="182" class="lbl" fill="#8899aa" font-size="10">MCU</text>
@@ -261,6 +262,19 @@ const swDnArm = document.getElementById('sw-dn-arm');
 
 const particles = document.getElementById('particles');
 
+// Light up the wires on the ACTIVE current path (green); non-conducting branches stay gray.
+const litWires = (function(){
+  const ws = [...document.querySelectorAll('#svg line')].filter(l => (l.getAttribute('stroke')||'').toLowerCase().includes('2e3a50'));
+  function sd(p,x1,y1,x2,y2){var dx=x2-x1,dy=y2-y1,L=dx*dx+dy*dy,u=L?((p[0]-x1)*dx+(p[1]-y1)*dy)/L:0;u=Math.max(0,Math.min(1,u));return Math.hypot(p[0]-(x1+u*dx),p[1]-(y1+u*dy));}
+  return function(path){
+    ws.forEach(w=>{
+      const m=[(w.x1.baseVal.value+w.x2.baseVal.value)/2,(w.y1.baseVal.value+w.y2.baseVal.value)/2];
+      let on=false; for(let k=0;k<path.length-1;k++){ if(sd(m,path[k][0],path[k][1],path[k+1][0],path[k+1][1])<=4){on=true;break;} }
+      w.setAttribute('stroke', on ? '#22d36a' : '#2e3a50');
+    });
+  };
+})();
+
 // ============================================================
 //  Truth table  →  derive logic from (mode, pressed)
 //  pull-up   : released → HIGH(1), LED on  | pressed → LOW(0),  LED off
@@ -326,6 +340,8 @@ function render() {
   note.innerHTML =
     '引脚悬空会随干扰漂移。上拉/下拉电阻把信号锁定在确定电平。<br>' +
     '当前：<b>' + modeName + '</b> — 程序应判断 <b>' + judge + '</b>。';
+
+  litWires(currentPath());
 }
 
 function applyLed(which, on) {
