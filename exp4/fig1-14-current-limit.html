@@ -173,6 +173,10 @@ const ledRays = document.getElementById('led-rays');
 const burnMark= document.getElementById('burn-mark');
 const particles = document.getElementById('particles');
 
+// connecting wires (gray) — collected once, recolored by state to "light up" the loop
+const wires = [...document.querySelectorAll('#svg line')].filter(l => (l.getAttribute('stroke')||'').toLowerCase().includes('2e3a50'));
+function setWires(c){ wires.forEach(w => w.setAttribute('stroke', c)); }
+
 const stSafe = document.getElementById('st-safe');
 const stOver = document.getElementById('st-over');
 const stBurn = document.getElementById('st-burn');
@@ -233,6 +237,7 @@ function update() {
   if (burnt) {
     // ── BURNT ──
     currentI = 0;
+    setWires('#2e3a50');   // dead circuit — wires go dark
     setStatus(stBurn, true);
     ledBody.setAttribute('fill', '#33373f');
     ledBody.setAttribute('stroke', '#5a6b7d');
@@ -258,6 +263,7 @@ function update() {
 
     if (zone === 'over') {
       // ── OVER-CURRENT ── yellow, too bright, flicker
+      setWires('#f5a623');   // loop lit amber = warning
       setStatus(stOver, true);
       ledBody.setAttribute('fill', '#7a5410');
       ledBody.setAttribute('stroke', '#f5a623');
@@ -275,6 +281,7 @@ function update() {
         '<br>继续减小 R₁ 电流将超过 40mA 而烧毁。';
     } else {
       // ── SAFE ── green, brightness scales with current
+      setWires('#22d36a');   // loop lit green = conducting normally
       setStatus(stSafe, true);
       ledBody.setAttribute('fill', '#1a6b3a');
       ledBody.setAttribute('stroke', '#22d36a');
