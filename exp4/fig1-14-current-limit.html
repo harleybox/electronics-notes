@@ -121,7 +121,7 @@
     <div>
       <div class="panel-title">电流 / 电压读数</div>
       <div class="readout">
-        电流 I = <b id="ro-i">13.6</b> mA<br>
+        <span id="ro-i-line">I = (5 − 2)V ÷ 220Ω = <b>13.6</b> mA</span><br>
         R₁ 压降 = <b id="ro-vr">3.0</b> V<br>
         D₁ 压降 = <b id="ro-vd">2.0</b> V
       </div>
@@ -159,7 +159,7 @@ const I_REF = 13.6;     // mA reference "normal bright" (R=220 @ 5V)
 const slider  = document.getElementById('r-slider');
 const rLabel  = document.getElementById('r-label');
 const rValSvg = document.getElementById('r-val-svg');
-const roI     = document.getElementById('ro-i');
+const roiLine = document.getElementById('ro-i-line');
 const roVr    = document.getElementById('ro-vr');
 const roVd    = document.getElementById('ro-vd');
 const iFill   = document.getElementById('i-fill');
@@ -217,7 +217,7 @@ function update() {
   if (zone === 'safe') burnt = false;
 
   // ── readouts ──
-  roI.textContent  = I.toFixed(1);
+  roiLine.innerHTML = 'I = (' + VCC + ' − ' + VLED + ')V ÷ ' + R + 'Ω = <b>' + I.toFixed(1) + '</b> mA';
   roVd.textContent = VLED.toFixed(1);
   roVr.textContent = (VCC - VLED).toFixed(1);
 
@@ -231,7 +231,7 @@ function update() {
   setStatus(stOver, false);
   setStatus(stBurn, false);
   ledBody.classList.remove('flicker');
-  roI.classList.remove('danger');
+  roiLine.classList.remove('danger');
   iGval.classList.remove('danger');
 
   if (burnt) {
@@ -247,7 +247,7 @@ function update() {
     burnMark.setAttribute('opacity', 1);
     iFill.style.background = 'linear-gradient(90deg,#6b2020,#e05050)';
     iGval.classList.add('danger');
-    roI.classList.add('danger');
+    roiLine.classList.add('danger');
     iGval.textContent = I.toFixed(1) + ' mA';
     note.className = 'stage-note danger';
     const Rsafe = Math.ceil((VCC - VLED) / 0.020 / 10) * 10; // R for 20mA at this supply
