@@ -188,6 +188,37 @@
       return { plus: [x, y - 40], minus: [x, y + 40], setReading(t) { read.textContent = t; } };
     }
 
+    // MCU / chip block. pin on the LEFT side at (x,y); body extends right.
+    mcu(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      g.appendChild(el('rect', { x: x, y: y - 22, width: 58, height: 44, rx: 4, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
+      const t1 = txt(x + 29, y - 3, o.label || 'MCU', C.gray, 10); t1.setAttribute('text-anchor', 'middle'); g.appendChild(t1);
+      const t2 = txt(x + 29, y + 12, o.sub || '输入引脚', '#6a7a8a', 9); t2.setAttribute('text-anchor', 'middle'); g.appendChild(t2);
+      return { pin: [x, y] };
+    }
+    // Vertical switch. pins a (top), b (bottom). setClosed(bool).
+    switchV(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      const lead1 = el('line', { x1: x, y1: y - 30, x2: x, y2: y - 12, stroke: C.wire, 'stroke-width': 2 });
+      const lead2 = el('line', { x1: x, y1: y + 12, x2: x, y2: y + 30, stroke: C.wire, 'stroke-width': 2 });
+      g.appendChild(lead1); g.appendChild(lead2);
+      this.wires.push({ el: lead1, a: [x, y - 30], b: [x, y - 12] }, { el: lead2, a: [x, y + 12], b: [x, y + 30] });
+      const d1 = el('circle', { cx: x, cy: y - 12, r: 3, fill: C.faint });
+      const d2 = el('circle', { cx: x, cy: y + 12, r: 3, fill: C.faint });
+      g.appendChild(d1); g.appendChild(d2);
+      const arm = el('line', { x1: x, y1: y - 12, x2: x + 15, y2: y + 6, stroke: C.faint, 'stroke-width': 2.5, 'stroke-linecap': 'round' });
+      g.appendChild(arm);
+      if (o.label) g.appendChild(txt(x + 14, y - 16, o.label, C.gray, 12));
+      return {
+        a: [x, y - 30], b: [x, y + 30],
+        setClosed(on) {
+          const col = on ? C.green : C.faint;
+          d1.setAttribute('fill', col); d2.setAttribute('fill', col); arm.setAttribute('stroke', col);
+          if (on) { arm.setAttribute('x2', x); arm.setAttribute('y2', y + 12); }
+          else    { arm.setAttribute('x2', x + 15); arm.setAttribute('y2', y + 6); }
+        }
+      };
+    }
     // Horizontal switch. pins a (left), b (right). setClosed(bool).
     switchH(x, y, o = {}) {
       const g = this._add(el('g', {}));

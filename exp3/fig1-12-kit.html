@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图1.12/1.13 — 上拉/下拉电阻（引擎版）</title>
+<link rel="stylesheet" href="../assets/circuit.css">
+<style>
+  .mcu-read { text-align:center; margin:6px 0; }
+  .mcu-read .num { font-size:44px; font-weight:bold; color:var(--green); line-height:1; }
+  .mcu-read .num.low { color:var(--dim); }
+  .mcu-read .cap { font-size:10px; color:var(--faint); letter-spacing:0.15em; margin-top:4px; }
+  .mode-row { display:flex; gap:8px; }
+  .mode-row .btn { flex:1; }
+</style>
+</head>
+<body>
+
+<h1>图1.12 / 1.13 — 上拉 / 下拉电阻（引擎版）</h1>
+
+<div class="stage">
+  <div id="circuit-wrap">
+    <svg id="svg" width="360" height="320" viewBox="0 0 360 320"></svg>
+  </div>
+
+  <div class="panel">
+    <div>
+      <div class="panel-title">接法模式</div>
+      <div class="mode-row">
+        <button class="btn small on"  id="m-up">上拉 (图1.12)</button>
+        <button class="btn small off" id="m-dn">下拉 (图1.13)</button>
+      </div>
+    </div>
+    <div>
+      <div class="panel-title">按键 S</div>
+      <button class="btn" id="btn-s">按住 S</button>
+    </div>
+    <div>
+      <div class="panel-title">单片机读到</div>
+      <div class="mcu-read"><div class="num" id="mcu-num">1</div><div class="cap">NODE 逻辑电平</div></div>
+    </div>
+    <div>
+      <div class="panel-title">状态</div>
+      <div id="st-node" class="status-item"><div class="status-dot"></div><span id="st-node-txt">NODE 高电平 (1)</span></div>
+      <div id="st-key"  class="status-item warn"><div class="status-dot"></div><span id="st-key-txt">S 未按下</span></div>
+      <div id="st-led"  class="status-item"><div class="status-dot"></div><span id="st-led-txt">LED 亮</span></div>
+    </div>
+    <div>
+      <div class="panel-title">说明</div>
+      <div class="stage-note" id="note"></div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/circuit-kit.js?v=6"></script>
+<script>
+const svg = document.getElementById('svg');
+const $ = id => document.getElementById(id);
+let mode = 'up', pressed = false;
+let fig;   // current built circuit { c, LED, SW, NODE, idle:[...], pressed:[...] }
+
+// ── Build the circuit for a mode (clears + redraws) ──
+function build(m) {
+  svg.innerHTML = Circuit.defs();
+  const c = new Circuit(svg);
+  const SRC = c.source(55, 165, { label: '5V' });   // pos(55,145) neg(55,185)
+  const MCU = c.mcu(255, 165, { sub: '输入引脚' });   // pin(255,165)
+  const GND = c.ground(105, 300);
+  let R, LED, SW, idle, pressed_path;
+
+  if (m === 'up') {
+    R   = c.resistor(150, 110, { label: 'R', value: '10k' }); // a(150,80) b(150,140)
+    LED = c.led(150, 220, { label: 'D' });                    // anode(150,208) cathode(150,232)
+    SW  = c.switchV(210, 240, { label: 'S' });                // a(210,210) b(210,270)  (NODE → GND)
+    c.wire(SRC.pos, [150, 70], { vfirst: true });
+    c.wire([150, 70], R.a);
+    c.wire(R.b, [150, 165]);            // → NODE
+    c.node([150, 165]);
+    c.wire([150, 165], LED.anode);      // NODE → LED
+    c.wire(LED.cathode, [150, 300]);    // LED → bottom rail
+    c.wire([210, 300], SRC.neg);        // bottom rail (210→55) → battery −
+    c.node([150, 300]);
+    c.wire([150, 165], [210, 165]);     // NODE → switch tap (can carry current when pressed)
+    c.node([210, 165]);
+    c.wire([210, 165], MCU.pin);        // switch tap → MCU (high-Z, stays gray)
+    c.wire([210, 165], SW.a);           // tap → switch
+    c.wire(SW.b, [210, 300]);           // switch → bottom rail
+    idle        = [[55,145],[55,70],[150,70],[150,300],[55,300],[55,145]];
+    pressed_path = [[55,145],[55,70],[150,70],[150,165],[210,165],[210,300],[55,300],[55,145]];
+  } else {
+    LED = c.led(150, 115, { label: 'D' });                    // anode(150,103) cathode(150,127)
+    R   = c.resistor(150, 215, { label: 'R', value: '10k' }); // a(150,185) b(150,245)
+    SW  = c.switchV(210, 110, { label: 'S' });                // a(210,80) b(210,140)  (NODE → VCC)
+    c.wire(SRC.pos, [150, 70], { vfirst: true });
+    c.wire([150, 70], LED.anode);       // VCC → LED
+    c.wire(LED.cathode, [150, 165]);    // LED → NODE
+    c.node([150, 165]);
+    c.wire([150, 165], R.a);            // NODE → R
+    c.wire(R.b, [150, 300]);            // R → bottom rail
+    c.wire([150, 300], SRC.neg);        // bottom rail → battery − (corner)
+    c.wire([150, 165], [210, 165]);     // NODE → switch tap
+    c.node([210, 165]);
+    c.wire([210, 165], MCU.pin);        // tap → MCU
+    c.wire([210, 165], SW.b);           // tap → switch (bottom)
+    c.wire(SW.a, [210, 70]);            // switch → VCC rail top
+    c.wire([210, 70], [150, 70]);       // tie to VCC rail
+    idle        = [[55,145],[55,70],[150,70],[150,300],[55,300],[55,145]];
+    pressed_path = [[55,145],[55,70],[210,70],[210,165],[150,165],[150,300],[55,300],[55,145]];
+  }
+  c.fit();
+  fig = { c, LED, SW, idle, pressed: pressed_path };
+}
+
+// ── Apply the current state (truth table) ──
+function render() {
+  // truth table
+  const nodeHigh = (mode === 'up') ? !pressed : pressed;
+  const ledOn = !pressed;
+  const mcu = nodeHigh ? 1 : 0;
+  const path = pressed ? fig.pressed : fig.idle;
+
+  fig.c.lightLoop(path, '#22d36a');
+  fig.SW.setClosed(pressed);
+  fig.LED.set(ledOn ? { color: 'green', b: 1 } : { color: 'off' });
+
+  $('mcu-num').textContent = mcu;
+  $('mcu-num').classList.toggle('low', mcu === 0);
+  $('st-node').classList.toggle('active', nodeHigh);
+  $('st-node-txt').textContent = nodeHigh ? 'NODE 高电平 (1)' : 'NODE 低电平 (0)';
+  $('st-key').classList.toggle('active', pressed);
+  $('st-key-txt').textContent = pressed ? 'S 已按下' : 'S 未按下';
+  $('st-led').classList.toggle('active', ledOn);
+  $('st-led-txt').textContent = ledOn ? 'LED 亮' : 'LED 灭';
+
+  const modeName = mode === 'up' ? '上拉' : '下拉';
+  const judge = mode === 'up' ? '按下 = 0' : '按下 = 1';
+  $('note').innerHTML = '引脚悬空会随干扰漂移。上拉/下拉电阻把信号锁定在确定电平。<br>' +
+    '当前：<b>' + modeName + '</b> — 程序应判断 <b>' + judge + '</b>。MCU 高阻输入，只读电压、不取电流（那条支路是灰的）。';
+}
+
+function setMode(m) {
+  mode = m; pressed = false;
+  $('m-up').classList.toggle('on', m === 'up'); $('m-up').classList.toggle('off', m !== 'up');
+  $('m-dn').classList.toggle('on', m === 'dn'); $('m-dn').classList.toggle('off', m !== 'dn');
+  $('btn-s').classList.remove('on'); $('btn-s').textContent = '按住 S';
+  build(m); render();
+}
+
+$('m-up').addEventListener('click', () => setMode('up'));
+$('m-dn').addEventListener('click', () => setMode('dn'));
+function press(p) { pressed = p; $('btn-s').classList.toggle('on', p); $('btn-s').textContent = p ? '松开 S' : '按住 S'; render(); }
+$('btn-s').addEventListener('mousedown', () => press(true));
+$('btn-s').addEventListener('touchstart', e => { e.preventDefault(); press(true); });
+document.addEventListener('mouseup', () => { if (pressed) press(false); });
+document.addEventListener('touchend', () => { if (pressed) press(false); });
+
+build('up'); render();
+</script>
+</body>
+</html>
