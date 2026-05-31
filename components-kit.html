@@ -71,7 +71,7 @@ const ITEMS = [
   { name: '晶闸管 VS · 横版（导通）', note: '阳极A左/阴极K右；下方虚线=门极G(触发控制端)。门极触发后一直导通（变红）',
     draw: (c) => { const s = c.scr(70, 50, { label: 'VS', sub: 'S6012R' }); s.setOn(true); return s; } },
   { name: '晶闸管 VS · 竖版（导通）', note: 'dir:"v" — 阳极A上/阴极K下，门极G在左侧',
-    draw: (c) => { const s = c.scr(72, 52, { label: 'VS', dir: 'v' }); s.setOn(true); return s; } },
+    draw: (c) => { const s = c.scr(72, 52, { label: 'VS', sub: 'S6012R', dir: 'v' }); s.setOn(true); return s; } },
   { name: '蜂鸣器 · 竖版（发声）', note: '喇叭符号+声波；上下两脚，通电发出声波动画',
     draw: (c) => { const b = c.buzzer(62, 52, { label: 'BUZ' }); b.setRinging(true); return b; } },
   { name: '蜂鸣器 · 横版（发声）', note: 'dir:"h" — 左右两脚，喇叭朝上',
