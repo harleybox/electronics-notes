@@ -13,6 +13,11 @@
   #btn-mute { margin-top:10px; }
   #btn-mute.muted { color:var(--faint); border-color:var(--border); }
   #stage-note.buzzing { color:var(--amber); }
+  .steps { display:flex; gap:5px; }
+  .step { flex:1; font-size:10px; line-height:1.45; text-align:center; padding:7px 2px;
+          border-radius:7px; background:#1e2535; color:#5a6b7d; border:1px solid #2a3040; transition:all .25s; }
+  .step.active { background:#13301f; color:var(--green); border-color:var(--green); }
+  .step.warn.active { background:#34280f; color:var(--amber); border-color:var(--amber); }
 </style>
 </head>
 <body>
@@ -39,6 +44,16 @@
       <div id="st-trig" class="status-item warn" style="margin-top:8px"><div class="status-dot"></div><span>VS 触发导通</span></div>
       <div id="st-buz"  class="status-item warn" style="margin-top:8px"><div class="status-dot"></div><span>蜂鸣器响</span></div>
       <div id="st-dis"  class="status-item" style="margin-top:8px"><div class="status-dot"></div><span>R₂ 放电（重置）</span></div>
+    </div>
+
+    <div>
+      <div class="panel-title">工作步骤</div>
+      <div class="steps">
+        <div class="step" id="step-1">①<br>充电</div>
+        <div class="step warn" id="step-2">②<br>触发</div>
+        <div class="step warn" id="step-3">③<br>发声</div>
+        <div class="step" id="step-4">④<br>放电</div>
+      </div>
     </div>
 
     <div>
@@ -111,6 +126,12 @@ const chargeSegs = [
   [[60,188],[60,110],[210,110],[210,320],[60,320],[60,202]],   // main charge loop (covers battery leads)
   [[210,207],[270,207],[270,320]]                              // R2 pulldown branch
 ];
+// signalling (threshold reached, before VS fires): charge + R2 + trigger chain, NO output yet
+const signalSegs = [
+  [[60,188],[60,110],[210,110],[210,320],[60,320],[60,202]],   // charge loop (battery, R1, C1)
+  [[210,207],[270,207],[270,320]],                             // R2 branch
+  [[270,207],[420,207],[420,264]]                              // trigger chain → gate
+];
 // triggered: charge + R2 + trigger chain (NODE→D2→D1→gate) + output (BUZ→VS)
 const trigSegs = [
   [[60,188],[60,110],[450,110],[450,320],[60,320],[60,202]],   // rails + BUZ + VS (output loop)
@@ -126,13 +147,17 @@ const dischargeSegs = [
 // particle flow paths (source + → ... → source −)
 const chargeFlow = [[60,175],[60,110],[210,110],[210,320],[60,320],[60,215]];
 const outFlow    = [[60,175],[60,110],[450,110],[450,320],[60,320],[60,215]];
+const trigFlow   = [[210,207],[270,207],[311,207],[369,207],[420,207],[420,264]]; // NODE → D2 → D1 → gate
 const pCharge = c.particles(chargeFlow);
 const pOut    = c.particles(outFlow);
+const pTrig   = c.particles(trigFlow);   // trigger signal travelling to the gate
 function allGray() { c.lightPaths([], '#22d36a'); }
+function setStep(n) { for (let i = 1; i <= 4; i++) $('step-' + i).classList.toggle('active', i === n); }
 
 // ── physics ──
 const VCC = 5.0, VTRIG = 2.8, TAU = 4000;
 let voltage = 0, pressing = false, buzzing = false;
+let triggering = false, trigTimer = null;   // signalling phase before VS fires
 let startTime = null, v0 = 0, rafId = null;
 let dischargeStart = null, vDischarge = 0;
 
@@ -146,21 +171,37 @@ function updateGauge(v) {
   $('gval').style.color = v >= VTRIG ? '#e05050' : '#22d36a';
 }
 
-function trigger() {
-  buzzing = true;
-  setStatus('st-trig', true); setStatus('st-buz', true);
+// Phase ②: threshold reached → a trigger signal travels through D2/D1 to the gate
+function startTrigger() {
+  triggering = true;
+  setStatus('st-trig', true);
+  setStep(2);
+  c.lightPaths(signalSegs, '#f5a623');                      // charge + R2 + trigger chain amber; output still gray
+  pCharge.set({ on: false });
+  pTrig.set({ on: true, color: '#f5a623', speed: 1.7 });    // signal racing to the gate
+  $('stage-note').className = 'stage-note buzzing';
+  $('stage-note').innerHTML = '② C₁ 电压达到门槛！<br>触发信号正经 D₂/D₁ 送往 VS 的门极…';
+  trigTimer = setTimeout(fireVS, 1100);
+}
+// Phase ③: signal reaches the gate → VS latches on → buzzer sounds
+function fireVS() {
+  trigTimer = null; triggering = false; buzzing = true;
+  setStatus('st-buz', true);
+  setStep(3);
+  pTrig.set({ on: false });
   VS.setOn(true); BUZ.setRinging(true);
   c.lightPaths(trigSegs, '#f5a623');
   pOut.set({ on: true, color: '#f5a623', speed: 1.4 });
   $('stage-note').className = 'stage-note buzzing';
-  $('stage-note').innerHTML = '⚠ C₁ 电压达到触发门槛！<br>VS 导通，电源经蜂鸣器→VS→地形成回路，蜂鸣器响，定时结束。';
+  $('stage-note').innerHTML = '③ VS 被触发、一直导通！<br>电源→蜂鸣器→VS→地接通，蜂鸣器响，定时结束。';
   startBuzzSound();
 }
 function untrigger() {
-  buzzing = false;
+  if (trigTimer) { clearTimeout(trigTimer); trigTimer = null; }
+  triggering = false; buzzing = false;
   setStatus('st-trig', false); setStatus('st-buz', false);
   VS.setOn(false); BUZ.setRinging(false);
-  pOut.set({ on: false });
+  pTrig.set({ on: false }); pOut.set({ on: false });
   stopBuzzSound();
 }
 
@@ -170,11 +211,14 @@ function tick(ts) {
     const elapsed = ts - startTime;
     voltage = VCC - (VCC - v0) * Math.exp(-elapsed / TAU);
     updateGauge(voltage);
-    setStatus('st-chg', true);
-    // charge current decreases as C1 fills → particle speed ∝ (VCC − v)
-    pCharge.set({ on: true, color: '#22d36a', speed: 0.5 + (VCC - voltage) / VCC * 1.2 });
-    if (!buzzing) c.lightPaths(chargeSegs, '#22d36a');
-    if (voltage >= VTRIG && !buzzing) trigger();
+    if (!buzzing && !triggering) {           // still charging
+      setStatus('st-chg', true);
+      setStep(1);
+      // charge current decreases as C1 fills → particle speed ∝ (VCC − v)
+      pCharge.set({ on: true, color: '#22d36a', speed: 0.5 + (VCC - voltage) / VCC * 1.2 });
+      c.lightPaths(chargeSegs, '#22d36a');
+      if (voltage >= VTRIG) startTrigger();   // → phase ② signalling
+    }
   }
   rafId = requestAnimationFrame(tick);
 }
@@ -213,7 +257,7 @@ function startPress() {
   if (soundOn) ensureAudio();
   pressing = true; startTime = null; dischargeStart = null;
   setStatus('st-s', true); setStatus('st-dis', false);
-  SW.setClosed(true);
+  SW.setClosed(true); setStep(1);
   $('btn-s').classList.add('on'); $('btn-s').textContent = '松开 S 停止';
   if (!rafId) rafId = requestAnimationFrame(tick);
 }
@@ -222,11 +266,11 @@ function stopPress() {
   setStatus('st-s', false); setStatus('st-chg', false);
   SW.setClosed(false);
   $('btn-s').classList.remove('on'); $('btn-s').textContent = '按住 S 开始计时';
-  if (buzzing) untrigger();
+  if (buzzing || triggering) untrigger();
   pCharge.set({ on: false });
   // discharge through R2
   vDischarge = voltage; dischargeStart = performance.now();
-  setStatus('st-dis', true);
+  setStatus('st-dis', true); setStep(4);
   $('stage-note').className = 'stage-note';
   $('stage-note').innerHTML = 'S 断开，C₁ 通过 R₂ 放电中…<br>电压归零后可再次计时。';
   c.lightPaths(dischargeSegs, '#22d36a'); // C1 ∥ R2 discharge loop
@@ -241,7 +285,7 @@ function animDischarge() {
     requestAnimationFrame(animDischarge);
   } else {
     voltage = 0; updateGauge(0);
-    setStatus('st-dis', false);
+    setStatus('st-dis', false); setStep(0);
     $('stage-note').innerHTML = 'C₁ 已放电清零，可重新按 S 开始新的计时。';
     allGray();
     cancelAnimationFrame(rafId); rafId = null;
