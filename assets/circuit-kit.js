@@ -320,36 +320,51 @@
       };
       return ret;
     }
-    // Buzzer (speaker symbol), vertical mount: pins a(top) b(bottom). setRinging(bool) shows sound waves.
+    // Buzzer (speaker symbol). dir 'v' (default) → pins a(top) b(bottom), horn opens right;
+    //                          dir 'h'           → pins a(left) b(right), horn opens up.
+    // setRinging(bool) animates the sound waves. Label sits centered on the symbol.
     buzzer(x, y, o = {}) {
       const g = this._add(el('g', {}));
-      const lT = el('line', { x1: x, y1: y - 28, x2: x, y2: y - 16, stroke: C.wire, 'stroke-width': 2 });
-      const lB = el('line', { x1: x, y1: y + 16, x2: x, y2: y + 28, stroke: C.wire, 'stroke-width': 2 });
-      g.appendChild(lT); g.appendChild(lB);
-      this.wires.push({ el: lT, a: [x, y - 28], b: [x, y - 16] }, { el: lB, a: [x, y + 16], b: [x, y + 28] });
-      // body box + horn opening to the right
-      g.appendChild(el('rect', { x: x - 12, y: y - 16, width: 12, height: 32, rx: 2, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
-      g.appendChild(el('path', { d: `M${x} ${y-12} L${x+14} ${y-20} L${x+14} ${y+20} L${x} ${y+12} Z`, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
-      const w1 = el('path', { d: `M${x+20} ${y-7} Q${x+27} ${y} ${x+20} ${y+7}`, fill: 'none', stroke: C.amber, 'stroke-width': 1.5, opacity: 0 });
-      const w2 = el('path', { d: `M${x+24} ${y-12} Q${x+34} ${y} ${x+24} ${y+12}`, fill: 'none', stroke: C.amber, 'stroke-width': 1.3, opacity: 0 });
-      g.appendChild(w1); g.appendChild(w2);
-      if (o.label) { const t = txt(x - 6, y - 32, o.label, C.gray, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+      let w1, w2, ret;
+      if (o.dir === 'h') {
+        const lL = el('line', { x1: x - 30, y1: y, x2: x - 16, y2: y, stroke: C.wire, 'stroke-width': 2 });
+        const lR = el('line', { x1: x + 16, y1: y, x2: x + 30, y2: y, stroke: C.wire, 'stroke-width': 2 });
+        g.appendChild(lL); g.appendChild(lR);
+        this.wires.push({ el: lL, a: [x - 30, y], b: [x - 16, y] }, { el: lR, a: [x + 16, y], b: [x + 30, y] });
+        g.appendChild(el('rect', { x: x - 16, y: y - 6, width: 32, height: 12, rx: 2, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
+        g.appendChild(el('path', { d: `M${x-12} ${y-6} L${x-20} ${y-20} L${x+20} ${y-20} L${x+12} ${y-6} Z`, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
+        w1 = el('path', { d: `M${x-7} ${y-26} Q${x} ${y-33} ${x+7} ${y-26}`, fill: 'none', stroke: C.amber, 'stroke-width': 1.5, opacity: 0 });
+        w2 = el('path', { d: `M${x-12} ${y-30} Q${x} ${y-41} ${x+12} ${y-30}`, fill: 'none', stroke: C.amber, 'stroke-width': 1.3, opacity: 0 });
+        g.appendChild(w1); g.appendChild(w2);
+        if (o.label) { const t = txt(x, y + 22, o.label, C.gray, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+        ret = { a: [x - 30, y], b: [x + 30, y] };
+      } else {
+        const lT = el('line', { x1: x, y1: y - 28, x2: x, y2: y - 16, stroke: C.wire, 'stroke-width': 2 });
+        const lB = el('line', { x1: x, y1: y + 16, x2: x, y2: y + 28, stroke: C.wire, 'stroke-width': 2 });
+        g.appendChild(lT); g.appendChild(lB);
+        this.wires.push({ el: lT, a: [x, y - 28], b: [x, y - 16] }, { el: lB, a: [x, y + 16], b: [x, y + 28] });
+        g.appendChild(el('rect', { x: x - 12, y: y - 16, width: 12, height: 32, rx: 2, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
+        g.appendChild(el('path', { d: `M${x} ${y-12} L${x+14} ${y-20} L${x+14} ${y+20} L${x} ${y+12} Z`, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
+        w1 = el('path', { d: `M${x+20} ${y-7} Q${x+27} ${y} ${x+20} ${y+7}`, fill: 'none', stroke: C.amber, 'stroke-width': 1.5, opacity: 0 });
+        w2 = el('path', { d: `M${x+24} ${y-12} Q${x+34} ${y} ${x+24} ${y+12}`, fill: 'none', stroke: C.amber, 'stroke-width': 1.3, opacity: 0 });
+        g.appendChild(w1); g.appendChild(w2);
+        if (o.label) { const t = txt(x + 1, y - 32, o.label, C.gray, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+        ret = { a: [x, y - 28], b: [x, y + 28] };
+      }
       let anim = null, phase = 0;
-      return {
-        a: [x, y - 28], b: [x, y + 28],
-        setRinging(on) {
-          if (on && !anim) {
-            anim = setInterval(() => {
-              phase += 0.18;
-              w1.setAttribute('opacity', (0.4 + 0.5 * Math.abs(Math.sin(phase))).toFixed(2));
-              w2.setAttribute('opacity', (0.2 + 0.4 * Math.abs(Math.sin(phase + 1))).toFixed(2));
-            }, 50);
-          } else if (!on && anim) {
-            clearInterval(anim); anim = null;
-            w1.setAttribute('opacity', 0); w2.setAttribute('opacity', 0);
-          }
+      ret.setRinging = (on) => {
+        if (on && !anim) {
+          anim = setInterval(() => {
+            phase += 0.18;
+            w1.setAttribute('opacity', (0.4 + 0.5 * Math.abs(Math.sin(phase))).toFixed(2));
+            w2.setAttribute('opacity', (0.2 + 0.4 * Math.abs(Math.sin(phase + 1))).toFixed(2));
+          }, 50);
+        } else if (!on && anim) {
+          clearInterval(anim); anim = null;
+          w1.setAttribute('opacity', 0); w2.setAttribute('opacity', 0);
         }
       };
+      return ret;
     }
     // small open (unconnected) terminal marker
     openTerm(x, y) { this.dotLayer.appendChild(el('circle', { cx: x, cy: y, r: 4, fill: '#161b27', stroke: C.faint, 'stroke-width': 1.5 })); return [x, y]; }
