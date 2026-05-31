@@ -54,7 +54,7 @@
   </div>
 </div>
 
-<script src="../assets/circuit-kit.js?v=10"></script>
+<script src="../assets/circuit-kit.js?v=11"></script>
 <script>
 const svg = document.getElementById('svg');
 const $ = id => document.getElementById(id);
@@ -120,8 +120,8 @@ const trigSegs = [
 ];
 // discharging (S open): C1 ∥ R2 loop, NODE→R2→GND→back to C1
 const dischargeSegs = [
-  [[210,225],[210,207],[270,207],[270,320]],                   // C1+ → NODE → R2 → GND
-  [[210,275],[210,320],[270,320]]                              // C1− → bottom rail → R2 bottom
+  [[210,245],[210,207],[270,207],[270,320]],                   // C1 top-plate lead → NODE → R2 → GND
+  [[210,255],[210,320],[270,320]]                              // C1 bottom-plate lead → bottom rail → R2 bottom
 ];
 // particle flow paths (source + → ... → source −)
 const chargeFlow = [[60,175],[60,110],[210,110],[210,320],[60,320],[60,215]];

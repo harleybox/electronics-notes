@@ -309,8 +309,14 @@
         g.appendChild(gateStub); g.appendChild(gateCtl);
         ret = { anode: [x - 10, y], cathode: [x + 10, y], gate: [x + 10, y + 30] };
       }
-      if (o.label) { const t = txt(x + (o.dir === 'v' ? 22 : 0), y + (o.dir === 'v' ? -2 : -16), o.label, C.gray, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
-      if (o.sub) { const s = txt(x + (o.dir === 'v' ? 26 : 0), y + (o.dir === 'v' ? 12 : -28), o.sub, '#6a7a8a', 9); s.setAttribute('text-anchor', 'middle'); g.appendChild(s); }
+      if (o.label) {
+        if (o.dir === 'v') g.appendChild(txt(x + 16, y - 3, o.label, C.gray, 12));               // right of triangle, left-aligned
+        else { const t = txt(x, y - 16, o.label, C.gray, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+      }
+      if (o.sub) {
+        if (o.dir === 'v') g.appendChild(txt(x + 16, y + 11, o.sub, '#6a7a8a', 9));               // below label, same left edge
+        else { const s = txt(x, y - 28, o.sub, '#6a7a8a', 9); s.setAttribute('text-anchor', 'middle'); g.appendChild(s); }
+      }
       ret.setOn = (on) => {
         tri.setAttribute('fill', on ? '#3a2010' : C.body);
         tri.setAttribute('stroke', on ? C.danger : C.faint);
