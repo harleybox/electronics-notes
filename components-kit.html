@@ -31,7 +31,7 @@
   </div>
 </div>
 
-<script src="assets/circuit-kit.js?v=13"></script>
+<script src="assets/circuit-kit.js?v=14"></script>
 <script>
 // Each entry renders ONE component via the engine, centered in a small card SVG.
 // 横/竖两个朝向放在一起，便于对照。
@@ -40,6 +40,8 @@ const ITEMS = [
     draw: (c) => c.source(75, 55, { label: '5V' }) },
   { name: '电源 · 横版', note: 'dir:"h" — 左负右正',
     draw: (c) => c.source(75, 55, { label: '5V', dir: 'h' }) },
+  { name: '交流信号源', note: '圆圈+正弦波；out(右)/gnd(下)，提供交流输入信号',
+    draw: (c) => c.acSource(62, 52, { label: 'Uₛ' }) },
   { name: '固定电阻 · 竖版', note: '矩形方块；上下两脚',
     draw: (c) => c.resistor(72, 55, { label: 'R', value: '10k' }) },
   { name: '固定电阻 · 横版', note: 'dir:"h" — 左右两脚',
@@ -62,6 +64,8 @@ const ITEMS = [
     draw: (c) => c.mcu(55, 55, { sub: '输入引脚' }) },
   { name: '三端稳压器', note: 'IN(左)/OUT(右)/GND(下) 三脚；输入输出旁配去耦电容',
     draw: (c) => c.regulator(75, 48, { w: 78, h: 58, label: 'LM1117', sub: 'U₄' }) },
+  { name: 'NPN 三极管', note: '基极B(左)/集电极C(上)/发射极E(下，箭头朝外)；放大或开关',
+    draw: (c) => { const q = c.transistor(70, 52, { label: 'Q', sub: '2N5210' }); q.setActive(true); return q; } },
   { name: '电容 · 竖版', note: '两块平行极板（蓝）；上下两脚，可显示充电量',
     draw: (c) => { const cap = c.capacitor(75, 55, { label: 'C' }); cap.setCharge(0.7); return cap; } },
   { name: '电容 · 横版', note: 'dir:"h" — 极板竖放，左右两脚',

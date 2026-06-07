@@ -220,6 +220,45 @@
       if (o.sub) { const s = txt(x, Ty - 7, o.sub, '#6a7a8a', 9); s.setAttribute('text-anchor', 'middle'); g.appendChild(s); }
       return { in: [Lx - 12, py], out: [Rx + 12, py], gnd: [x, By + 12] };
     }
+    // NPN bipolar transistor. pins: base (left), collector (top), emitter (bottom, arrow out).
+    // setActive(bool) tints the body when amplifying.
+    transistor(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      const body = el('circle', { cx: x, cy: y, r: 20, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 });
+      g.appendChild(body);
+      g.appendChild(el('line', { x1: x - 8, y1: y - 12, x2: x - 8, y2: y + 12, stroke: C.gray, 'stroke-width': 2.5 })); // base bar
+      const bl = el('line', { x1: x - 26, y1: y, x2: x - 8, y2: y, stroke: C.wire, 'stroke-width': 2 });               // base lead
+      g.appendChild(bl);
+      g.appendChild(el('line', { x1: x - 8, y1: y - 7, x2: x + 10, y2: y - 16, stroke: C.gray, 'stroke-width': 2 }));  // collector slant
+      const cl = el('line', { x1: x + 10, y1: y - 16, x2: x + 10, y2: y - 36, stroke: C.wire, 'stroke-width': 2 });
+      g.appendChild(cl);
+      g.appendChild(el('line', { x1: x - 8, y1: y + 7, x2: x + 10, y2: y + 16, stroke: C.gray, 'stroke-width': 2 }));  // emitter slant
+      const eline = el('line', { x1: x + 10, y1: y + 16, x2: x + 10, y2: y + 36, stroke: C.wire, 'stroke-width': 2 });
+      g.appendChild(eline);
+      // emitter arrow (NPN: points away from base, toward emitter)
+      g.appendChild(el('polygon', { points: `${x+6.4},${y+14.2} ${x-0.3},${y+14.4} ${x+2.4},${y+8.6}`, fill: C.gray }));
+      this.wires.push({ el: bl, a: [x - 26, y], b: [x - 8, y] },
+                      { el: cl, a: [x + 10, y - 16], b: [x + 10, y - 36] },
+                      { el: eline, a: [x + 10, y + 16], b: [x + 10, y + 36] });
+      if (o.label) g.appendChild(txt(x + 25, y - 4, o.label, C.gray, 12));
+      if (o.sub)   g.appendChild(txt(x + 25, y + 10, o.sub, '#6a7a8a', 9));
+      return {
+        base: [x - 26, y], collector: [x + 10, y - 36], emitter: [x + 10, y + 36],
+        setActive(on) { body.setAttribute('fill', on ? '#13301f' : C.body); body.setAttribute('stroke', on ? C.green : C.faint); }
+      };
+    }
+    // AC / signal source: circle with a sine wave. pins: out (right), gnd (bottom).
+    acSource(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      g.appendChild(el('circle', { cx: x, cy: y, r: 16, fill: C.body, stroke: C.amber, 'stroke-width': 1.5 }));
+      g.appendChild(el('path', { d: `M${x-9} ${y} Q${x-4.5} ${y-8} ${x} ${y} T${x+9} ${y}`, fill: 'none', stroke: C.amber, 'stroke-width': 1.5 }));
+      const ol = el('line', { x1: x + 16, y1: y, x2: x + 32, y2: y, stroke: C.wire, 'stroke-width': 2 });
+      const gl = el('line', { x1: x, y1: y + 16, x2: x, y2: y + 34, stroke: C.wire, 'stroke-width': 2 });
+      g.appendChild(ol); g.appendChild(gl);
+      this.wires.push({ el: ol, a: [x + 16, y], b: [x + 32, y] }, { el: gl, a: [x, y + 16], b: [x, y + 34] });
+      if (o.label) { const t = txt(x, y - 22, o.label, C.amber, 11); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+      return { out: [x + 32, y], gnd: [x, y + 34] };
+    }
     // Vertical switch. pins a (top), b (bottom). setClosed(bool).
     switchV(x, y, o = {}) {
       const g = this._add(el('g', {}));
