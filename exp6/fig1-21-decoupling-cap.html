@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图1.21 — 去耦电容器的作用</title>
+<link rel="stylesheet" href="../assets/circuit.css">
+<style>
+  .scope-wrap { display:flex; flex-direction:column; gap:10px; }
+  .scope-box { }
+  .scope-cap { font-size:10px; color:var(--muted); margin-bottom:4px; display:flex; justify-content:space-between; }
+  .scope-cap b { font-variant-numeric:tabular-nums; }
+  canvas.scope { width:100%; height:56px; display:block; border-radius:4px; background:#070b11; border:1px solid var(--border); }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:10px; color:var(--dim); }
+  .leg { display:flex; align-items:center; gap:5px; }
+  .leg-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  #btn-cap.danger:not(.on) { background:#2a1010; border-color:var(--danger); color:var(--danger); box-shadow:0 0 12px #e0505044; }
+  .btn-row { display:flex; gap:8px; }
+  .btn-row .btn { padding:9px; font-size:11px; letter-spacing:.04em; text-transform:none; }
+</style>
+</head>
+<body>
+
+<h1>图1.21 — 去耦电容器的作用（LM1117 · 5V→3.3V）</h1>
+
+<div class="stage">
+  <div id="circuit-wrap">
+    <svg id="svg" width="700" height="320" viewBox="0 0 700 320"></svg>
+  </div>
+
+  <div class="panel">
+    <div>
+      <div class="panel-title">输入 / 输出波形</div>
+      <div class="scope-wrap">
+        <div class="scope-box">
+          <div class="scope-cap"><span>输入端 5V</span><b id="lab-in">有噪声</b></div>
+          <canvas class="scope" id="scope-in" width="320" height="56"></canvas>
+        </div>
+        <div class="scope-box">
+          <div class="scope-cap"><span>输出端 3.3V</span><b id="lab-out">已滤波 ✓</b></div>
+          <canvas class="scope" id="scope-out" width="320" height="56"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">电路状态</div>
+      <div id="st-noise" class="status-item warn"><div class="status-dot"></div><span>输入端注入噪声</span></div>
+      <div id="st-in"  class="status-item"><div class="status-dot"></div><span>C₆/C₇ 吸收输入噪声</span></div>
+      <div id="st-out" class="status-item"><div class="status-dot"></div><span>C₈/C₉ 滤除输出残波</span></div>
+      <div id="st-clean" class="status-item"><div class="status-dot"></div><span>输出纯净 3.3V</span></div>
+      <div id="st-leak" class="status-item danger"><div class="status-dot"></div><span>噪声穿透到输出！</span></div>
+    </div>
+
+    <div>
+      <div class="panel-title">操作</div>
+      <button class="btn on" id="btn-noise">噪声：开</button>
+      <button class="btn danger" id="btn-cap" style="margin-top:8px">去耦电容：开</button>
+      <div class="btn-row" style="margin-top:8px">
+        <button class="btn small on" id="btn-hi">高频干扰</button>
+        <button class="btn small on" id="btn-lo">低频纹波</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">图例</div>
+      <div class="legend">
+        <div class="leg"><div class="leg-dot" style="background:#f5a623"></div>高频噪声</div>
+        <div class="leg"><div class="leg-dot" style="background:#4a7aaa"></div>低频纹波</div>
+        <div class="leg"><div class="leg-dot" style="background:#22d36a"></div>干净电流</div>
+        <div class="leg"><div class="leg-dot" style="background:#e05050"></div>被电容吸收</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">说明</div>
+      <div class="stage-note" id="note">高频噪声被靠近芯片的小电容 C₇/C₈（0.1μF）就近旁路到地；<br>低频纹波由远端大电容 C₆/C₉（10μF）储能滤除，输出得到纯净的 3.3V。</div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/circuit-kit.js?v=13"></script>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('svg');
+const $ = id => document.getElementById(id);
+svg.innerHTML = Circuit.defs();
+const c = new Circuit(svg);
+
+// ── geometry ──
+const railY = 80, gndY = 250;
+const X = { src: 60, c6: 150, c7: 240, reg: 355, c8: 490, c9: 580, load: 660 };
+const capCx = { hiIn: X.c7, loIn: X.c6, hiOut: X.c8, loOut: X.c9 };
+
+// ── place components ──
+const SRC = c.source(X.src, 165, { label: '5V' });                         // pos[60,145] neg[60,185]
+const REG = c.regulator(X.reg, 150, { w: 120, h: 160, pinY: railY,         // in[283,80] out[427,80] gnd[355,242]
+                                       label: 'LM1117', sub: 'U₄' });
+const C6 = c.capacitor(X.c6, 165, { label: 'C₆' }); const C6g = c.partLayer.lastChild;
+const C7 = c.capacitor(X.c7, 165, { label: 'C₇' }); const C7g = c.partLayer.lastChild;
+const C8 = c.capacitor(X.c8, 165, { label: 'C₈' }); const C8g = c.partLayer.lastChild;
+const C9 = c.capacitor(X.c9, 165, { label: 'C₉' }); const C9g = c.partLayer.lastChild;
+const RL = c.resistor(X.load, 165, { label: 'R_L', value: '负载' });        // a[660,135] b[660,195]
+
+// ── wiring ──
+// input rail: 5V → caps → chip IN
+c.wire(SRC.pos, [X.src, railY], { vfirst: true });
+c.wire([X.src, railY], REG.in);
+c.wire([X.c6, railY], C6.a); c.node([X.c6, railY]);
+c.wire([X.c7, railY], C7.a); c.node([X.c7, railY]);
+// output rail: chip OUT → caps → load
+c.wire(REG.out, [X.load, railY]);
+c.wire([X.c8, railY], C8.a); c.node([X.c8, railY]);
+c.wire([X.c9, railY], C9.a); c.node([X.c9, railY]);
+c.wire([X.load, railY], RL.a);
+// caps & chip & load down to GND rail
+c.wire(C6.b, [X.c6, gndY]);  c.node([X.c6, gndY]);
+c.wire(C7.b, [X.c7, gndY]);  c.node([X.c7, gndY]);
+c.wire(REG.gnd, [X.reg, gndY]); c.node([X.reg, gndY]);
+c.wire(C8.b, [X.c8, gndY]);  c.node([X.c8, gndY]);
+c.wire(C9.b, [X.c9, gndY]);  c.node([X.c9, gndY]);
+c.wire(RL.b, [X.load, gndY]);
+// GND rail
+c.wire(SRC.neg, [X.src, gndY], { vfirst: true });
+c.wire([X.src, gndY], [X.load, gndY]);
+
+// ── extra labels (coordinate space) ──
+function sText(x, y, s, fill, size, anchor) {
+  const t = document.createElementNS(NS, 'text');
+  t.setAttribute('x', x); t.setAttribute('y', y); t.setAttribute('fill', fill);
+  t.setAttribute('font-size', size || 10); t.setAttribute('text-anchor', anchor || 'middle');
+  t.setAttribute('font-family', "'Courier New',monospace"); t.textContent = s;
+  svg.appendChild(t); return t;
+}
+sText(625, 70, '3.3V', '#22d36a', 12, 'middle');
+const annot = [
+  [X.c6, '10μF', '低频·远', '#4a7aaa'],
+  [X.c7, '0.1μF', '高频·近', '#f5a623'],
+  [X.c8, '0.1μF', '高频·近', '#f5a623'],
+  [X.c9, '10μF', '低频·远', '#4a7aaa'],
+];
+annot.forEach(([x, v, role, col]) => { sText(x, 272, v, col, 9); sText(x, 284, role, 'var(--dim)', 8); });
+
+c.fit(14, 1.0);
+
+// ── steady clean DC current (always flowing through the regulator) ──
+const clean = c.particles([[X.src, 145], [X.src, railY], REG.in, REG.out, [X.load, railY], [X.load, gndY], [X.src, gndY], [X.src, 185]]);
+clean.set({ on: true, color: '#22d36a', speed: 0.9 });
+
+// ── custom noise particles on the SVG ──
+const noiseLayer = document.createElementNS(NS, 'g');
+svg.appendChild(noiseLayer);
+let noiseOn = true, capsOn = true, hiOn = true, loOn = true;
+const noise = [];
+
+class Noise {
+  constructor(type) {
+    this.type = type;                       // 'hi' | 'lo'
+    this.x = X.src + 14; this.y = railY;
+    this.vx = type === 'hi' ? 2.3 + Math.random() * 0.7 : 1.4 + Math.random() * 0.4;
+    this.r = type === 'hi' ? 3 : 4;
+    this.color = type === 'hi' ? '#f5a623' : '#4a7aaa';
+    this.side = 'in';
+    this.absorbed = false; this.dead = false; this.life = 1;
+    this.el = document.createElementNS(NS, 'circle');
+    this.el.setAttribute('r', this.r); noiseLayer.appendChild(this.el);
+  }
+  update() {
+    if (this.absorbed) {                    // dive into the cap toward GND, fade red
+      this.y += 5; this.life -= 0.07; this.r += 0.25; this.color = '#e05050';
+      if (this.life <= 0 || this.y > gndY) this.dead = true;
+      return;
+    }
+    this.x += this.vx;
+    this.y = this.type === 'hi' ? railY + Math.sin(this.x * 0.3) * 3 : railY;
+    if (this.side === 'in') {
+      const cap = this.type === 'hi' ? capCx.hiIn : capCx.loIn;
+      if (capsOn && Math.abs(this.x - cap) < 7 && Math.random() < 0.55) { this.absorbed = true; this.x = cap; return; }
+      if (this.x >= REG.in[0]) {            // reached chip input
+        if (capsOn) { this.dead = true; }   // residual cleaned by the regulator
+        else { this.side = 'out'; this.x = REG.out[0]; }   // no caps → noise passes through
+      }
+    } else {                                // output rail
+      const cap = this.type === 'hi' ? capCx.hiOut : capCx.loOut;
+      if (capsOn && Math.abs(this.x - cap) < 7 && Math.random() < 0.6) { this.absorbed = true; this.x = cap; return; }
+      if (this.x > X.load) this.dead = true;
+    }
+  }
+  draw() {
+    this.el.setAttribute('cx', this.x.toFixed(1));
+    this.el.setAttribute('cy', this.y.toFixed(1));
+    this.el.setAttribute('r', this.r.toFixed(1));
+    this.el.setAttribute('fill', this.color);
+    this.el.setAttribute('opacity', (this.absorbed ? this.life * 0.8 : 0.85).toFixed(2));
+  }
+}
+
+// ── oscilloscope scopes ──
+const sIn = $('scope-in').getContext('2d');
+const sOut = $('scope-out').getContext('2d');
+const SW = 320, SH = 56, MID = SH / 2;
+const inBuf = new Array(SW).fill(MID), outBuf = new Array(SW).fill(MID);
+let t = 0;
+
+function drawScope(ctx, buf, color) {
+  ctx.fillStyle = '#070b11'; ctx.fillRect(0, 0, SW, SH);
+  ctx.strokeStyle = '#10202c'; ctx.lineWidth = 0.5;
+  for (let x = 0; x < SW; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, SH); ctx.stroke(); }
+  for (let y = 0; y < SH; y += 14) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(SW, y); ctx.stroke(); }
+  ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.beginPath();
+  buf.forEach((v, i) => i === 0 ? ctx.moveTo(i, v) : ctx.lineTo(i, v));
+  ctx.stroke();
+}
+function updateScopes() {
+  let nIn = 0;
+  if (noiseOn) {
+    if (hiOn) nIn += Math.sin(t * 0.8) * 9 + Math.sin(t * 1.6) * 4.5;
+    if (loOn) nIn += Math.sin(t * 0.08) * 7;
+  }
+  inBuf.push(MID + nIn); inBuf.shift();
+  let nOut = 0;
+  if (noiseOn && !capsOn) {
+    if (hiOn) nOut += Math.sin(t * 0.8) * 7 + Math.sin(t * 1.6) * 3.5;
+    if (loOn) nOut += Math.sin(t * 0.08) * 5.5;
+  } else if (noiseOn && capsOn) {
+    if (loOn) nOut += Math.sin(t * 0.08) * 1.1;   // tiny residual ripple
+  }
+  outBuf.push(MID + nOut); outBuf.shift();
+  drawScope(sIn, inBuf, noiseOn ? '#f5a623' : '#22d36a');
+  drawScope(sOut, outBuf, capsOn ? '#22d36a' : '#e05050');
+  $('lab-in').textContent = noiseOn ? '有噪声' : '干净';
+  $('lab-in').style.color = noiseOn ? '#f5a623' : '#22d36a';
+  $('lab-out').textContent = capsOn ? '已滤波 ✓' : '噪声穿透！';
+  $('lab-out').style.color = capsOn ? '#22d36a' : '#e05050';
+}
+
+// ── status / dim caps / note ──
+function refresh() {
+  $('st-noise').classList.toggle('active', noiseOn);
+  $('st-in').classList.toggle('active', noiseOn && capsOn);
+  $('st-out').classList.toggle('active', capsOn);
+  $('st-clean').classList.toggle('active', capsOn);
+  $('st-leak').classList.toggle('active', noiseOn && !capsOn);
+  const dim = capsOn ? 1 : 0.22;
+  [C6g, C7g, C8g, C9g].forEach(g => g.style.opacity = dim);
+  if (!capsOn) {
+    $('note').className = 'stage-note danger';
+    $('note').innerHTML = '去耦电容被移除！输入端的高频噪声与低频纹波<br>直接穿过稳压器到达输出，3.3V 供电被污染。';
+  } else if (!noiseOn) {
+    $('note').className = 'stage-note';
+    $('note').innerHTML = '当前无噪声输入，电源经 LM1117 稳压为干净的 3.3V。<br>开启噪声可观察去耦电容如何就地旁路干扰。';
+  } else {
+    $('note').className = 'stage-note';
+    $('note').innerHTML = '高频噪声被靠近芯片的小电容 C₇/C₈（0.1μF）就近旁路到地；<br>低频纹波由远端大电容 C₆/C₉（10μF）储能滤除，输出得到纯净的 3.3V。';
+  }
+}
+
+// ── buttons ──
+$('btn-noise').addEventListener('click', function () {
+  noiseOn = !noiseOn; this.classList.toggle('on', noiseOn);
+  this.textContent = '噪声：' + (noiseOn ? '开' : '关'); refresh();
+});
+$('btn-cap').addEventListener('click', function () {
+  capsOn = !capsOn; this.classList.toggle('on', capsOn);
+  this.textContent = '去耦电容：' + (capsOn ? '开' : '关'); refresh();
+});
+$('btn-hi').addEventListener('click', function () {
+  hiOn = !hiOn; this.classList.toggle('on', hiOn);
+  this.textContent = '高频干扰' + (hiOn ? '' : '（关）');
+});
+$('btn-lo').addEventListener('click', function () {
+  loOn = !loOn; this.classList.toggle('on', loOn);
+  this.textContent = '低频纹波' + (loOn ? '' : '（关）');
+});
+$('btn-cap').classList.add('on');   // start ON (danger style only highlights when off via JS below)
+
+// ── main loop ──
+let spawnAcc = 0;
+function frame() {
+  t++;
+  if (noiseOn) {
+    spawnAcc++;
+    if (hiOn && spawnAcc % 3 === 0 && Math.random() < 0.8) noise.push(new Noise('hi'));
+    if (loOn && spawnAcc % 9 === 0) noise.push(new Noise('lo'));
+  }
+  for (let i = noise.length - 1; i >= 0; i--) {
+    noise[i].update();
+    if (noise[i].dead) { noise[i].el.remove(); noise.splice(i, 1); continue; }
+    noise[i].draw();
+  }
+  updateScopes();
+  requestAnimationFrame(frame);
+}
+refresh();
+frame();
+</script>
+</body>
+</html>

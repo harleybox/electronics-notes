@@ -196,6 +196,30 @@
       const t2 = txt(x + 29, y + 12, o.sub || '输入引脚', '#6a7a8a', 9); t2.setAttribute('text-anchor', 'middle'); g.appendChild(t2);
       return { pin: [x, y] };
     }
+    // 3-terminal voltage regulator / IC block (tall body, e.g. LM1117).
+    // pins: in (left side) & out (right side) at vertical `pinY` (default center y);
+    //       gnd (bottom center). IN/OUT/GND text drawn inside; label = chip name, sub = part id.
+    regulator(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      const w = o.w || 120, h = o.h || 150;
+      const Lx = x - w / 2, Rx = x + w / 2, Ty = y - h / 2, By = y + h / 2;
+      const py = o.pinY != null ? o.pinY : y;
+      g.appendChild(el('rect', { x: Lx, y: Ty, width: w, height: h, rx: 5, fill: C.body, stroke: C.blue, 'stroke-width': 1.5 }));
+      const inLead  = el('line', { x1: Lx - 12, y1: py, x2: Lx, y2: py, stroke: C.wire, 'stroke-width': 2 });
+      const outLead = el('line', { x1: Rx, y1: py, x2: Rx + 12, y2: py, stroke: C.wire, 'stroke-width': 2 });
+      const gndLead = el('line', { x1: x, y1: By, x2: x, y2: By + 12, stroke: C.wire, 'stroke-width': 2 });
+      g.appendChild(inLead); g.appendChild(outLead); g.appendChild(gndLead);
+      this.wires.push({ el: inLead, a: [Lx - 12, py], b: [Lx, py] },
+                      { el: outLead, a: [Rx, py], b: [Rx + 12, py] },
+                      { el: gndLead, a: [x, By], b: [x, By + 12] });
+      // pin labels sit just INSIDE the body, below the pin, so they never clash with the top edge
+      g.appendChild(txt(Lx + 6, py + 14, o.inLabel || 'IN', '#5a8aaa', 9));
+      const lo = txt(Rx - 6, py + 14, o.outLabel || 'OUT', '#5a8aaa', 9); lo.setAttribute('text-anchor', 'end'); g.appendChild(lo);
+      const lg = txt(x, By - 9, o.gndLabel || 'GND', '#5a8aaa', 9); lg.setAttribute('text-anchor', 'middle'); g.appendChild(lg);
+      if (o.label) { const t = txt(x, y, o.label, C.blue, 12); t.setAttribute('text-anchor', 'middle'); t.setAttribute('dominant-baseline', 'central'); t.setAttribute('font-weight', 'bold'); g.appendChild(t); }
+      if (o.sub) { const s = txt(x, Ty - 7, o.sub, '#6a7a8a', 9); s.setAttribute('text-anchor', 'middle'); g.appendChild(s); }
+      return { in: [Lx - 12, py], out: [Rx + 12, py], gnd: [x, By + 12] };
+    }
     // Vertical switch. pins a (top), b (bottom). setClosed(bool).
     switchV(x, y, o = {}) {
       const g = this._add(el('g', {}));

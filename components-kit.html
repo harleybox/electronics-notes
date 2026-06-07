@@ -31,7 +31,7 @@
   </div>
 </div>
 
-<script src="assets/circuit-kit.js?v=11"></script>
+<script src="assets/circuit-kit.js?v=13"></script>
 <script>
 // Each entry renders ONE component via the engine, centered in a small card SVG.
 // 横/竖两个朝向放在一起，便于对照。
@@ -60,6 +60,8 @@ const ITEMS = [
     draw: (c) => { const v = c.voltmeter(70, 55); v.setReading('+6.00'); return v; } },
   { name: '单片机引脚', note: '高阻输入：只读电压、不取电流（支路保持灰）',
     draw: (c) => c.mcu(55, 55, { sub: '输入引脚' }) },
+  { name: '三端稳压器', note: 'IN(左)/OUT(右)/GND(下) 三脚；输入输出旁配去耦电容',
+    draw: (c) => c.regulator(75, 48, { w: 78, h: 58, label: 'LM1117', sub: 'U₄' }) },
   { name: '电容 · 竖版', note: '两块平行极板（蓝）；上下两脚，可显示充电量',
     draw: (c) => { const cap = c.capacitor(75, 55, { label: 'C' }); cap.setCharge(0.7); return cap; } },
   { name: '电容 · 横版', note: 'dir:"h" — 极板竖放，左右两脚',
