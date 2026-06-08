@@ -10,20 +10,39 @@
   .lib { width: 100%; max-width: 960px; margin: 0 auto; }
   .sub { font-size: 12px; color: var(--dim); margin: -8px 0 28px; text-align: center; line-height: 1.7; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; cursor: pointer; transition: border-color .15s, transform .15s; }
+  .card:hover { border-color: var(--green); transform: translateY(-2px); }
   .symbolbox { background: #10141d; border: 1px solid var(--border); border-radius: 8px; padding: 4px; margin-bottom: 10px; }
   .card svg { display: block; margin: 0 auto; }
   .name { font-size: 13px; color: var(--txt); }
   .note { font-size: 10px; color: var(--dim); margin-top: 5px; line-height: 1.55; }
+  .tap { font-size: 9px; color: var(--green); margin-top: 6px; opacity: .8; }
   .footer { font-size: 11px; color: var(--dim); margin-top: 28px; line-height: 1.8; text-align: center; }
   .footer a { color: var(--green); text-decoration: none; }
+
+  /* ── click-to-explain modal ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(6,9,14,.78); backdrop-filter: blur(2px);
+    display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50; }
+  .modal-overlay[hidden] { display: none; }
+  .modal-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    max-width: 420px; width: 100%; padding: 22px; position: relative;
+    box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  .modal-close { position: absolute; top: 12px; right: 14px; background: none; border: none;
+    color: var(--dim); font-size: 22px; cursor: pointer; line-height: 1; }
+  .modal-close:hover { color: var(--txt); }
+  .modal-symbol { background: #10141d; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px; margin-bottom: 14px; display: flex; justify-content: center; }
+  .modal-name { font-size: 16px; color: var(--txt); text-align: center; margin-bottom: 12px; letter-spacing: .05em; }
+  .modal-explain { font-size: 13px; color: var(--muted); line-height: 1.85; }
+  .modal-explain b { color: var(--green); }
+  .modal-explain a { color: var(--green); }
 </style>
 </head>
 <body>
 <div class="lib">
   <h1>组件图例库 · 引擎生成</h1>
   <div class="sub">下面每个符号都是用 <b style="color:var(--muted)">circuit-kit.js</b> 引擎当场画的——<br>
-    和实际电路图里用的<b style="color:var(--muted)">完全是同一份代码</b>，不会再各画各的、对不上。</div>
+    和实际电路图里用的<b style="color:var(--muted)">完全是同一份代码</b>。<b style="color:var(--green)">点任意卡片</b>看通俗解释。</div>
   <div class="grid" id="grid"></div>
   <div class="footer">
     每个符号都由引擎当场绘制，和电路图共用同一份代码。<br>
@@ -31,74 +50,122 @@
   </div>
 </div>
 
-<script src="assets/circuit-kit.js?v=14"></script>
+<div class="modal-overlay" id="modal" hidden>
+  <div class="modal-card">
+    <button class="modal-close" id="modal-close" aria-label="关闭">×</button>
+    <div class="modal-symbol" id="modal-symbol"></div>
+    <div class="modal-name" id="modal-name"></div>
+    <div class="modal-explain" id="modal-explain"></div>
+  </div>
+</div>
+
+<script src="assets/circuit-kit.js?v=13"></script>
 <script>
-// Each entry renders ONE component via the engine, centered in a small card SVG.
-// 横/竖两个朝向放在一起，便于对照。
+// Each entry renders ONE component via the engine. `explain` = 0-基础白话解释（点击弹窗显示）。
 const ITEMS = [
   { name: '电源 · 竖版', note: '长板正极(橙) / 短板负极(灰) + 数字电压',
+    explain: '给整个电路提供电力的"水泵"。长板是正极(+)、短板是负极(−)，电流从正极流出、绕一圈流回负极。旁边的数字是它的电压（如 5V），电压越高"水压"越大。',
     draw: (c) => c.source(75, 55, { label: '5V' }) },
   { name: '电源 · 横版', note: 'dir:"h" — 左负右正',
+    explain: '和竖版电源一样，只是横着放。左边负极、右边正极。提供电路工作所需的电压与电流。',
     draw: (c) => c.source(75, 55, { label: '5V', dir: 'h' }) },
-  { name: '交流信号源', note: '圆圈+正弦波；out(右)/gnd(下)，提供交流输入信号',
-    draw: (c) => c.acSource(62, 52, { label: 'Uₛ' }) },
   { name: '固定电阻 · 竖版', note: '矩形方块；上下两脚',
+    explain: '阻碍电流的元件，像一段变窄的水管。两个主要用途：<b>限流</b>（防止电流太大烧坏元件）和<b>分压</b>（分掉一部分电压）。阻值单位是欧姆(Ω)，10k = 10000Ω。',
     draw: (c) => c.resistor(72, 55, { label: 'R', value: '10k' }) },
   { name: '固定电阻 · 横版', note: 'dir:"h" — 左右两脚',
+    explain: '同样是电阻，横着放、左右两个脚。作用就是限流和分压。',
     draw: (c) => c.resistor(75, 50, { label: 'R', value: '10k', dir: 'h' }) },
   { name: 'LED · 竖版（亮）', note: '三角+阴极杠+柔和光晕；通电发光',
+    explain: '发光二极管：通电就发光的小灯。电流只能从三角(阳极)流向竖杠(阴极)，方向接反了不亮。常用作指示灯。注意它必须串一个电阻限流，否则容易烧。',
     draw: (c) => { const d = c.led(72, 52, { label: 'D' }); d.set({ color: 'green', b: 1 }); return d; } },
   { name: 'LED · 横版（亮）', note: 'dir:"h" — 三角朝右，阳极左/阴极右',
+    explain: '同样是发光二极管，横着放：三角朝右，阳极在左、阴极在右。电流从左往右才能点亮。',
     draw: (c) => { const d = c.led(72, 52, { label: 'D', dir: 'h' }); d.set({ color: 'green', b: 1 }); return d; } },
   { name: 'LED · 烧毁', note: '过流损坏 → 变灰 + 红叉（12V 那个状态）',
+    explain: '如果电流太大（比如忘了串限流电阻），LED 会被烧坏：变灰、打个红叉，再也不亮。这就是为什么 LED 几乎总要配一个限流电阻。',
     draw: (c) => { const d = c.led(72, 52, { label: 'D' }); d.set({ color: 'burnt' }); return d; } },
   { name: '开关 · 断开', note: '斜臂离开触点 = 断路（无电流）',
+    explain: '控制电路通断的元件。断开时斜臂离开触点，电路是"断路"——没有电流，灯不亮。',
     draw: (c) => { const s = c.switchH(75, 55, { label: 'S' }); s.setClosed(false); return s; } },
   { name: '开关 · 闭合', note: '斜臂搭上触点 = 导通（绿）',
+    explain: '闭合时斜臂搭上触点，电路接通，电流就能流过（线变绿），灯亮。和断开是同一个开关的两种状态。',
     draw: (c) => { const s = c.switchH(75, 55, { label: 'S' }); s.setClosed(true); return s; } },
   { name: '接地 GND', note: '0V 参考点 / 电源负极返回',
+    explain: '0V 参考点，可以理解成电流的"家"或最低水位——电路里所有电流最终都流回地。图里出现的多个"地"符号，其实是连在一起的<b>同一个点</b>。',
     draw: (c) => c.ground(75, 40) },
   { name: '电压表', note: '圆圈+读数；并联测电压，理想内阻∞、不取电流',
+    explain: '测量两点之间电压的仪表，要<b>并联</b>接在被测元件两端。它内阻极大、几乎不取电流，所以接上去基本不影响原电路。',
     draw: (c) => { const v = c.voltmeter(70, 55); v.setReading('+6.00'); return v; } },
   { name: '单片机引脚', note: '高阻输入：只读电压、不取电流（支路保持灰）',
+    explain: '单片机(MCU)的输入脚：只负责"读"电压的高或低（判断是 1 还是 0），几乎不取电流。所以接它的那条支路通常没有明显电流（在图里保持灰色）。',
     draw: (c) => c.mcu(55, 55, { sub: '输入引脚' }) },
   { name: '三端稳压器', note: 'IN(左)/OUT(右)/GND(下) 三脚；输入输出旁配去耦电容',
+    explain: '把较高/不稳定的输入电压，稳定成固定的较低电压输出。例如 LM1117 把 5V 稳成 3.3V 给芯片供电。三只脚：IN 进、OUT 出、GND 接地；输入输出旁通常配去耦电容滤噪。',
     draw: (c) => c.regulator(75, 48, { w: 78, h: 58, label: 'LM1117', sub: 'U₄' }) },
-  { name: 'NPN 三极管', note: '基极B(左)/集电极C(上)/发射极E(下，箭头朝外)；放大或开关',
-    draw: (c) => { const q = c.transistor(70, 52, { label: 'Q', sub: '2N5210' }); q.setActive(true); return q; } },
   { name: '电容 · 竖版', note: '两块平行极板（蓝）；上下两脚，可显示充电量',
+    explain: '存电荷的元件，内部是两块<b>不挨着</b>的板。关键脾气：<b>挡直流、放交流</b>——不变的直流过不去，来回变的交流能"穿"过去，而且频率越高越通。用于滤波、旁路、去耦、定时等。<br>👉 想直观感受，去看 <a href="basics/capacitor-intro.html">「电容入门」动图</a>。',
     draw: (c) => { const cap = c.capacitor(75, 55, { label: 'C' }); cap.setCharge(0.7); return cap; } },
   { name: '电容 · 横版', note: 'dir:"h" — 极板竖放，左右两脚',
+    explain: '同样是电容，横着放、左右两脚。脾气一样：挡直流、放交流，频率越高越通。',
     draw: (c) => c.capacitor(75, 55, { label: 'C', dir: 'h' }) },
   { name: '二极管 · 横版', note: '三角+阴极杠；阳极左/阴极右，单向导通',
+    explain: '电流的"单向阀门"：只允许电流从一个方向通过（三角 → 竖杠），反方向截止。用于整流（交流变直流）、防止电源接反、抬高电压门槛等。',
     draw: (c) => c.diode(75, 55, { label: 'D' }) },
   { name: '二极管 · 竖版', note: 'dir:"v" — 阳极上/阴极下',
+    explain: '同样是单向阀门，竖着放：阳极在上、阴极在下，电流只能从上往下通过。',
     draw: (c) => c.diode(75, 52, { label: 'D', dir: 'v' }) },
   { name: '晶闸管 VS · 横版（导通）', note: '阳极A左/阴极K右；下方虚线=门极G(触发控制端)。门极触发后一直导通（变红）',
+    explain: '可控的"电子开关"：平时不导通，给门极(G)一个触发信号后就<b>一直导通</b>，直到主电流被切断才关断。常用于触发、定时、可控整流。',
     draw: (c) => { const s = c.scr(70, 50, { label: 'VS', sub: 'S6012R' }); s.setOn(true); return s; } },
   { name: '晶闸管 VS · 竖版（导通）', note: 'dir:"v" — 阳极A上/阴极K下，门极G在左侧',
+    explain: '同样是可控开关，竖着放：阳极在上、阴极在下，门极 G 在左侧。触发后保持导通。',
     draw: (c) => { const s = c.scr(72, 52, { label: 'VS', sub: 'S6012R', dir: 'v' }); s.setOn(true); return s; } },
   { name: '蜂鸣器 · 竖版（发声）', note: '喇叭符号+声波；上下两脚，通电发出声波动画',
+    explain: '通电就发声的元件，用来做提示音或报警。符号像个小喇叭，通电时画面会画出声波。',
     draw: (c) => { const b = c.buzzer(62, 52, { label: 'BUZ' }); b.setRinging(true); return b; } },
   { name: '蜂鸣器 · 横版（发声）', note: 'dir:"h" — 左右两脚，喇叭朝上',
+    explain: '同样是蜂鸣器，横着放、左右两脚，喇叭朝上。通电发声。',
     draw: (c) => { const b = c.buzzer(74, 60, { label: 'BUZ', dir: 'h' }); b.setRinging(true); return b; } },
 ];
+
+function renderSymbol(parent, item, vb) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 150 110');
+  svg.setAttribute('width', vb || 150); svg.setAttribute('height', (vb ? vb * 110 / 150 : 110));
+  svg.insertAdjacentHTML('afterbegin', Circuit.defs());
+  parent.appendChild(svg);
+  item.draw(new Circuit(svg));
+  return svg;
+}
 
 const grid = document.getElementById('grid');
 ITEMS.forEach(item => {
   const card = document.createElement('div'); card.className = 'card';
   const box = document.createElement('div'); box.className = 'symbolbox';
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 150 110'); svg.setAttribute('width', '150'); svg.setAttribute('height', '110');
-  svg.insertAdjacentHTML('afterbegin', Circuit.defs());
-  box.appendChild(svg);
-  const c = new Circuit(svg);
-  item.draw(c);
+  renderSymbol(box, item);
   const name = document.createElement('div'); name.className = 'name'; name.textContent = item.name;
   const note = document.createElement('div'); note.className = 'note'; note.textContent = item.note;
-  card.appendChild(box); card.appendChild(name); card.appendChild(note);
+  const tap = document.createElement('div'); tap.className = 'tap'; tap.textContent = '点击看解释 →';
+  card.appendChild(box); card.appendChild(name); card.appendChild(note); card.appendChild(tap);
+  card.addEventListener('click', () => openModal(item));
   grid.appendChild(card);
 });
+
+// ── modal ──
+const modal = document.getElementById('modal');
+const mSym = document.getElementById('modal-symbol');
+const mName = document.getElementById('modal-name');
+const mExplain = document.getElementById('modal-explain');
+function openModal(item) {
+  mSym.innerHTML = ''; renderSymbol(mSym, item, 220);
+  mName.textContent = item.name;
+  mExplain.innerHTML = item.explain || '';
+  modal.hidden = false;
+}
+function closeModal() { modal.hidden = true; mSym.innerHTML = ''; }
+document.getElementById('modal-close').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 </script>
 </body>
 </html>

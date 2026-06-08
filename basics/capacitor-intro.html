@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电容入门 — 挡直流 · 放交流</title>
+<link rel="stylesheet" href="../assets/circuit.css">
+<style>
+  .key { background:#13251c; border:1px solid #1f6b3a; border-radius:8px; padding:10px 12px;
+         font-size:12px; color:var(--green); line-height:1.7; }
+  .key b { color:#7af0a8; }
+  .big { font-size:13px; color:var(--txt); }
+  .read { font-size:12px; color:var(--muted); line-height:1.9; font-variant-numeric:tabular-nums; }
+  .read b { color:var(--green); }
+  .read .inf { color:var(--danger); }
+  .mode-row { display:flex; gap:8px; }
+  .mode-row .btn { padding:10px; }
+  #lamp-state.on { color:var(--green); }
+  #lamp-state.off { color:var(--dim); }
+  .slider-row.disabled { opacity:.35; pointer-events:none; }
+</style>
+</head>
+<body>
+
+<h1>电容入门 — 挡直流 · 放交流</h1>
+
+<div class="stage">
+  <div id="circuit-wrap">
+    <svg id="svg" width="460" height="240" viewBox="0 0 460 240"></svg>
+  </div>
+
+  <div class="panel">
+    <div>
+      <div class="panel-title">这把钥匙 🔑</div>
+      <div class="key">电容 = 中间<b>断开</b>的两块板。<br>
+        · <b>直流</b>（不变）→ 被挡住，过不去<br>
+        · <b>交流</b>（来回变）→ 能"穿"过去<br>
+        · 变化<b>越快</b>（频率越高）→ 越通</div>
+    </div>
+
+    <div>
+      <div class="panel-title">选择电源类型</div>
+      <div class="mode-row">
+        <button class="btn on" id="btn-dc">直流 ⎓</button>
+        <button class="btn" id="btn-ac">交流 ∿</button>
+      </div>
+    </div>
+
+    <div class="slider-row disabled" id="freq-wrap">
+      <div class="slider-head"><span>交流频率 f</span><b id="freq-val">1.0 kHz</b></div>
+      <input type="range" id="freq" min="0" max="100" value="50">
+    </div>
+
+    <div>
+      <div class="panel-title">仪表</div>
+      <div class="read">
+        电容阻抗 X<sub>C</sub> = <b id="xc">∞</b><br>
+        电流大小 = <b id="cur">0</b><br>
+        小灯 = <b id="lamp-state" class="off">灭</b>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel-title">说明</div>
+      <div class="stage-note big" id="note">现在是<b>直流</b>：接通后电容很快充满，电流只流一下就停——<br>电容把直流"挡"住了，小灯闪一下就灭。</div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/circuit-kit.js?v=13"></script>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('svg');
+const $ = id => document.getElementById(id);
+svg.innerHTML = Circuit.defs();
+const c = new Circuit(svg);
+
+// ── geometry ──
+const SX = 70, TOP = 60, BOT = 180, LEDX = 360, CAPX = 220;
+
+// custom switchable source (circle with ⎓ / ∿ symbol)
+const srcG = document.createElementNS(NS, 'g');
+svg.appendChild(srcG);
+function mk(tag, attrs) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+srcG.appendChild(mk('circle', { cx: SX, cy: 120, r: 24, fill: '#1e2535', stroke: '#4a7aaa', 'stroke-width': 1.5 }));
+const srcSym = mk('text', { x: SX, y: 120, fill: '#4a7aaa', 'font-size': 22, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': "'Courier New',monospace" });
+srcSym.textContent = '⎓'; srcG.appendChild(srcSym);
+const srcLbl = mk('text', { x: SX, y: 160, fill: '#8899aa', 'font-size': 11, 'text-anchor': 'middle', 'font-family': "'Courier New',monospace" });
+srcLbl.textContent = '电源'; srcG.appendChild(srcLbl);
+
+// capacitor (horizontal, in series on the top wire) + LED + wires
+const CAP = c.capacitor(CAPX, TOP, { label: 'C', dir: 'h' });           // a[195,60] b[245,60]
+const LED = c.led(LEDX, 120, { label: '小灯' });                         // anode[360,108] cathode[360,132]
+const GND = c.ground(SX, BOT);
+
+// source leads (registered so they can light)
+c.wire([SX, 96], [SX, TOP]);                 // source top → top-left corner
+c.wire([SX, TOP], CAP.a);                    // → capacitor
+c.wire(CAP.b, [LEDX, TOP]);                   // capacitor → top-right corner
+c.wire([LEDX, TOP], LED.anode);              // → LED anode
+c.wire(LED.cathode, [LEDX, BOT]);            // LED cathode → bottom-right
+c.wire([LEDX, BOT], [SX, BOT]);              // bottom wire
+c.wire([SX, BOT], [SX, 144]);                // → source bottom
+c.fit(16, 1.15);
+
+// ── current particles around the loop ──
+const loop = [[SX, 96], [SX, TOP], [LEDX, TOP], [LEDX, 108], [LEDX, 132], [LEDX, BOT], [SX, BOT], [SX, 144]];
+const flow = c.particles(loop);
+
+// ── state ──
+let mode = 'dc';
+const C_FARAD = 1e-6;
+// slider 0..100 → 10 Hz .. 100 kHz (log)
+function sliderToFreq(v) { return Math.round(Math.pow(10, 1 + v / 100 * 4)); }
+function fmtFreq(f) { return f >= 1000 ? (f / 1000).toFixed(1) + ' kHz' : f + ' Hz'; }
+function fmtXc(x) { return x >= 1000 ? (x / 1000).toFixed(1) + ' kΩ' : x.toFixed(0) + ' Ω'; }
+
+// DC animation state machine
+let dcPhase = 0, dcT = 0;     // 0=charging 1=full-hold 2=reset
+function setLamp(on, txt) { $('lamp-state').textContent = txt; $('lamp-state').className = on ? 'on' : 'off'; }
+
+function applyMode() {
+  const dc = mode === 'dc';
+  $('btn-dc').classList.toggle('on', dc);
+  $('btn-ac').classList.toggle('on', !dc);
+  srcSym.textContent = dc ? '⎓' : '∿';
+  $('freq-wrap').classList.toggle('disabled', dc);
+  if (dc) {
+    dcPhase = 0; dcT = 0;
+    $('xc').textContent = '∞'; $('xc').className = 'inf';
+    $('note').innerHTML = '现在是<b>直流</b>：接通后电容很快充满，电流只流一下就停——<br>电容把直流"挡"住了，小灯闪一下就灭。';
+  } else {
+    $('xc').className = '';
+    flow.set({ on: true });
+    updateAC();
+    $('note').innerHTML = '现在是<b>交流</b>：电源来回变，电容不停充放电，电流就持续"穿"过去——<br>小灯一直亮；<b>频率越高，电容越通，灯越亮</b>。';
+  }
+}
+
+function updateAC() {
+  const f = sliderToFreq(+$('freq').value);
+  $('freq-val').textContent = fmtFreq(f);
+  const xc = 1 / (2 * Math.PI * f * C_FARAD);
+  $('xc').textContent = fmtXc(xc);
+  // brightness & current grow with frequency (lower Xc → more current)
+  const norm = (+$('freq').value) / 100;          // 0..1
+  const b = 0.25 + norm * 0.75;
+  LED.set({ color: 'green', b });
+  flow.set({ on: true, color: '#22d36a', speed: 0.5 + norm * 2.2 });
+  c.lightAll('#22d36a');
+  $('cur').textContent = (b * 100).toFixed(0) + ' %';
+  setLamp(true, '亮 ' + (b * 100).toFixed(0) + '%');
+}
+
+// DC: charge pulse → current flows briefly, then stops
+let last = 0;
+function tick(ts) {
+  const dt = last ? Math.min(50, ts - last) : 16; last = ts;
+  if (mode === 'dc') {
+    dcT += dt;
+    if (dcPhase === 0) {                 // charging (current flows)
+      const frac = Math.min(1, dcT / 1400);
+      flow.set({ on: true, color: '#22d36a', speed: 0.5 + (1 - frac) * 2.0 });
+      c.lightAll('#22d36a');
+      const b = (1 - frac) * 0.9;
+      LED.set({ color: 'green', b });
+      $('cur').textContent = (b * 110).toFixed(0) + ' %';
+      setLamp(b > 0.05, b > 0.05 ? '闪亮…' : '灭');
+      if (frac >= 1) { dcPhase = 1; dcT = 0; }
+    } else if (dcPhase === 1) {          // full → no current
+      flow.set({ on: false });
+      c.lightAll('#2e3a50');
+      LED.set({ color: 'off' });
+      $('cur').textContent = '0';
+      setLamp(false, '灭（已充满）');
+      if (dcT > 1600) { dcPhase = 2; dcT = 0; }
+    } else {                             // brief reset, then recharge to repeat the lesson
+      if (dcT > 400) { dcPhase = 0; dcT = 0; }
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+// ── controls ──
+$('btn-dc').addEventListener('click', () => { mode = 'dc'; applyMode(); });
+$('btn-ac').addEventListener('click', () => { mode = 'ac'; applyMode(); });
+$('freq').addEventListener('input', () => { if (mode === 'ac') updateAC(); });
+
+applyMode();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
