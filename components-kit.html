@@ -64,7 +64,7 @@
   </div>
 </div>
 
-<script src="assets/circuit-kit.js?v=15"></script>
+<script src="assets/circuit-kit.js?v=16"></script>
 <script>
 // Each entry renders ONE component via the engine. `explain` = 0-基础白话解释（点击弹窗显示）。
 const ITEMS = [
@@ -112,10 +112,10 @@ const ITEMS = [
     draw: (c) => c.regulator(75, 48, { w: 78, h: 58, label: 'LM1117', sub: 'U₄' }) },
   { name: '电容 · 竖版', note: '两块平行极板（蓝）；上下两脚，可显示充电量',
     explain: '存电荷的元件，内部是两块<b>不挨着</b>的板。关键脾气：<b>挡直流、放交流</b>——不变的直流过不去，来回变的交流能"穿"过去，而且频率越高越通。用于滤波、旁路、去耦、定时等。<br>👉 想直观感受，去看 <a href="basics/capacitor-intro.html">「电容入门」动图</a>。',
-    draw: (c) => { const cap = c.capacitor(75, 55, { label: 'C' }); cap.setCharge(0.7); return cap; } },
+    draw: (c) => { const cap = c.capacitor(75, 55, { label: 'C', value: '10μF' }); cap.setCharge(0.7); return cap; } },
   { name: '电容 · 横版', note: 'dir:"h" — 极板竖放，左右两脚',
     explain: '同样是电容，横着放、左右两脚。脾气一样：挡直流、放交流，频率越高越通。',
-    draw: (c) => c.capacitor(75, 55, { label: 'C', dir: 'h' }) },
+    draw: (c) => c.capacitor(75, 55, { label: 'C', value: '0.1μF', dir: 'h' }) },
   { name: '二极管 · 横版', note: '三角+阴极杠；阳极左/阴极右，单向导通',
     explain: '电流的"单向阀门"：只允许电流从一个方向通过（三角 → 竖杠），反方向截止。用于整流（交流变直流）、防止电源接反、抬高电压门槛等。',
     draw: (c) => c.diode(75, 55, { label: 'D' }) },

@@ -71,7 +71,7 @@
   </div>
 </div>
 
-<script src="../assets/circuit-kit.js?v=15"></script>
+<script src="../assets/circuit-kit.js?v=16"></script>
 <script>
 const NS = 'http://www.w3.org/2000/svg';
 const svg = document.getElementById('svg');
@@ -84,15 +84,15 @@ const VCC = 70, GND = 370;
 // ── place components ──
 const AC = c.acSource(65, 215, { label: 'Uₛ', dir: 'h' });                    // a(接地)[35,215] b(出信号)[95,215]
 const R5 = c.resistor(125, 215, { label: 'R₅', value: '1k', dir: 'h' });       // a[95,215] b[155,215]
-const C1 = c.capacitor(195, 215, { label: 'C₁', dir: 'h' });                   // a[170,215] b[220,215]
+const C1 = c.capacitor(195, 215, { label: 'C₁', value: '1μF', dir: 'h' });      // a[170,215] b[220,215]
 const Q  = c.transistor(320, 215, { label: 'Q₁', sub: '2N5210' });             // base[294,215] col[330,179] emi[330,251]
 const R2 = c.resistor(245, 140, { label: 'R₂', value: '31k' });                // a[245,110] b[245,170]
 const R3 = c.resistor(245, 300, { label: 'R₃', value: '20k' });                // a[245,270] b[245,330]
 const R1 = c.resistor(Q.collector[0], 135, { label: 'R₁', value: '1.5k' });    // a[330,105] b[330,165]
-const C3 = c.capacitor(390, Q.collector[1], { label: 'C₃', dir: 'h' });        // a[365,179] b[415,179]
+const C3 = c.capacitor(390, Q.collector[1], { label: 'C₃', value: '1μF', dir: 'h' });  // a[365,179] b[415,179]
 const R6 = c.resistor(450, 250, { label: 'R₆', value: '1k' });                 // a[450,220] b[450,280]
 const R4 = c.resistor(300, 305, { label: 'R₄', value: '1k' });                 // a[300,275] b[300,335]
-const C2 = c.capacitor(380, 305, { label: 'C₂' }); const C2g = c.partLayer.lastChild;  // a[380,280] b[380,330]
+const C2 = c.capacitor(380, 305, { label: 'C₂', value: '1μF' }); const C2g = c.partLayer.lastChild;  // a[380,280] b[380,330]
 const DC = c.source(540, 210, {});                                             // pos[540,190] neg[540,230]
 
 const bn = [245, 215];                 // base node
@@ -136,9 +136,6 @@ function sText(x, y, s, fill, size, anchor) {
   svg.appendChild(t); return t;
 }
 sText(DC.pos[0] + 4, VCC - 6, '+V', '#f5a623', 11, 'start');
-sText(195, 238, '1μF', '#4a7aaa', 9);   // C1
-sText(378, 200, '1μF', '#4a7aaa', 9);   // C3
-sText(380, 348, '1μF', '#4a7aaa', 9);   // C2
 
 c.fit(16, 1.0);
 

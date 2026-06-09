@@ -332,6 +332,7 @@
         g.appendChild(el('line', { x1: x + 5, y1: y - 14, x2: x + 5, y2: y + 14, stroke: C.blue, 'stroke-width': 2.5 }));
         this.wires.push({ el: lL, a: [x - 25, y], b: [x - 5, y] }, { el: lR, a: [x + 5, y], b: [x + 25, y] });
         if (o.label) { const t = txt(x, y - 20, o.label, C.blue, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+        if (o.value) { const v = txt(x, y + 24, o.value, C.blue, 10); v.setAttribute('text-anchor', 'middle'); g.appendChild(v); }
         return { a: [x - 25, y], b: [x + 25, y], setCharge() {} };
       }
       const lT = el('line', { x1: x, y1: y - 25, x2: x, y2: y - 5, stroke: C.wire, 'stroke-width': 2 });
@@ -342,7 +343,8 @@
       g.appendChild(el('line', { x1: x - 16, y1: y - 5, x2: x + 16, y2: y - 5, stroke: C.blue, 'stroke-width': 2.5 })); // + plate
       g.appendChild(el('line', { x1: x - 16, y1: y + 5, x2: x + 16, y2: y + 5, stroke: C.blue, 'stroke-width': 2.5 })); // − plate
       this.wires.push({ el: lT, a: [x, y - 25], b: [x, y - 5] }, { el: lB, a: [x, y + 5], b: [x, y + 25] });
-      if (o.label) { const t = txt(x - 24, y + 4, o.label, C.blue, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+      if (o.label) { const t = txt(x - 22, y + 4, o.label, C.blue, 12); t.setAttribute('text-anchor', 'end'); g.appendChild(t); }
+      if (o.value) { const v = txt(x + 22, y + 4, o.value, C.blue, 10); v.setAttribute('text-anchor', 'start'); g.appendChild(v); }
       return {
         a: [x, y - 25], b: [x, y + 25],
         setCharge(frac) { const hh = Math.max(0, Math.min(1, frac)) * 9; fill.setAttribute('y', y + 5 - hh); fill.setAttribute('height', hh); }
