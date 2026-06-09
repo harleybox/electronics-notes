@@ -71,7 +71,7 @@
   </div>
 </div>
 
-<script src="../assets/circuit-kit.js?v=14"></script>
+<script src="../assets/circuit-kit.js?v=15"></script>
 <script>
 const NS = 'http://www.w3.org/2000/svg';
 const svg = document.getElementById('svg');
@@ -82,7 +82,7 @@ const c = new Circuit(svg);
 const VCC = 70, GND = 370;
 
 // ── place components ──
-const AC = c.acSource(55, 215, { label: 'Uₛ' });                              // out[87,215] gnd[55,249]
+const AC = c.acSource(65, 215, { label: 'Uₛ', dir: 'h' });                    // a(接地)[35,215] b(出信号)[95,215]
 const R5 = c.resistor(125, 215, { label: 'R₅', value: '1k', dir: 'h' });       // a[95,215] b[155,215]
 const C1 = c.capacitor(195, 215, { label: 'C₁', dir: 'h' });                   // a[170,215] b[220,215]
 const Q  = c.transistor(320, 215, { label: 'Q₁', sub: '2N5210' });             // base[294,215] col[330,179] emi[330,251]
@@ -101,10 +101,10 @@ const out = [R6.a[0], col[1]];         // output node [450,179]
 
 // ── wiring ──
 // input chain
-c.wire(AC.out, R5.a);
+c.wire(AC.b, R5.a);
 c.wire(R5.b, C1.a);
 c.wire(C1.b, bn); c.wire(bn, Q.base); c.node(bn);
-c.wire(AC.gnd, [AC.gnd[0], GND]);
+c.wire(AC.a, [AC.a[0], GND]);
 // base bias divider
 c.wire([bn[0], VCC], R2.a); c.wire(R2.b, bn);
 c.wire(bn, R3.a); c.wire(R3.b, [bn[0], GND]);
@@ -122,7 +122,7 @@ c.wire(C2.b, [C2.a[0], GND]);
 c.wire(DC.pos, [DC.pos[0], VCC]); c.wire(DC.neg, [DC.neg[0], GND]);
 // rails
 c.wire([bn[0], VCC], [DC.pos[0], VCC]);
-c.wire([AC.gnd[0], GND], [DC.neg[0], GND]);
+c.wire([AC.a[0], GND], [DC.neg[0], GND]);
 // rail junction dots
 c.node([bn[0], VCC]); c.node([col[0], VCC]);
 c.node([R3.b[0], GND]); c.node([R4.a[0], GND]); c.node([C2.a[0], GND]); c.node([R6.a[0], GND]);
@@ -147,7 +147,7 @@ const dc = c.particles([DC.pos, [DC.pos[0], VCC], [col[0], VCC], col, emi, [R4.a
 dc.set({ on: true, color: '#1a6b3a', speed: 0.6 });
 
 // ── AC signal particles ──
-const pIn  = c.particles([AC.out, R5.a, R5.b, C1.a, C1.b, bn, Q.base]);
+const pIn  = c.particles([AC.b, R5.a, R5.b, C1.a, C1.b, bn, Q.base]);
 const pOut = c.particles([col, C3.a, C3.b, out, R6.a, [R6.a[0], GND]]);
 const pByp = c.particles([emi, [C2.a[0], emi[1]], C2.a, C2.b, [C2.a[0], GND]]);
 const pR4  = c.particles([emi, [R4.a[0], emi[1]], R4.a, R4.b, [R4.a[0], GND]]);
