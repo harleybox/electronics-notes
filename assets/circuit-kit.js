@@ -14,6 +14,23 @@
     wire: '#2e3a50', green: '#22d36a', amber: '#f5a623', danger: '#e05050',
     gray: '#8899aa', faint: '#4a5a6a', body: '#1e2535', blue: '#4a7aaa',
   };
+  // default hover-tooltip text per component type (a page can override via o.tip)
+  const TIPS = {
+    source: '直流电源（电池）：提供稳定不变的直流电；长板＋、短板−，给电路供能。',
+    acSource: '交流信号源：输出来回变化的交流信号（圆圈里的 ∿ 即交流），是被放大/处理的输入。',
+    resistor: '电阻：阻碍电流，用于限流、分压。阻值单位 Ω（1k = 1000Ω）。',
+    capacitor: '电容：挡直流、放交流（频率越高越通）；用于滤波 / 旁路 / 去耦 / 定时。',
+    led: 'LED 发光二极管：通电发光、单向导通，须串限流电阻。',
+    diode: '二极管：电流的单向阀门，只许一个方向通过。',
+    transistor: '三极管：放大器——基极的小信号控制集电极的大电流，实现放大。',
+    regulator: '三端稳压器：把较高输入电压稳成固定的较低输出（如 5V→3.3V）。',
+    scr: '晶闸管 (SCR)：可控开关，门极触发后一直导通，直到主电流被切断。',
+    buzzer: '蜂鸣器：通电发声，用作提示音 / 报警。',
+    voltmeter: '电压表：并联测电压，内阻极大、几乎不取电流。',
+    mcu: '单片机引脚：高阻输入，只读电压（判 1/0）、几乎不取电流。',
+    ground: '接地 GND：0V 参考点，电路里所有电流最终都流回这里。',
+    sw: '开关：控制电路通断（断开 = 断路、闭合 = 导通）。',
+  };
   function el(tag, attrs) {
     const e = document.createElementNS(NS, tag);
     for (const k in attrs) e.setAttribute(k, attrs[k]);
@@ -34,7 +51,22 @@
       this.particleLayer = el('g', {}); svg.appendChild(this.particleLayer);
       this.wires = [];   // {el, a:[x,y], b:[x,y]}
     }
-    _add(node) { this.partLayer.appendChild(node); return node; }
+    _add(node, tip) { this.partLayer.appendChild(node); if (tip) this._tip(node, tip); return node; }
+    // attach a hover tooltip to a component group
+    _tip(g, text) {
+      g.style.cursor = 'help';
+      g.addEventListener('mouseenter', () => { const d = Circuit._tipEl(); d.textContent = text; d.style.opacity = '1'; });
+      g.addEventListener('mousemove', (e) => { const d = Circuit._tipEl(); d.style.left = (e.clientX + 14) + 'px'; d.style.top = (e.clientY + 16) + 'px'; });
+      g.addEventListener('mouseleave', () => { Circuit._tipEl().style.opacity = '0'; });
+    }
+    static _tipEl() {
+      if (!Circuit.__tipEl) {
+        const d = document.createElement('div');
+        d.style.cssText = "position:fixed;z-index:9999;pointer-events:none;max-width:230px;background:#0f1117;border:1px solid #2a3040;border-radius:8px;padding:7px 10px;font:11px/1.5 'Courier New',monospace;color:#cdd9e5;opacity:0;transition:opacity .12s;box-shadow:0 4px 18px rgba(0,0,0,.55);";
+        document.body.appendChild(d); Circuit.__tipEl = d;
+      }
+      return Circuit.__tipEl;
+    }
 
     /* Frame the content with a small EVEN margin, displayed at `scale` size.
        margin = gap from content to edge (small, even on all sides);
@@ -69,7 +101,7 @@
     /* ---- components (fixed geometry, named pins) ---- */
     // Battery / DC source, vertical. pins: pos (top), neg (bottom).
     source(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.source);
       if (o.dir === 'h') { // horizontal: − on left, + on right
         const lL = el('line', { x1: x - 20, y1: y, x2: x - 7, y2: y, stroke: C.wire, 'stroke-width': 2 });
         const lR = el('line', { x1: x + 7, y1: y, x2: x + 20, y2: y, stroke: C.wire, 'stroke-width': 2 });
@@ -99,7 +131,7 @@
     // AC signal source: circle with a sine wave inside. Outputs alternating current.
     // dir 'v' (default) → pins a(top) b(bottom); 'h' → a(left) b(right).
     acSource(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.acSource);
       const r = 18;
       const sine = (cx) => `M ${cx - 11} ${y} Q ${cx - 5.5} ${y - 8} ${cx} ${y} T ${cx + 11} ${y}`;
       if (o.dir === 'h') {
@@ -123,7 +155,7 @@
     }
     // Resistor box. dir 'v' (default) → pins a(top) b(bottom); 'h' → a(left) b(right).
     resistor(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.resistor);
       const h = o.dir === 'h';
       g.appendChild(el('rect', h
         ? { x: x - 30, y: y - 10, width: 60, height: 20, rx: 3, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }
@@ -140,7 +172,7 @@
     }
     // LED, vertical, current flows top→bottom (anode top). pins anode, cathode.
     led(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.led);
       const h = o.dir === 'h';
       const glow = el('circle', { cx: x, cy: y, r: 28, fill: 'url(#kitGlow)', opacity: 0 }); // base r = max lit size so fit() reserves room
       g.appendChild(glow);
@@ -188,7 +220,7 @@
     // Ground symbol. pin top. Includes its own connection dot (GND taps the
     // circuit, forming a junction there).
     ground(x, y) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), TIPS.ground);
       this.dotLayer.appendChild(el('circle', { cx: x, cy: y, r: 3.5, fill: C.faint }));
       g.appendChild(el('line', { x1: x, y1: y, x2: x, y2: y + 10, stroke: C.wire, 'stroke-width': 2 }));
       g.appendChild(el('line', { x1: x - 14, y1: y + 10, x2: x + 14, y2: y + 10, stroke: C.faint, 'stroke-width': 2 }));
@@ -201,7 +233,7 @@
     // Voltmeter (ideal, vertical). pins plus (top), minus (bottom). setReading(text).
     // Leads are NOT registered as current-carrying wires — a voltmeter draws no current.
     voltmeter(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.voltmeter);
       g.appendChild(el('line', { x1: x, y1: y - 40, x2: x, y2: y - 26, stroke: C.wire, 'stroke-width': 2 }));
       g.appendChild(el('line', { x1: x, y1: y + 26, x2: x, y2: y + 40, stroke: C.wire, 'stroke-width': 2 }));
       g.appendChild(el('circle', { cx: x, cy: y, r: 26, fill: '#10141d', stroke: C.blue, 'stroke-width': 1.5 }));
@@ -215,7 +247,7 @@
 
     // MCU / chip block. pin on the LEFT side at (x,y); body extends right.
     mcu(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.mcu);
       g.appendChild(el('rect', { x: x, y: y - 22, width: 58, height: 44, rx: 4, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 }));
       const t1 = txt(x + 29, y - 3, o.label || 'MCU', C.gray, 10); t1.setAttribute('text-anchor', 'middle'); g.appendChild(t1);
       const t2 = txt(x + 29, y + 12, o.sub || '输入引脚', '#6a7a8a', 9); t2.setAttribute('text-anchor', 'middle'); g.appendChild(t2);
@@ -225,7 +257,7 @@
     // pins: in (left side) & out (right side) at vertical `pinY` (default center y);
     //       gnd (bottom center). IN/OUT/GND text drawn inside; label = chip name, sub = part id.
     regulator(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.regulator);
       const w = o.w || 120, h = o.h || 150;
       const Lx = x - w / 2, Rx = x + w / 2, Ty = y - h / 2, By = y + h / 2;
       const py = o.pinY != null ? o.pinY : y;
@@ -248,7 +280,7 @@
     // NPN bipolar transistor. pins: base (left), collector (top), emitter (bottom, arrow out).
     // setActive(bool) tints the body when amplifying.
     transistor(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.transistor);
       const body = el('circle', { cx: x, cy: y, r: 20, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 });
       g.appendChild(body);
       g.appendChild(el('line', { x1: x - 8, y1: y - 12, x2: x - 8, y2: y + 12, stroke: C.gray, 'stroke-width': 2.5 })); // base bar
@@ -274,7 +306,7 @@
     }
     // Vertical switch. pins a (top), b (bottom). setClosed(bool).
     switchV(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.sw);
       const lead1 = el('line', { x1: x, y1: y - 30, x2: x, y2: y - 12, stroke: C.wire, 'stroke-width': 2 });
       const lead2 = el('line', { x1: x, y1: y + 12, x2: x, y2: y + 30, stroke: C.wire, 'stroke-width': 2 });
       g.appendChild(lead1); g.appendChild(lead2);
@@ -297,7 +329,7 @@
     }
     // Horizontal switch. pins a (left), b (right). setClosed(bool).
     switchH(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.sw);
       const lead1 = el('line', { x1: x - 30, y1: y, x2: x - 12, y2: y, stroke: C.wire, 'stroke-width': 2 });
       const lead2 = el('line', { x1: x + 12, y1: y, x2: x + 30, y2: y, stroke: C.wire, 'stroke-width': 2 });
       g.appendChild(lead1); g.appendChild(lead2);
@@ -322,7 +354,7 @@
     // Capacitor. dir 'v' (default) → plates horizontal, pins a(top) b(bottom);
     // 'h' → plates vertical, pins a(left) b(right). setCharge(frac 0..1) shows fill.
     capacitor(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.capacitor);
       const h = o.dir === 'h';
       if (h) {
         const lL = el('line', { x1: x - 25, y1: y, x2: x - 5, y2: y, stroke: C.wire, 'stroke-width': 2 });
@@ -352,7 +384,7 @@
     }
     // Plain diode. dir 'h' (default) → anode left, cathode right; 'v' → anode top, cathode bottom.
     diode(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.diode);
       if (o.dir === 'v') {
         g.appendChild(el('polygon', { points: `${x-10},${y-9} ${x+10},${y-9} ${x},${y+9}`, fill: '#3a5a7a', stroke: C.blue, 'stroke-width': 1.5 }));
         g.appendChild(el('line', { x1: x - 10, y1: y + 9, x2: x + 10, y2: y + 9, stroke: C.blue, 'stroke-width': 2.5 }));
@@ -368,7 +400,7 @@
     //                  dir 'v'           → anode top, cathode bottom, gate to the left.
     // setOn(bool) lights the body when conducting.
     scr(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.scr);
       let tri, bar, gateStub, gateCtl, ret;
       if (o.dir === 'v') { // current flows top → bottom; triangle points DOWN
         tri = el('polygon', { points: `${x-10},${y-9} ${x+10},${y-9} ${x},${y+9}`, fill: C.body, stroke: C.faint, 'stroke-width': 1.5 });
@@ -408,7 +440,7 @@
     //                          dir 'h'           → pins a(left) b(right), horn opens up.
     // setRinging(bool) animates the sound waves. Label sits centered on the symbol.
     buzzer(x, y, o = {}) {
-      const g = this._add(el('g', {}));
+      const g = this._add(el('g', {}), o.tip || TIPS.buzzer);
       let w1, w2, ret;
       if (o.dir === 'h') {
         const lL = el('line', { x1: x - 30, y1: y, x2: x - 16, y2: y, stroke: C.wire, 'stroke-width': 2 });
