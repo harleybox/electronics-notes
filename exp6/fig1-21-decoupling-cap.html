@@ -154,13 +154,21 @@ let noiseOn = true, capsOn = true, hiOn = true, loOn = true;
 const noise = [];
 
 class Noise {
-  constructor(type) {
+  constructor(type, origin = 'in') {
     this.type = type;                       // 'hi' | 'lo'
-    this.x = X.src + 14; this.y = railY;
-    this.vx = type === 'hi' ? 2.3 + Math.random() * 0.7 : 1.4 + Math.random() * 0.4;
+    this.origin = origin;                   // 'in' = 来自 5V 输入 · 'load' = 负载电流突变在输出端产生的波动
+    this.y = railY;
+    if (origin === 'load') {                // starts at the load, travels LEFT toward the output caps
+      this.x = X.load - 12;
+      this.vx = -(type === 'hi' ? 2.0 + Math.random() * 0.6 : 1.2 + Math.random() * 0.4);
+      this.side = 'out';
+    } else {
+      this.x = X.src + 14;
+      this.vx = type === 'hi' ? 2.3 + Math.random() * 0.7 : 1.4 + Math.random() * 0.4;
+      this.side = 'in';
+    }
     this.r = type === 'hi' ? 3 : 4;
     this.color = type === 'hi' ? '#f5a623' : '#4a7aaa';
-    this.side = 'in';
     this.absorbed = false; this.dead = false; this.life = 1;
     this.el = document.createElementNS(NS, 'circle');
     this.el.setAttribute('r', this.r); noiseLayer.appendChild(this.el);
@@ -180,10 +188,10 @@ class Noise {
         if (capsOn) { this.dead = true; }   // residual cleaned by the regulator
         else { this.side = 'out'; this.x = REG.out[0]; }   // no caps → noise passes through
       }
-    } else {                                // output rail
+    } else {                                // output rail (passthrough noise → right, or load noise → left)
       const cap = this.type === 'hi' ? capCx.hiOut : capCx.loOut;
       if (capsOn && Math.abs(this.x - cap) < 7 && Math.random() < 0.6) { this.absorbed = true; this.x = cap; return; }
-      if (this.x > X.load) this.dead = true;
+      if (this.vx > 0 ? this.x > X.load : this.x < REG.out[0]) this.dead = true;
     }
   }
   draw() {
@@ -282,6 +290,9 @@ function frame() {
     spawnAcc++;
     if (hiOn && spawnAcc % 3 === 0 && Math.random() < 0.8) noise.push(new Noise('hi'));
     if (loOn && spawnAcc % 9 === 0) noise.push(new Noise('lo'));
+    // output-side noise from the load (so C₈/C₉ also do visible work)
+    if (hiOn && spawnAcc % 4 === 0 && Math.random() < 0.6) noise.push(new Noise('hi', 'load'));
+    if (loOn && spawnAcc % 13 === 0) noise.push(new Noise('lo', 'load'));
   }
   for (let i = noise.length - 1; i >= 0; i--) {
     noise[i].update();
