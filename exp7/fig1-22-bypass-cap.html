@@ -144,7 +144,7 @@ c.fit(16, 1.0);
 const dc = c.particles([DC.pos, [DC.pos[0], VCC], [col[0], VCC], col, emi, [R4.a[0], emi[1]], [R4.a[0], GND], [DC.neg[0], GND], DC.neg]);
 dc.set({ on: true, color: '#1a6b3a', speed: 0.6 });
 // bias-divider current: +V → R₂ → base node → R₃ → GND (so R₂/R₃ also show current)
-const pBias = c.particles([[bn[0], VCC], R2.a, R2.b, bn, R3.a, R3.b, [bn[0], GND]]);
+const pBias = c.particles([[col[0], VCC], [bn[0], VCC], R2.a, R2.b, bn, R3.a, R3.b, [bn[0], GND]]);
 pBias.set({ on: true, color: '#1a6b3a', speed: 0.5 });
 
 // ── AC signal particles ──
