@@ -35,7 +35,8 @@
   .modal-close:hover { color: var(--txt); border-color: var(--green); }
   .modal-symbol { background: #10141d; border: 1px solid var(--border); border-radius: 8px;
     padding: 8px; margin-bottom: 14px; display: flex; justify-content: center; }
-  .modal-name { font-size: 16px; color: var(--txt); text-align: center; margin-bottom: 12px; letter-spacing: .05em; }
+  .modal-name { font-size: 16px; color: var(--txt); text-align: center; margin-bottom: 3px; letter-spacing: .05em; }
+  .modal-en { font-size: 11px; color: var(--dim); text-align: center; letter-spacing: .12em; margin-bottom: 14px; text-transform: uppercase; }
   .modal-explain { font-size: 13px; color: var(--muted); line-height: 1.85; }
   .modal-explain b { color: var(--green); }
   .modal-explain a { color: var(--green); }
@@ -58,20 +59,24 @@
     <button class="modal-close" id="modal-close" aria-label="关闭">×</button>
     <div class="modal-symbol" id="modal-symbol"></div>
     <div class="modal-name" id="modal-name"></div>
+    <div class="modal-en" id="modal-en"></div>
     <div class="modal-explain" id="modal-explain"></div>
   </div>
 </div>
 
-<script src="assets/circuit-kit.js?v=13"></script>
+<script src="assets/circuit-kit.js?v=14"></script>
 <script>
 // Each entry renders ONE component via the engine. `explain` = 0-基础白话解释（点击弹窗显示）。
 const ITEMS = [
-  { name: '电源 · 竖版', note: '长板正极(橙) / 短板负极(灰) + 数字电压',
-    explain: '给整个电路提供电力的"水泵"。长板是正极(+)、短板是负极(−)，电流从正极流出、绕一圈流回负极。旁边的数字是它的电压（如 5V），电压越高"水压"越大。',
+  { name: '直流电源 · 竖版', note: '电池符号；长板正极(橙)/短板负极(灰)，输出稳定直流',
+    explain: '这是<b>直流电源</b>（电池或稳压电源），输出<b>稳定不变</b>的直流电——电压、电流方向始终不变。前面实例 1~7 用的都是它。长板是正极(+)、短板是负极(−)，电流从正极流出、绕一圈流回负极；数字是它的电压（如 5V）。<br>👉 和下面的「交流信号源」对照着看，就懂直流 vs 交流了。',
     draw: (c) => c.source(75, 55, { label: '5V' }) },
-  { name: '电源 · 横版', note: 'dir:"h" — 左负右正',
-    explain: '和竖版电源一样，只是横着放。左边负极、右边正极。提供电路工作所需的电压与电流。',
+  { name: '直流电源 · 横版', note: 'dir:"h" — 左负右正，输出稳定直流',
+    explain: '同样是<b>直流电源</b>，只是横着放：左边负极、右边正极。输出稳定不变的直流电。',
     draw: (c) => c.source(75, 55, { label: '5V', dir: 'h' }) },
+  { name: '交流信号源', note: '圆圈+正弦波；输出来回变化的交流（信号/噪声）',
+    explain: '输出<b>来回变化</b>的交流——电压方向不停翻转（正弦波），圆圈里的 ∿ 就代表交流。声音、无线电信号、电源上的噪声，本质都是交流。<br>它和直流电源相反：电容对直流"挡"、对交流"放"，所以交流能"穿"过电容。<br>👉 想看交流怎么穿过电容，去玩 <a href="basics/capacitor-intro.html">「电容入门」动图</a>。',
+    draw: (c) => c.acSource(75, 52, { label: 'AC' }) },
   { name: '固定电阻 · 竖版', note: '矩形方块；上下两脚',
     explain: '阻碍电流的元件，像一段变窄的水管。两个主要用途：<b>限流</b>（防止电流太大烧坏元件）和<b>分压</b>（分掉一部分电压）。阻值单位是欧姆(Ω)，10k = 10000Ω。',
     draw: (c) => c.resistor(72, 55, { label: 'R', value: '10k' }) },
@@ -154,14 +159,34 @@ ITEMS.forEach(item => {
   grid.appendChild(card);
 });
 
+// English name by component type (orientation/state doesn't change it; first keyword match wins)
+const EN_NAMES = [
+  ['交流', 'AC Signal Source'],
+  ['直流电源', 'DC Power Source · Battery'],
+  ['电阻', 'Resistor'],
+  ['LED', 'LED · Light-Emitting Diode'],
+  ['开关', 'Switch'],
+  ['接地', 'Ground (GND)'],
+  ['电压表', 'Voltmeter'],
+  ['单片机', 'MCU Pin'],
+  ['稳压器', 'Voltage Regulator'],
+  ['电容', 'Capacitor'],
+  ['二极管', 'Diode'],
+  ['晶闸管', 'Thyristor (SCR)'],
+  ['蜂鸣器', 'Buzzer'],
+];
+function enName(name) { for (const [k, v] of EN_NAMES) if (name.includes(k)) return v; return ''; }
+
 // ── modal ──
 const modal = document.getElementById('modal');
 const mSym = document.getElementById('modal-symbol');
 const mName = document.getElementById('modal-name');
+const mEn = document.getElementById('modal-en');
 const mExplain = document.getElementById('modal-explain');
 function openModal(item) {
   mSym.innerHTML = ''; renderSymbol(mSym, item, 220);
   mName.textContent = item.name;
+  mEn.textContent = enName(item.name);
   mExplain.innerHTML = item.explain || '';
   modal.hidden = false;
 }

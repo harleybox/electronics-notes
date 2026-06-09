@@ -96,6 +96,31 @@
       if (o.label) { labelEl = txt(x - 28, y + 4, o.label, C.amber, 12); labelEl.setAttribute('text-anchor', 'middle'); g.appendChild(labelEl); }
       return { pos: [x, y - 20], neg: [x, y + 20], labelEl };
     }
+    // AC signal source: circle with a sine wave inside. Outputs alternating current.
+    // dir 'v' (default) → pins a(top) b(bottom); 'h' → a(left) b(right).
+    acSource(x, y, o = {}) {
+      const g = this._add(el('g', {}));
+      const r = 18;
+      const sine = (cx) => `M ${cx - 11} ${y} Q ${cx - 5.5} ${y - 8} ${cx} ${y} T ${cx + 11} ${y}`;
+      if (o.dir === 'h') {
+        const lL = el('line', { x1: x - r - 12, y1: y, x2: x - r, y2: y, stroke: C.wire, 'stroke-width': 2 });
+        const lR = el('line', { x1: x + r, y1: y, x2: x + r + 12, y2: y, stroke: C.wire, 'stroke-width': 2 });
+        g.appendChild(lL); g.appendChild(lR);
+        this.wires.push({ el: lL, a: [x - r - 12, y], b: [x - r, y] }, { el: lR, a: [x + r, y], b: [x + r + 12, y] });
+        g.appendChild(el('circle', { cx: x, cy: y, r, fill: C.body, stroke: C.blue, 'stroke-width': 1.5 }));
+        g.appendChild(el('path', { d: sine(x), fill: 'none', stroke: C.amber, 'stroke-width': 1.8 }));
+        if (o.label) { const t = txt(x, y + r + 16, o.label, C.gray, 12); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
+        return { a: [x - r - 12, y], b: [x + r + 12, y] };
+      }
+      const lT = el('line', { x1: x, y1: y - r - 12, x2: x, y2: y - r, stroke: C.wire, 'stroke-width': 2 });
+      const lB = el('line', { x1: x, y1: y + r, x2: x, y2: y + r + 12, stroke: C.wire, 'stroke-width': 2 });
+      g.appendChild(lT); g.appendChild(lB);
+      this.wires.push({ el: lT, a: [x, y - r - 12], b: [x, y - r] }, { el: lB, a: [x, y + r], b: [x, y + r + 12] });
+      g.appendChild(el('circle', { cx: x, cy: y, r, fill: C.body, stroke: C.blue, 'stroke-width': 1.5 }));
+      g.appendChild(el('path', { d: sine(x), fill: 'none', stroke: C.amber, 'stroke-width': 1.8 }));
+      if (o.label) { const t = txt(x - r - 10, y + 4, o.label, C.gray, 12); t.setAttribute('text-anchor', 'end'); g.appendChild(t); }
+      return { a: [x, y - r - 12], b: [x, y + r + 12] };
+    }
     // Resistor box. dir 'v' (default) → pins a(top) b(bottom); 'h' → a(left) b(right).
     resistor(x, y, o = {}) {
       const g = this._add(el('g', {}));

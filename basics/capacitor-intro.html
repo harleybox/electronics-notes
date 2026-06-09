@@ -67,7 +67,7 @@
   </div>
 </div>
 
-<script src="../assets/circuit-kit.js?v=13"></script>
+<script src="../assets/circuit-kit.js?v=14"></script>
 <script>
 const NS = 'http://www.w3.org/2000/svg';
 const svg = document.getElementById('svg');
@@ -78,33 +78,44 @@ const c = new Circuit(svg);
 // ── geometry ──
 const SX = 70, TOP = 60, BOT = 180, LEDX = 360, CAPX = 220;
 
-// custom switchable source (circle with ⎓ / ∿ symbol)
-const srcG = document.createElementNS(NS, 'g');
-svg.appendChild(srcG);
 function mk(tag, attrs) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
-srcG.appendChild(mk('circle', { cx: SX, cy: 120, r: 24, fill: '#1e2535', stroke: '#4a7aaa', 'stroke-width': 1.5 }));
-const srcSym = mk('text', { x: SX, y: 120, fill: '#4a7aaa', 'font-size': 22, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': "'Courier New',monospace" });
-srcSym.textContent = '⎓'; srcG.appendChild(srcSym);
-const srcLbl = mk('text', { x: SX, y: 160, fill: '#8899aa', 'font-size': 11, 'text-anchor': 'middle', 'font-family': "'Courier New',monospace" });
-srcLbl.textContent = '电源'; srcG.appendChild(srcLbl);
 
-// capacitor (horizontal, in series on the top wire) + LED + wires
+// ── all components come from the shared kit (same code as the component library) ──
 const CAP = c.capacitor(CAPX, TOP, { label: 'C', dir: 'h' });           // a[195,60] b[245,60]
 const LED = c.led(LEDX, 120, { label: '小灯' });                         // anode[360,108] cathode[360,132]
 const GND = c.ground(SX, BOT);
+const SRC_DC = c.source(SX, 120, { label: '5V' });   const dcG = c.partLayer.lastChild;  // pos[70,100] neg[70,140]
+const SRC_AC = c.acSource(SX, 120, { label: 'AC' });  const acG = c.partLayer.lastChild;  // a[70,90]  b[70,150]
 
-// source leads (registered so they can light)
-c.wire([SX, 96], [SX, TOP]);                 // source top → top-left corner
-c.wire([SX, TOP], CAP.a);                    // → capacitor
-c.wire(CAP.b, [LEDX, TOP]);                   // capacitor → top-right corner
-c.wire([LEDX, TOP], LED.anode);              // → LED anode
-c.wire(LED.cathode, [LEDX, BOT]);            // LED cathode → bottom-right
-c.wire([LEDX, BOT], [SX, BOT]);              // bottom wire
-c.wire([SX, BOT], [SX, 144]);                // → source bottom
+// short stubs from each source's pins to the loop corners; they show/hide together with the source
+const dcBridge = mk('g', {}); svg.appendChild(dcBridge);
+dcBridge.appendChild(mk('line', { x1: SX, y1: 100, x2: SX, y2: TOP, stroke: '#2e3a50', 'stroke-width': 2 }));
+dcBridge.appendChild(mk('line', { x1: SX, y1: 140, x2: SX, y2: BOT, stroke: '#2e3a50', 'stroke-width': 2 }));
+const acBridge = mk('g', {}); svg.appendChild(acBridge);
+acBridge.appendChild(mk('line', { x1: SX, y1: 90, x2: SX, y2: TOP, stroke: '#2e3a50', 'stroke-width': 2 }));
+acBridge.appendChild(mk('line', { x1: SX, y1: 150, x2: SX, y2: BOT, stroke: '#2e3a50', 'stroke-width': 2 }));
+
+// main loop wires: top (through capacitor), right (through LED), bottom
+c.wire([SX, TOP], CAP.a);
+c.wire(CAP.b, [LEDX, TOP]);
+c.wire([LEDX, TOP], LED.anode);
+c.wire(LED.cathode, [LEDX, BOT]);
+c.wire([LEDX, BOT], [SX, BOT]);
 c.fit(16, 1.15);
 
-// ── current particles around the loop ──
-const loop = [[SX, 96], [SX, TOP], [LEDX, TOP], [LEDX, 108], [LEDX, 132], [LEDX, BOT], [SX, BOT], [SX, 144]];
+// recolor the loop = kit wires + whichever bridge stubs are visible
+function lightLoop(color) {
+  c.lightAll(color);
+  [dcBridge, acBridge].forEach(b => [...b.children].forEach(l => l.setAttribute('stroke', color)));
+}
+// switch which source (and its stubs) is shown
+function showSource(dc) {
+  dcG.style.display = dc ? '' : 'none';   acG.style.display = dc ? 'none' : '';
+  dcBridge.style.display = dc ? '' : 'none';   acBridge.style.display = dc ? 'none' : '';
+}
+
+// ── current particles around the loop (source segment not drawn) ──
+const loop = [[SX, TOP], [LEDX, TOP], [LEDX, 108], [LEDX, 132], [LEDX, BOT], [SX, BOT]];
 const flow = c.particles(loop);
 
 // ── state ──
@@ -123,7 +134,7 @@ function applyMode() {
   const dc = mode === 'dc';
   $('btn-dc').classList.toggle('on', dc);
   $('btn-ac').classList.toggle('on', !dc);
-  srcSym.textContent = dc ? '⎓' : '∿';
+  showSource(dc);
   $('freq-wrap').classList.toggle('disabled', dc);
   if (dc) {
     dcPhase = 0; dcT = 0;
@@ -147,7 +158,7 @@ function updateAC() {
   const b = 0.25 + norm * 0.75;
   LED.set({ color: 'green', b });
   flow.set({ on: true, color: '#22d36a', speed: 0.5 + norm * 2.2 });
-  c.lightAll('#22d36a');
+  lightLoop('#22d36a');
   $('cur').textContent = (b * 100).toFixed(0) + ' %';
   setLamp(true, '亮 ' + (b * 100).toFixed(0) + '%');
 }
@@ -161,7 +172,7 @@ function tick(ts) {
     if (dcPhase === 0) {                 // charging (current flows)
       const frac = Math.min(1, dcT / 1400);
       flow.set({ on: true, color: '#22d36a', speed: 0.5 + (1 - frac) * 2.0 });
-      c.lightAll('#22d36a');
+      lightLoop('#22d36a');
       const b = (1 - frac) * 0.9;
       LED.set({ color: 'green', b });
       $('cur').textContent = (b * 110).toFixed(0) + ' %';
@@ -169,7 +180,7 @@ function tick(ts) {
       if (frac >= 1) { dcPhase = 1; dcT = 0; }
     } else if (dcPhase === 1) {          // full → no current
       flow.set({ on: false });
-      c.lightAll('#2e3a50');
+      lightLoop('#2e3a50');
       LED.set({ color: 'off' });
       $('cur').textContent = '0';
       setLamp(false, '灭（已充满）');
