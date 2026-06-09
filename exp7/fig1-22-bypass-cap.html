@@ -94,6 +94,7 @@ const R6 = c.resistor(450, 250, { label: 'R₆', value: '1k' });                
 const R4 = c.resistor(300, 305, { label: 'R₄', value: '1k' });                 // a[300,275] b[300,335]
 const C2 = c.capacitor(380, 305, { label: 'C₂', value: '1μF' }); const C2g = c.partLayer.lastChild;  // a[380,280] b[380,330]
 const DC = c.source(540, 210, {});                                             // pos[540,190] neg[540,230]
+c.ground(160, GND);                                                            // 接地符号：底部那条公共线就是 0V 参考（地）
 
 const bn = [245, 215];                 // base node
 const col = Q.collector, emi = Q.emitter;
