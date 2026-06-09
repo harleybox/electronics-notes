@@ -272,18 +272,6 @@
         setActive(on) { body.setAttribute('fill', on ? '#13301f' : C.body); body.setAttribute('stroke', on ? C.green : C.faint); }
       };
     }
-    // AC / signal source: circle with a sine wave. pins: out (right), gnd (bottom).
-    acSource(x, y, o = {}) {
-      const g = this._add(el('g', {}));
-      g.appendChild(el('circle', { cx: x, cy: y, r: 16, fill: C.body, stroke: C.amber, 'stroke-width': 1.5 }));
-      g.appendChild(el('path', { d: `M${x-9} ${y} Q${x-4.5} ${y-8} ${x} ${y} T${x+9} ${y}`, fill: 'none', stroke: C.amber, 'stroke-width': 1.5 }));
-      const ol = el('line', { x1: x + 16, y1: y, x2: x + 32, y2: y, stroke: C.wire, 'stroke-width': 2 });
-      const gl = el('line', { x1: x, y1: y + 16, x2: x, y2: y + 34, stroke: C.wire, 'stroke-width': 2 });
-      g.appendChild(ol); g.appendChild(gl);
-      this.wires.push({ el: ol, a: [x + 16, y], b: [x + 32, y] }, { el: gl, a: [x, y + 16], b: [x, y + 34] });
-      if (o.label) { const t = txt(x, y - 22, o.label, C.amber, 11); t.setAttribute('text-anchor', 'middle'); g.appendChild(t); }
-      return { out: [x + 32, y], gnd: [x, y + 34] };
-    }
     // Vertical switch. pins a (top), b (bottom). setClosed(bool).
     switchV(x, y, o = {}) {
       const g = this._add(el('g', {}));
